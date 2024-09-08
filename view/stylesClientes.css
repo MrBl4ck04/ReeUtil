@@ -1,0 +1,175 @@
+:root {
+    --color-bg-dark: #1F2421;
+    --color-bg-primary: #216869;
+    --color-accent: #49A078;
+    --color-secondary: #9CC5A1;
+    --color-light: #DCE1DE;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--color-bg-dark);
+    color: var(--color-light);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--color-accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-light);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+
+nav a {
+    color: var(--color-light);
+    text-decoration: none;
+    font-size: 18px;
+}
+
+nav ul li a {
+    background-color: var(--color-accent);
+    color: var(--color-light);
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 5px;
+    display: inline-block;
+    border: 2px solid transparent; 
+    transition: all 0.3s ease; 
+    margin-right: 10px; 
+}
+
+nav ul li a:hover {
+    background-color: transparent; 
+    border: 2px solid var(--color-light); 
+    color: var(--color-light); 
+}
+
+
+.icons {
+    display: flex;
+    gap: 10px;
+}
+
+.icons i {
+    font-size: 24px;
+    color: var(--color-light);
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: flex-start; 
+    padding-left: 20px; 
+    height: 100vh; 
+    background-image: url('../view/principalClientes.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    color: white; 
+}
+
+.hero h1, .hero p, .hero .explore-btn {
+    margin: 10px 0;
+    text-align: left; 
+}
+
+.explore-btn {
+    background-color: var(--color-accent);
+    color: var(--color-light);
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    border-radius: 5px;
+    display: inline-block;
+    border: 2px solid transparent; 
+    transition: all 0.3s ease; 
+}
+
+.explore-btn:hover {
+    background-color: transparent; 
+    border: 2px solid var(--color-light); 
+    color: var(--color-light); 
+}
+
+
+.carousel-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--color-light);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.carousel {
+    background-color: var(--color-bg-primary);
+    padding: 20px;
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.carousel-container {
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+    overflow: hidden;
+}
+
+.carousel-images {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-images img {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.carousel-prev, .carousel-next {
+    background-color: var(--color-accent);
+    color: var(--color-light);
+    border: none;
+    padding: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+}
+
+.carousel-prev {
+    left: 10px;
+}
+
+.carousel-next {
+    right: 10px;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+footer {
+    background-color: var(--color-bg-dark);
+    color: var(--color-light);
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+}
