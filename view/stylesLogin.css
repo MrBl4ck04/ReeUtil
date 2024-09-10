@@ -10,7 +10,7 @@ body{
 }
 .main{
     width: 350px;
-    height: 500px;
+    height: 800px;
     background: red;
     overflow: hidden;
     background: url("backLogin.png")no-repeat center / cover;

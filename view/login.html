@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Login ReeUtil</title>
-    <link rel="stylesheet" type="text/css" href="stylesLogin.css"
+    <link rel="stylesheet" type="text/css" href="stylesLogin.css">
     <link href="https://fonts.googleapis.com/css?family=Jost:wght@500&display=swap" rel="stylesheet">    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,22 +12,25 @@
             <input type="checkbox" id="chk" aria-hidden="true">
 
             <div class="signup">
-                <form>
-                    <label for="chk" aria-hidden="true">Registarse</label>
-                    <input type="text" name="txt" placeholder="Nombre de Usuario" requiered="">
-                    <input type="email" name="email" placeholder="Email" requiered="">
-                    <input type="password" name="pswd" placeholder="Contraeña" requiered="">
-                    <button>Registrarse</button>
+                <form action="http://localhost:5500/register" method="POST">
+                    <label for="chk" aria-hidden="true">Registrarse</label>
+                    <input type="text" name="txt" placeholder="Nombre de Usuario" required="">
+                    <input type="text" name="apellido" placeholder="Apellido" required="">
+                    <input type="email" name="email" placeholder="Email" required="">
+                    <input type="password" name="pswd" placeholder="Contraseña" required="">
+                    <input type="text" name="direccion" placeholder="Dirección">
+                    <input type="text" name="telefono" placeholder="Teléfono">
+                    <input type="checkbox" name="rol"> ¿Es administrador?
+                    <button type="submit">Registrarse</button>
                 </form>
-            </div>
-
-            <div class="login">
-                <form>
+                
+                <form action="/login" method="POST">
                     <label for="chk" aria-hidden="true">Iniciar Sesión</label>
-                    <input type="email" name="email" placeholder="Email" requiered="">
-                    <input type="password" name="pswd" placeholder="Contraeña" requiered="">
-                    <button>Iniciar sesión</button>
+                    <input type="email" name="email" placeholder="Email" required="">
+                    <input type="password" name="pswd" placeholder="Contraseña" required="">
+                    <button type="submit">Iniciar sesión</button>
                 </form>
+                
             </div>
         </div>
 </body>
