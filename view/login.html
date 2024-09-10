@@ -8,9 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-        <div class="main">
-            <input type="checkbox" id="chk" aria-hidden="true">
-
+    <div class="main">
+        <input type="checkbox" id="chk" aria-hidden="true">
+    
+        <div class="forms">
             <div class="signup">
                 <form action="http://localhost:5500/register" method="POST">
                     <label for="chk" aria-hidden="true">Registrarse</label>
@@ -23,15 +24,18 @@
                     <input type="checkbox" name="rol"> ¿Es administrador?
                     <button type="submit">Registrarse</button>
                 </form>
-                
+            </div>
+    
+            <div class="login">
                 <form action="/login" method="POST">
                     <label for="chk" aria-hidden="true">Iniciar Sesión</label>
                     <input type="email" name="email" placeholder="Email" required="">
                     <input type="password" name="pswd" placeholder="Contraseña" required="">
                     <button type="submit">Iniciar sesión</button>
                 </form>
-                
             </div>
         </div>
+    </div>
+    
 </body>
 </html>
