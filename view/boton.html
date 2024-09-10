@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botón conectado a MongoDB</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="connectButton">Conectar a MongoDB</button>
+
+    <script>
+        document.getElementById('connectButton').addEventListener('click', async function() {
+            try {
+                const response = await fetch('http://127.0.0.1:3000/conectar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                console.error('Error al conectar:', error);
+                alert('Error al conectar con MongoDB.');
+            }
+        });
+    </script>
+</body>
+</html>
