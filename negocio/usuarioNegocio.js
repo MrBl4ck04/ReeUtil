@@ -14,7 +14,7 @@ const usuarioSchema = new mongoose.Schema({
 });
 
 // Modelo basado en el esquema
-const Usuario = mongoose.model('Usuario', usuarioSchema);
+const Usuario = mongoose.model('usuarios', usuarioSchema);
 
 // Función para registrar usuarios
 // negocio/usuarioNegocio.js
