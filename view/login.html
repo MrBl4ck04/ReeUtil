@@ -13,7 +13,8 @@
     
         <div class="forms">
             <div class="signup">
-                <form action="http://localhost:5500/register" method="POST">
+                <!-- Cambia el atributo 'action' para evitar el comportamiento predeterminado -->
+                <form id="registerForm">
                     <label for="chk" aria-hidden="true">Registrarse</label>
                     <input type="text" name="txt" placeholder="Nombre de Usuario" required="">
                     <input type="text" name="apellido" placeholder="Apellido" required="">
@@ -23,6 +24,15 @@
                     <input type="tel" name="telefono" placeholder="Teléfono">
                     <button type="submit">Registrarse</button>
                 </form>
+
+                <!-- Div para mostrar el mensaje de éxito o error -->
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <p id="message">Usuario registrado con éxito</p>
+                        <p id="errorMessage" style="color: red;">Error al registrar el usuario</p>
+                    </div>
+                </div>
             </div>
     
             <div class="login">
@@ -35,6 +45,56 @@
             </div>
         </div>
     </div>
-    
+
+    <script>
+         // Get the modal
+    var modal = document.getElementById('myModal');
+    var message = document.getElementById('message');
+    var errorMessage = document.getElementById('errorMessage');
+    var span = document.getElementsByClassName("close")[0];
+
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('http://localhost:5500/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                message.style.display = 'block';
+                errorMessage.style.display = 'none';
+                modal.style.display = "block";
+            } else {
+                errorMessage.style.display = 'block';
+                message.style.display = 'none';
+                modal.style.display = "block";
+            }
+        } catch (error) {
+            errorMessage.style.display = 'block';
+            message.style.display = 'none';
+            modal.style.display = "block";
+            console.error('Error:', error);
+        }
+    });
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
 </body>
 </html>
