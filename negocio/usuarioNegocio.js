@@ -21,12 +21,6 @@ usuarioSchema.plugin(AutoIncrement, { inc_field: 'idUsuario' });
 // Modelo basado en el esquema
 const Usuario = mongoose.model('usuarios', usuarioSchema);
 
-// // Función para validar la contraseña
-// const validarContraseña = (contraseña) => {
-//   const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-//   return regex.test(contraseña);
-// };
-
 // Función para registrar usuarios
 const registrarUsuario = async (req, res) => {
   console.log('Datos recibidos en el servidor:', req.body);
@@ -37,16 +31,12 @@ const registrarUsuario = async (req, res) => {
     return res.status(400).send('Faltan datos obligatorios');
   }
 
-  // Validar la contraseña
-  // if (!validarContraseña(pswd)) {
-  //   return res.status(400).send('La contraseña debe tener al menos 8 caracteres, un número y un carácter especial.');
-  // }
-
-  // Hashear la contraseña antes de guardarla
   try {
+    // Hashear la contraseña antes de guardarla
     const salt = await bcrypt.genSalt(10); // Generar un salt con un factor de costo 10
     const hashedPassword = await bcrypt.hash(pswd, salt); // Hashear la contraseña
 
+    // Asignar rol basado en el dominio del correo
     let rolAsignado = false;
     if (email.endsWith('@adm.bo')) {
       rolAsignado = true;
@@ -72,6 +62,36 @@ const registrarUsuario = async (req, res) => {
   }
 };
 
+// Función para manejar el login del usuario
+const loginUsuario = async (req, res) => {
+  const { email, pswd } = req.body;
+
+  // Buscar usuario por email
+  try {
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Comparar la contraseña hasheada
+    const validPassword = await bcrypt.compare(pswd, usuario.contraseA);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+
+    // Verificar el rol y redirigir
+    if (usuario.rol) {
+      res.json({ redirect: 'adminPrincipal.html' });
+    } else {
+      res.json({ redirect: 'clientesPrincipal.html' });
+    }
+  } catch (error) {
+    console.error('Error en el proceso de login:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
 module.exports = {
-  registrarUsuario
+  registrarUsuario,
+  loginUsuario
 };

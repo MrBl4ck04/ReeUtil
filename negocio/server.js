@@ -25,9 +25,14 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 // Middleware
 app.use(cors());
 
-// Ruta para registrar usuarios
+// Importar las rutas de usuario
 const usuarioNegocio = require('./usuarioNegocio');
+
+// Ruta para registrar usuarios
 app.post('/register', usuarioNegocio.registrarUsuario);
+
+// Ruta para login de usuarios
+app.post('/login', usuarioNegocio.loginUsuario);
 
 // Ruta para registrar dispositivos
 const newDispos = require('./newDispos');
