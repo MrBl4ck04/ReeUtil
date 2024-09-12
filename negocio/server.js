@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const formidable = require('formidable');
+const path = require('path'); // Importar el módulo path
 const app = express();
 const port = 5500;
 
 // Middleware para manejar JSON y formularios
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Esto es importante para recibir datos de formularios
+app.use(express.urlencoded({ extended: true }));
 
 // URI de conexión a MongoDB Atlas
 const uri = 'mongodb+srv://mati:clapper123@reeutil.f0n5a.mongodb.net/reeutil';
@@ -22,12 +24,14 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Ya lo tienes, pero asegúrate de que esté aquí
-app.use(express.urlencoded({ extended: true })); // Importante para manejar datos de formularios
 
 // Ruta para registrar usuarios
 const usuarioNegocio = require('./usuarioNegocio');
 app.post('/register', usuarioNegocio.registrarUsuario);
+
+// Ruta para registrar dispositivos
+const newDispos = require('./newDispos');
+app.post('/registerDevice', newDispos.registrarDispositivo);
 
 // Iniciar servidor
 app.listen(port, () => {
