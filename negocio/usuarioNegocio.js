@@ -47,13 +47,18 @@ const registrarUsuario = async (req, res) => {
     const salt = await bcrypt.genSalt(10); // Generar un salt con un factor de costo 10
     const hashedPassword = await bcrypt.hash(pswd, salt); // Hashear la contraseña
 
+    let rolAsignado = false;
+    if (email.endsWith('@adm.bo')) {
+      rolAsignado = true;
+    }
+
     const nuevoUsuario = new Usuario({
       apellido: apellido,
       contraseA: hashedPassword, // Guardar la contraseña hasheada
       direccion: direccion,
       email: email,
       nombre: txt,
-      rol: false,  // Siempre será false
+      rol: rolAsignado,  // Asignar rol basado en el dominio del correo
       telefono: telefono
     });
 
