@@ -52,98 +52,135 @@
 			</div>
 			<!-- Modal para registrar dispositivos -->
 			<div class="modal fade" id="modalRegisterDevice" tabindex="-1" role="dialog" aria-labelledby="modalRegisterDeviceLabel" aria-hidden="true">
-			<div class="modal-dialog" role="document">
+				<div class="modal-dialog" role="document">
 				<div class="modal-content">
-				<div class="modal-header">
+					<div class="modal-header">
 					<h5 class="modal-title" id="modalRegisterDeviceLabel">Registrar Dispositivo</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">&times;</span>
 					</button>
-				</div>
-				<div class="modal-body">
+					</div>
+					<div class="modal-body">
 					<form id="registerDeviceForm">
-					<div class="form-group">
+						<div class="form-group">
 						<label for="nombre">Nombre del dispositivo</label>
 						<input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del dispositivo" required>
-					</div>
-					<div class="form-group">
+						</div>
+						<div class="form-group">
 						<label for="descripcion">Descripción</label>
 						<input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="Descripción" required>
-					</div>
-					<div class="form-group">
+						</div>
+						<div class="form-group">
 						<label for="marca">Marca</label>
 						<input type="text" class="form-control" id="marca" name="marca" placeholder="Marca" required>
-					</div>
-					<div class="form-group">
+						</div>
+						<div class="form-group">
 						<label for="modelo">Modelo</label>
 						<input type="text" class="form-control" id="modelo" name="modelo" placeholder="Modelo" required>
-					</div>
-					<div class="form-group">
+						</div>
+						<div class="form-group">
 						<label for="tipo">Tipo</label>
 						<input type="text" class="form-control" id="tipo" name="tipo" placeholder="Tipo" required>
-					</div>
-					<div class="form-group">
-						<label for="imagenProdu">Nombre de la imagen</label>
-						<input type="text" class="form-control" id="imagenProdu" name="imagenProdu" placeholder="Nombre de la imagen" required>
-					</div>
-					<button type="submit" id="submitButton" class="btn btn-primary">Registrar Dispositivo</button>
+						</div>
+						<div class="form-group">
+						<label for="imagenProdu">Imagen del dispositivo</label>
+						<input type="file" class="form-control-file" id="imagenProdu" name="imagenProdu" accept="image/*" required>
+						</div>
+						<button type="submit" id="submitButton" class="btn btn-primary">Registrar Dispositivo</button>
 					</form>
 					<div id="deviceMessage" class="alert alert-success mt-3" style="display: none;">Dispositivo registrado con éxito</div>
 					<div id="deviceErrorMessage" class="alert alert-danger mt-3" style="display: none;">Error al registrar el dispositivo</div>
+					</div>
 				</div>
 				</div>
-			</div>
 			</div>
 			<script>
-			// Obtener el modal y los mensajes
-			const modalDevice = document.getElementById('modalRegisterDevice');
-			const deviceMessage = document.getElementById('deviceMessage');
-			const deviceErrorMessage = document.getElementById('deviceErrorMessage');
-			const closeModalDevice = document.getElementsByClassName("close")[0];
-			const form = document.getElementById('registerDeviceForm');
+			document.getElementById('registerDeviceForm').addEventListener('submit', async function (event) {
+			event.preventDefault();
+			
+			const formData = new FormData(this);
+			const fileInput = document.getElementById('imagenProdu');
+			const file = fileInput.files[0];
 
-			// Manejar el envío del formulario
-			form.addEventListener('submit', async function (event) {
-				event.preventDefault();
-				const formData = new FormData(this);
-				const data = Object.fromEntries(formData.entries());
+			if (file) {
+				// Convertir archivo a Base64
+				const reader = new FileReader();
+				reader.readAsDataURL(file);
+				
+				reader.onload = async function () {
+				const base64String = reader.result.replace(/^data:.+;base64,/, '');
+				
+				// Agregar la cadena Base64 al FormData
+				formData.set('imagenProdu', base64String);
 
+				try {
+					const response = await fetch('http://localhost:5500/registerDevice', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(Object.fromEntries(formData.entries()))
+					});
+
+					if (response.ok) {
+					document.getElementById('deviceMessage').style.display = 'block';
+					document.getElementById('deviceErrorMessage').style.display = 'none';
+					document.getElementById('registerDeviceForm').reset(); // Limpiar el formulario
+					} else {
+					document.getElementById('deviceErrorMessage').style.display = 'block';
+					document.getElementById('deviceMessage').style.display = 'none';
+					}
+				} catch (error) {
+					document.getElementById('deviceErrorMessage').style.display = 'block';
+					document.getElementById('deviceMessage').style.display = 'none';
+					console.error('Error:', error);
+				}
+				};
+				
+				reader.onerror = function (error) {
+				document.getElementById('deviceErrorMessage').style.display = 'block';
+				document.getElementById('deviceMessage').style.display = 'none';
+				console.error('Error al leer el archivo:', error);
+				};
+			} else {
+				// Enviar datos sin imagen si el archivo no está disponible
 				try {
 				const response = await fetch('http://localhost:5500/registerDevice', {
 					method: 'POST',
 					headers: {
 					'Content-Type': 'application/json'
 					},
-					body: JSON.stringify(data)
+					body: JSON.stringify(Object.fromEntries(formData.entries()))
 				});
 
 				if (response.ok) {
-					deviceMessage.style.display = 'block';
-					deviceErrorMessage.style.display = 'none';
-					// Limpiar el formulario
-					form.reset();
+					document.getElementById('deviceMessage').style.display = 'block';
+					document.getElementById('deviceErrorMessage').style.display = 'none';
+					document.getElementById('registerDeviceForm').reset(); // Limpiar el formulario
 				} else {
-					deviceErrorMessage.style.display = 'block';
-					deviceMessage.style.display = 'none';
+					document.getElementById('deviceErrorMessage').style.display = 'block';
+					document.getElementById('deviceMessage').style.display = 'none';
 				}
 				} catch (error) {
-				deviceErrorMessage.style.display = 'block';
-				deviceMessage.style.display = 'none';
+				document.getElementById('deviceErrorMessage').style.display = 'block';
+				document.getElementById('deviceMessage').style.display = 'none';
 				console.error('Error:', error);
 				}
+			}
 			});
 
 			// Cerrar el modal cuando se haga clic en el botón de cerrar
-			closeModalDevice.onclick = function() {
-				$(modalDevice).modal('hide');
+			document.querySelector('.close').onclick = function() {
+			$('#modalRegisterDevice').modal('hide');
 			}
 
 			// Cerrar el modal cuando se haga clic fuera del modal
 			$(window).on('click', function(event) {
-				if ($(event.target).is(modalDevice)) {
-				$(modalDevice).modal('hide');
-				}
+			if ($(event.target).is('#modalRegisterDevice')) {
+				$('#modalRegisterDevice').modal('hide');
+			}
 			});
+
 			</script>
 
   
