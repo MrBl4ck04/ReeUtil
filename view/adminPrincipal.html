@@ -102,75 +102,83 @@
 			const fileInput = document.getElementById('imagenProdu');
 			const file = fileInput.files[0];
 
+			// Verificar el idUsuario en localStorage
+			const idUsuario = localStorage.getItem('idUsuario');
+			console.log('idUsuario en localStorage:', idUsuario); // Aquí verificamos el valor de idUsuario
+			
+			if (idUsuario) {
+				formData.append('idUsuario', idUsuario); // Añadir idUsuario a FormData
+			} else {
+				console.error('idUsuario no encontrado en localStorage');
+				return; // Salir si no se encuentra el idUsuario
+			}
+
 			if (file) {
 				// Convertir archivo a Base64
 				const reader = new FileReader();
 				reader.readAsDataURL(file);
 				
 				reader.onload = async function () {
-				const base64String = reader.result.replace(/^data:.+;base64,/, '');
-				
-				// Agregar la cadena Base64 al FormData
-				formData.set('imagenProdu', base64String);
+					const base64String = reader.result.replace(/^data:.+;base64,/, '');
+					
+					// Agregar la cadena Base64 al FormData
+					formData.set('imagenProdu', base64String);
 
+					try {
+						const response = await fetch('http://localhost:5500/registerDevice', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify(Object.fromEntries(formData.entries()))
+						});
+
+						if (response.ok) {
+							document.getElementById('deviceMessage').style.display = 'block';
+							document.getElementById('deviceErrorMessage').style.display = 'none';
+							document.getElementById('registerDeviceForm').reset();
+						} else {
+							document.getElementById('deviceErrorMessage').style.display = 'block';
+							document.getElementById('deviceMessage').style.display = 'none';
+						}
+					} catch (error) {
+						document.getElementById('deviceErrorMessage').style.display = 'block';
+						document.getElementById('deviceMessage').style.display = 'none';
+						console.error('Error:', error);
+					}
+				};
+				
+				reader.onerror = function (error) {
+					document.getElementById('deviceErrorMessage').style.display = 'block';
+					document.getElementById('deviceMessage').style.display = 'none';
+					console.error('Error al leer el archivo:', error);
+				};
+			} else {
 				try {
 					const response = await fetch('http://localhost:5500/registerDevice', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(Object.fromEntries(formData.entries()))
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(Object.fromEntries(formData.entries()))
 					});
 
 					if (response.ok) {
-					document.getElementById('deviceMessage').style.display = 'block';
-					document.getElementById('deviceErrorMessage').style.display = 'none';
-					document.getElementById('registerDeviceForm').reset();
+						document.getElementById('deviceMessage').style.display = 'block';
+						document.getElementById('deviceErrorMessage').style.display = 'none';
+						document.getElementById('registerDeviceForm').reset(); 
 					} else {
-					document.getElementById('deviceErrorMessage').style.display = 'block';
-					document.getElementById('deviceMessage').style.display = 'none';
+						document.getElementById('deviceErrorMessage').style.display = 'block';
+						document.getElementById('deviceMessage').style.display = 'none';
 					}
 				} catch (error) {
 					document.getElementById('deviceErrorMessage').style.display = 'block';
 					document.getElementById('deviceMessage').style.display = 'none';
 					console.error('Error:', error);
 				}
-				};
-				
-				reader.onerror = function (error) {
-				document.getElementById('deviceErrorMessage').style.display = 'block';
-				document.getElementById('deviceMessage').style.display = 'none';
-				console.error('Error al leer el archivo:', error);
-				};
-			} else {
-				try {
-				const response = await fetch('http://localhost:5500/registerDevice', {
-					method: 'POST',
-					headers: {
-					'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(Object.fromEntries(formData.entries()))
-				});
-
-				if (response.ok) {
-					document.getElementById('deviceMessage').style.display = 'block';
-					document.getElementById('deviceErrorMessage').style.display = 'none';
-					document.getElementById('registerDeviceForm').reset(); 
-				} else {
-					document.getElementById('deviceErrorMessage').style.display = 'block';
-					document.getElementById('deviceMessage').style.display = 'none';
-				}
-				} catch (error) {
-				document.getElementById('deviceErrorMessage').style.display = 'block';
-				document.getElementById('deviceMessage').style.display = 'none';
-				console.error('Error:', error);
-				}
 			}
-			});
+		});
 
-			document.querySelector('.close').onclick = function() {
-			$('#modalRegisterDevice').modal('hide');
-			}
 			</script>
 
   

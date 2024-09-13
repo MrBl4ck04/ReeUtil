@@ -19,7 +19,10 @@ dispositivoSchema.plugin(AutoIncrement, { inc_field: 'idCatalogo' });
 const Dispositivo = mongoose.model('Dispositivo', dispositivoSchema, 'catalogo');
 
 const registrarDispositivo = async (req, res) => {
-  const { descripcion, imagenProdu, marca, modelo, nombre, tipo } = req.body;
+  const { descripcion, imagenProdu, marca, modelo, nombre, tipo, idUsuario } = req.body;
+
+  // Convertir idUsuario a número, si es posible
+  const idUsuarioNum = parseInt(idUsuario, 10);
 
   if (!descripcion || !imagenProdu || !marca || !modelo || !nombre || !tipo) {
     return res.status(400).send('Faltan datos obligatorios');
@@ -32,7 +35,8 @@ const registrarDispositivo = async (req, res) => {
       marca,
       modelo,
       nombre,
-      tipo
+      tipo,
+      idUsuario: isNaN(idUsuarioNum) ? null : idUsuarioNum // Asignar null si idUsuario no es un número válido
     });
 
     console.log('Datos que se intentan guardar:', nuevoDispositivo);

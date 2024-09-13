@@ -66,25 +66,21 @@ const registrarUsuario = async (req, res) => {
 const loginUsuario = async (req, res) => {
   const { email, pswd } = req.body;
 
-  // Buscar usuario por email
   try {
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // Comparar la contraseña hasheada
     const validPassword = await bcrypt.compare(pswd, usuario.contraseA);
     if (!validPassword) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Verificar el rol y redirigir
-    if (usuario.rol) {
-      res.json({ redirect: 'adminPrincipal.html' });
-    } else {
-      res.json({ redirect: 'clientesPrincipal.html' });
-    }
+    res.json({
+      idUsuario: usuario.idUsuario.toString(), // Convertir idUsuario a cadena
+      redirect: usuario.rol ? 'adminPrincipal.html' : 'clientesPrincipal.html'
+    });
   } catch (error) {
     console.error('Error en el proceso de login:', error);
     res.status(500).json({ message: 'Error en el servidor' });

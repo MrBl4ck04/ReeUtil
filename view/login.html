@@ -79,32 +79,33 @@
 
         // Manejar el login de usuario
         document.getElementById('loginForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+        event.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
 
-            try {
-                const response = await fetch('http://localhost:5500/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+        try {
+            const response = await fetch('http://localhost:5500/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-                const result = await response.json();
+            const result = await response.json();
+            console.log('Resultado del login:', result);
 
-                if (response.ok) {
-                    // Redirigir según el rol del usuario
-                    window.location.href = result.redirect;
-                } else {
-                    alert(result.message || 'Error en el login');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error en el servidor');
+            if (response.ok) {
+                localStorage.setItem('idUsuario', result.idUsuario);
+                console.log('idUsuario guardado en localStorage:', localStorage.getItem('idUsuario'));
+                window.location.href = result.redirect;
+            } else {
+                alert(result.message || 'Error en el login');
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error en el servidor');
+        }
 
         // Modal para mostrar mensajes de éxito o error en el registro
         var modal = document.getElementById('myModal');
@@ -119,6 +120,7 @@
                 modal.style.display = "none";
             }
         }
+    });
     </script>
 </body>
 </html>
