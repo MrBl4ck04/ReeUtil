@@ -49,33 +49,55 @@
 
     <script>
         // Manejar el registro de usuario
-        document.getElementById('registerForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+        // Manejar el registro de usuario
+document.getElementById('registerForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
 
-            try {
-                const response = await fetch('http://localhost:5500/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    document.getElementById('message').style.display = 'block';
-                    document.getElementById('errorMessage').style.display = 'none';
-                } else {
-                    document.getElementById('errorMessage').style.display = 'block';
-                    document.getElementById('message').style.display = 'none';
-                }
-            } catch (error) {
-                document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('message').style.display = 'none';
-                console.error('Error:', error);
-            }
+    try {
+        const response = await fetch('http://localhost:5500/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         });
+
+        // Mostrar el modal si el registro es exitoso
+        var modal = document.getElementById('myModal');
+        if (response.ok) {
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            modal.style.display = 'block'; // Mostrar el modal
+        } else {
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('message').style.display = 'none';
+            modal.style.display = 'block'; // Mostrar el modal con mensaje de error
+        }
+    } catch (error) {
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('message').style.display = 'none';
+        var modal = document.getElementById('myModal');
+        modal.style.display = 'block'; // Mostrar el modal en caso de error
+        console.error('Error:', error);
+    }
+});
+
+// Modal para mostrar mensajes de éxito o error en el registro
+var modal = document.getElementById('myModal');
+var span = document.getElementsByClassName("close")[0];
+
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
 
         // Manejar el login de usuario
         document.getElementById('loginForm').addEventListener('submit', async function (event) {
@@ -107,19 +129,6 @@
             alert('Error en el servidor');
         }
 
-        // Modal para mostrar mensajes de éxito o error en el registro
-        var modal = document.getElementById('myModal');
-        var span = document.getElementsByClassName("close")[0];
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
     });
     </script>
 </body>
