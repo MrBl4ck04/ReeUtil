@@ -50,8 +50,17 @@
     <script>
         // Manejar el registro de usuario
         // Manejar el registro de usuario
-document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        document.getElementById('registerForm').addEventListener('submit', async function (event) {
     event.preventDefault();
+
+    const email = document.querySelector('input[name="email"]').value;
+
+    // Verificar que el correo contenga un '@'
+    if (!email.includes('@')) {
+        alert('Por favor, introduce un correo electrónico válido.');
+        return; // Detener el proceso si el correo es inválido
+    }
+
     const formData = new FormData(this);
     const data = Object.fromEntries(formData.entries());
 
