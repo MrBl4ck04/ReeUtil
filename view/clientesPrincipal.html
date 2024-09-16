@@ -209,6 +209,7 @@
 					<img id="modal-product-image" src="" alt="" class="modal-product-img" />
 					<h2 id="modal-product-name"></h2>
 					<p id="modal-product-description"></p>
+					<p id="modal-product-marca"></p>
 					<p id="modal-product-type"></p>
 				</div>
 			</div>
@@ -269,7 +270,7 @@
 													</div>
 												</div>
 												<div class="content-card-product">
-													<h3>${producto.marca} ${producto.modelo}</h3>
+													<h3>${producto.nombre}</h3>
 													<span class="add-cart"><i class="fa-solid fa-basket-shopping"></i></span>
 													<p class="tipo">${producto.tipo}</p>
 												</div>
@@ -366,12 +367,14 @@
 								const modal = document.getElementById('productModal');
 								const modalImg = document.getElementById('modal-product-image');
 								const modalName = document.getElementById('modal-product-name');
+								const modalMarca = document.getElementById('modal-product-marca');
 								const modalDescription = document.getElementById('modal-product-description');
 								const modalType = document.getElementById('modal-product-type');
 
 								//modalImg.src = producto.imagen;
-								modalName.textContent = productos.marca + ' ' + productos.modelo;
+								modalName.textContent = productos.nombre;
 								modalDescription.textContent = productos.descripcion;
+								modalMarca.textContent=productos.marca;
 								modalType.textContent = productos.tipo;
 
 								modal.style.display = 'block';
