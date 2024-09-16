@@ -473,6 +473,7 @@
 		></script>
 <!-- Modal de confirmación para eliminar del catalogo-->
  <!-- Modal de Confirmación de Eliminación -->
+<!-- Modal de confirmación para eliminar del catalogo-->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 	  <div class="modal-content">
@@ -493,25 +494,26 @@
 	</div>
   </div>
   
+  
   <!-- Modal de Notificación -->
-  <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel" aria-hidden="true">
+<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
-	  <div class="modal-content">
-		<div class="modal-header">
-		  <h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
-		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		  </button>
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="notificationMessage">
+				<!-- Mensaje se actualizará dinámicamente -->
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+			</div>
 		</div>
-		<div class="modal-body" id="notificationMessage">
-		  <!-- Mensaje se actualizará dinámicamente -->
-		</div>
-		<div class="modal-footer">
-		  <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
-		</div>
-	  </div>
 	</div>
-  </div>
+</div>
 	</body>
 </html>
 
@@ -537,7 +539,7 @@
 			<td>${item.modelo}</td>
 			<td>${item.descripcion}</td>
 			<td>${item.tipo}</td>
-			<td><button class="btn btn-danger" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+			<td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
 		  `;
 		  tableBody.appendChild(row);
 		});
@@ -547,24 +549,54 @@
 	});
 
 	// Función para eliminar un dispositivo por ID
-	async function eliminarDispositivo(id) {
-	  if (confirm('¿Estás seguro de que deseas eliminar este dispositivo?')) {
-		try {
-		  const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
-			method: 'DELETE'
-		  });
+	let idDispositivoEliminar = null; // Variable global para almacenar el ID del dispositivo a eliminar
 
-		  if (response.ok) {
-			alert('Dispositivo eliminado con éxito');
-			location.reload(); // Recargar la página para actualizar la tabla
-		  } else {
-			alert('Error al eliminar el dispositivo');
-		  }
-		} catch (error) {
-		  console.error('Error:', error);
-		}
-	  }
+	// Función para abrir el modal y preparar la eliminación
+	function eliminarDispositivo(id) {
+		idDispositivoEliminar = id; // Guardar el ID del dispositivo a eliminar
+		const myModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'), {
+			keyboard: false
+		});
+		myModal.show(); // Mostrar el modal de confirmación
 	}
+
+	// Función para mostrar el modal de notificación
+	function mostrarNotificacion(mensaje) {
+		document.getElementById('notificationMessage').innerText = mensaje;
+		const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'), {
+			keyboard: false
+		});
+		notificationModal.show();
+	}
+
+	// Función para confirmar la eliminación del dispositivo
+	document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
+		if (idDispositivoEliminar) {
+			try {
+				const response = await fetch(`http://localhost:5500/catalogo/${idDispositivoEliminar}`, {
+					method: 'DELETE'
+				});
+
+				if (response.ok) {
+					// Mostrar el modal de notificación con el mensaje de éxito
+					mostrarNotificacion('Dispositivo eliminado con éxito');
+					
+					// Recargar la página después de un pequeño retraso para dar tiempo de ver la notificación
+					setTimeout(() => {
+						location.reload(); // Recargar la página para actualizar la tabla
+					}, 2000); // Espera 2 segundos antes de recargar
+				} else {
+					// Mostrar el modal de notificación con el mensaje de error
+					mostrarNotificacion('Error al eliminar el dispositivo');
+				}
+			} catch (error) {
+				console.error('Error:', error);
+				// Mostrar el modal de notificación con el mensaje de error
+				mostrarNotificacion('Ocurrió un error al intentar eliminar el dispositivo');
+			}
+		}
+	});
 </script>
+
 
 	
