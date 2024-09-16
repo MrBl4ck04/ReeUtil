@@ -1244,13 +1244,13 @@ html {
 }
 
 .carousel-track-container {
-    overflow: hidden;
-    width: 100%;
+    overflow: hidden; /* Hide overflow for smooth scrolling */
+    position: relative;
 }
 
 .carousel-track {
-    display: flex;
-    transition: transform 0.3s ease;
+    display: flex; /* Use flex to make sure items are displayed in a row */
+    transition: transform 0.3s ease; /* Smooth scrolling */
 }
 
 .card-product {
@@ -1272,7 +1272,7 @@ html {
     border: none;
     cursor: pointer;
     padding: 10px;
-    z-index: 3;
+    z-index: 9999;
     opacity: 0; /* Hidden by default */
     transition: opacity 0.3s ease;
 }

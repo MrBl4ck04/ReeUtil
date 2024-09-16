@@ -253,7 +253,6 @@
 									card.innerHTML = `
 												<div class="container-img">
 													<img src="prod1.png" alt="${producto.nombre}" />
-													<span class="discount">-10%</span>
 													<div class="button-group">
 														<span><i class="fa-regular fa-eye"></i></span>
 													</div>
@@ -271,29 +270,68 @@
 
 							// Función para iniciar el carrusel
 							function iniciarCarrusel() {
-								const track = document.querySelector('.carousel-track');
-								const prevButton = document.querySelector('.prev-btn');
-								const nextButton = document.querySelector('.next-btn');
-								const cardWidth = document.querySelector('.card-product').offsetWidth + 15;  // Ancho de cada tarjeta más el margen
-								let currentIndex = 0;
+    const track = document.querySelector('.carousel-track');
+    const prevButton = document.querySelector('.prev-btn');
+    const nextButton = document.querySelector('.next-btn');
+    let currentIndex = 0;
 
-								nextButton.addEventListener('click', () => {
-									const itemsToShow = Math.floor(track.clientWidth / cardWidth);  // Número de productos visibles en el contenedor
-									const totalItems = track.children.length;
+    // Función para calcular el ancho total de todas las tarjetas dentro del carrusel
+    const calcularAnchoTotal = () => {
+        let totalWidth = 0;
+        const cards = document.querySelectorAll('.card-product');
+        cards.forEach(card => {
+            const cardStyle = window.getComputedStyle(card);
+            const cardWidth = card.getBoundingClientRect().width;
+            const marginLeft = parseFloat(cardStyle.marginLeft);
+            const marginRight = parseFloat(cardStyle.marginRight);
+            totalWidth += cardWidth + marginLeft + marginRight;
+        });
+        return totalWidth;
+    };
 
-									if (currentIndex < totalItems - itemsToShow) {
-										currentIndex++;
-										track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-									}
-								});
+    const calcularAnchoTarjeta = () => {
+        const cardProduct = document.querySelector('.card-product');
+        const cardStyle = window.getComputedStyle(cardProduct);
+        const cardWidth = cardProduct.getBoundingClientRect().width;
+        const marginLeft = parseFloat(cardStyle.marginLeft);
+        const marginRight = parseFloat(cardStyle.marginRight);
+        return cardWidth + marginLeft + marginRight;
+    };
 
-								prevButton.addEventListener('click', () => {
-									if (currentIndex > 0) {
-										currentIndex--;
-										track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-									}
-								});
-							}
+    let cardWidth = calcularAnchoTarjeta();
+    let totalWidth = calcularAnchoTotal();
+
+    // Recalcular el ancho si la ventana cambia de tamaño (responsive)
+    window.addEventListener('resize', () => {
+        cardWidth = calcularAnchoTarjeta();
+        totalWidth = calcularAnchoTotal();
+    });
+
+    nextButton.addEventListener('click', () => {
+        const itemsToShow = Math.floor(track.clientWidth / cardWidth);
+        const totalItems = track.children.length;
+        const maxScroll = totalWidth - track.clientWidth;
+
+        // Actualizar la posición del índice
+        if (currentIndex < totalItems - itemsToShow) {
+            currentIndex++;
+            const currentScroll = currentIndex * cardWidth;
+
+            // Verificar que el desplazamiento no exceda el máximo
+            track.style.transform = `translateX(-${Math.min(currentScroll, maxScroll)}px)`;
+        }
+    });
+
+    prevButton.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', iniciarCarrusel);
+
 						</script>
 					</div>
 				</div>
