@@ -50,12 +50,30 @@ app.listen(port, () => {
 // Importar modelo del catálogo
 const Catalogo = require('./catalogo');
 
-// Ruta para obtener los datos del catálogo
-app.get('/catalogo', async (req, res) => { // Cambiado POST a GET
+// Ruta para obtener los datos del catálogo (GET)
+app.get('/catalogo', async (req, res) => {
   try {
     const catalogo = await Catalogo.find({});
     res.json(catalogo);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los datos del catálogo' });
+  }
+});
+
+// Ruta para eliminar un dispositivo del catálogo (DELETE)
+app.delete('/catalogo/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const dispositivoEliminado = await Catalogo.findByIdAndDelete(id);
+
+    if (!dispositivoEliminado) {
+      return res.status(404).json({ message: 'Dispositivo no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Dispositivo eliminado con éxito' });
+  } catch (error) {
+    console.error('Error al eliminar el dispositivo:', error);
+    res.status(500).json({ error: 'Error al eliminar el dispositivo' });
   }
 });
