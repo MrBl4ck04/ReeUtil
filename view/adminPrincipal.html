@@ -249,9 +249,19 @@
               <section class="container blogs mt-5">
                 <div class="d-flex align-items-center">
                     <h1 class="heading-1 mb-0">Dispositivos    </h1>
-                    <span class="add-cart">
-                      <i class="fa-solid fa-plus"></i>
-                    </span>
+                    <span class="add-cart" id="openModal">
+						<i class="fa-solid fa-plus"></i>
+					</span>
+					<script>
+						// Capturar el clic en el span con id "openModal"
+						document.getElementById('openModal').addEventListener('click', function () {
+							// Usar Bootstrap para mostrar el modal
+							var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
+								keyboard: false
+							});
+							myModal.show();
+						});
+					</script>					
                   </div>
                 <table class="table table-striped bg-white fs-5">
                   <thead>
