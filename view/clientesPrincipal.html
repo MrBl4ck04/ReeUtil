@@ -202,6 +202,18 @@
 			</div>
 		</section>
 
+		<div id="productModal" class="modal">
+			<div class="modal-content">
+				<span class="closepro">&times;</span>
+				<div class="modal-body">
+					<img id="modal-product-image" src="" alt="" class="modal-product-img" />
+					<h2 id="modal-product-name"></h2>
+					<p id="modal-product-description"></p>
+					<p id="modal-product-type"></p>
+				</div>
+			</div>
+		</div>
+
 		<section class="container top-products">
 			<h1 class="heading-1">Mejores Productos</h1>
 
@@ -226,8 +238,7 @@
 										}
 									});
 									const productos = await response.json();
-									generarCards(productos);  // Generar las tarjetas con los productos obtenidos
-									// Mover la lógica del carrusel aquí, después de que las tarjetas estén generadas
+									generarCards(productos);
 									iniciarCarrusel();
 								} catch (error) {
 									console.error('Error al obtener productos:', error);
@@ -254,7 +265,7 @@
 												<div class="container-img">
 													<img src="prod1.png" alt="${producto.nombre}" />
 													<div class="button-group">
-														<span><i class="fa-regular fa-eye"></i></span>
+														<span class="view-product"><i class="fa-regular fa-eye"></i></span>
 													</div>
 												</div>
 												<div class="content-card-product">
@@ -265,73 +276,111 @@
 											`;
 
 									track.appendChild(card);
+									const viewButton = card.querySelector('.view-product');
+									viewButton.addEventListener('click', () => {
+										mostrarModalProducto(producto);
+									});
 								});
+								iniciarCarrusel();
 							}
 
 							// Función para iniciar el carrusel
 							function iniciarCarrusel() {
-    const track = document.querySelector('.carousel-track');
-    const prevButton = document.querySelector('.prev-btn');
-    const nextButton = document.querySelector('.next-btn');
-    let currentIndex = 0;
+								const track = document.querySelector('.carousel-track');
+								const prevButton = document.querySelector('.prev-btn');
+								const nextButton = document.querySelector('.next-btn');
+								let currentIndex = 0;
 
-    // Función para calcular el ancho total de todas las tarjetas dentro del carrusel
-    const calcularAnchoTotal = () => {
-        let totalWidth = 0;
-        const cards = document.querySelectorAll('.card-product');
-        cards.forEach(card => {
-            const cardStyle = window.getComputedStyle(card);
-            const cardWidth = card.getBoundingClientRect().width;
-            const marginLeft = parseFloat(cardStyle.marginLeft);
-            const marginRight = parseFloat(cardStyle.marginRight);
-            totalWidth += cardWidth + marginLeft + marginRight;
-        });
-        return totalWidth;
-    };
+								// Función para calcular el ancho total de todas las tarjetas dentro del carrusel
+								const calcularAnchoTotal = () => {
+									let totalWidth = 0;
+									const cards = document.querySelectorAll('.card-product');
+									cards.forEach(card => {
+										const cardStyle = window.getComputedStyle(card);
+										const cardWidth = card.getBoundingClientRect().width;
+										const marginLeft = parseFloat(cardStyle.marginLeft);
+										const marginRight = parseFloat(cardStyle.marginRight);
+										totalWidth += cardWidth + marginLeft + marginRight;
+									});
+									return totalWidth;
+								};
 
-    const calcularAnchoTarjeta = () => {
-        const cardProduct = document.querySelector('.card-product');
-        const cardStyle = window.getComputedStyle(cardProduct);
-        const cardWidth = cardProduct.getBoundingClientRect().width;
-        const marginLeft = parseFloat(cardStyle.marginLeft);
-        const marginRight = parseFloat(cardStyle.marginRight);
-        return cardWidth + marginLeft + marginRight;
-    };
+								const calcularAnchoTarjeta = () => {
+									const cardProduct = document.querySelector('.card-product');
 
-    let cardWidth = calcularAnchoTarjeta();
-    let totalWidth = calcularAnchoTotal();
+									// Verificar si existe alguna tarjeta antes de calcular su ancho
+									if (!cardProduct) {
+										console.error("No se encontró ningún elemento con la clase 'card-product'. Asegúrate de que las tarjetas existan antes de calcular su ancho.");
+										return 0;
+									}
 
-    // Recalcular el ancho si la ventana cambia de tamaño (responsive)
-    window.addEventListener('resize', () => {
-        cardWidth = calcularAnchoTarjeta();
-        totalWidth = calcularAnchoTotal();
-    });
+									const cardStyle = window.getComputedStyle(cardProduct);
+									const cardWidth = cardProduct.getBoundingClientRect().width;
+									const marginLeft = parseFloat(cardStyle.marginLeft);
+									const marginRight = parseFloat(cardStyle.marginRight);
+									return cardWidth + marginLeft + marginRight;
+								};
 
-    nextButton.addEventListener('click', () => {
-        const itemsToShow = Math.floor(track.clientWidth / cardWidth);
-        const totalItems = track.children.length;
-        const maxScroll = totalWidth - track.clientWidth;
+								let cardWidth = calcularAnchoTarjeta();
+								let totalWidth = calcularAnchoTotal();
 
-        // Actualizar la posición del índice
-        if (currentIndex < totalItems - itemsToShow) {
-            currentIndex++;
-            const currentScroll = currentIndex * cardWidth;
+								// Recalcular el ancho si la ventana cambia de tamaño (responsive)
+								window.addEventListener('resize', () => {
+									cardWidth = calcularAnchoTarjeta();
+									totalWidth = calcularAnchoTotal();
+								});
 
-            // Verificar que el desplazamiento no exceda el máximo
-            track.style.transform = `translateX(-${Math.min(currentScroll, maxScroll)}px)`;
-        }
-    });
+								nextButton.addEventListener('click', () => {
+									const itemsToShow = Math.floor(track.clientWidth / cardWidth);
+									const totalItems = track.children.length;
+									const maxScroll = totalWidth - track.clientWidth;
 
-    prevButton.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-        }
-    });
-}
+									// Actualizar la posición del índice
+									if (currentIndex < totalItems - itemsToShow) {
+										currentIndex++;
+										const currentScroll = currentIndex * cardWidth;
 
-document.addEventListener('DOMContentLoaded', iniciarCarrusel);
+										// Verificar que el desplazamiento no exceda el máximo
+										track.style.transform = `translateX(-${Math.min(currentScroll, maxScroll)}px)`;
+									}
+								});
 
+								prevButton.addEventListener('click', () => {
+									if (currentIndex > 0) {
+										currentIndex--;
+										track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+									}
+								});
+							}
+
+							// Inicia la carga de productos cuando el DOM esté completamente cargado
+							document.addEventListener('DOMContentLoaded', cargarProductos);
+
+							function mostrarModalProducto(productos) {
+								const modal = document.getElementById('productModal');
+								const modalImg = document.getElementById('modal-product-image');
+								const modalName = document.getElementById('modal-product-name');
+								const modalDescription = document.getElementById('modal-product-description');
+								const modalType = document.getElementById('modal-product-type');
+
+								//modalImg.src = producto.imagen;
+								modalName.textContent = productos.marca + ' ' + productos.modelo;
+								modalDescription.textContent = productos.descripcion;
+								modalType.textContent = productos.tipo;
+
+								modal.style.display = 'block';
+
+								const closeModal = document.getElementsByClassName('closepro')[0];
+								closeModal.onclick = function () {
+									modal.style.display = 'none';
+								};
+
+								window.onclick = function (event) {
+									if (event.target === modal) {
+										modal.style.display = 'none';
+									}
+								};
+							}
 						</script>
 					</div>
 				</div>

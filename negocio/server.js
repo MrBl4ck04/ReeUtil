@@ -39,7 +39,7 @@ const newDispos = require('./newDispos');
 app.post('/registerDevice', newDispos.registrarDispositivo);
 
 // Ruta para sacar catalogo
-const cata= require('./catalogo'); 
+const cata= require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
 // Iniciar servidor

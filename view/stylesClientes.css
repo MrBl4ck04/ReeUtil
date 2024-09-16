@@ -1284,3 +1284,23 @@ html {
 .next-btn {
     right: 10px;
 }
+
+
+.closepro {
+	color: #aaa;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
+	position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .closepro:hover,
+  .closepro:focus {
+	color: black;
+	text-decoration: none;
+	cursor: pointer;
+  }
