@@ -248,7 +248,7 @@
             
               <section class="container blogs mt-5">
                 <div class="d-flex align-items-center">
-                    <h1 class="heading-1 mb-0">Dispositivos    </h1>
+                    <h1 class="heading-1 mb-0">Catalogo    </h1>
                     <span class="add-cart" id="openModal">
 						<i class="fa-solid fa-plus"></i>
 					</span>
@@ -273,21 +273,9 @@
                       <th>Modelo</th>
                       <th>Descripción</th>
                       <th>Tipo</th>
-                      <th>ID Usuario</th>
-
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>1</td>
-                      <td>Dispo</td>
-                      <td>Dispo</td>
-                      <td>Dispo</td>
-                      <td>Dispo</td>
-                      <td>Dispo</td>
-                      <td>1</td>
-                    </tr>
+				  <tbody id="catalogoTableBody">                   
                   </tbody>
                 </table>
               </section>
@@ -484,3 +472,35 @@
 		></script>
 	</body>
 </html>
+
+<script>
+	document.addEventListener('DOMContentLoaded', async () => {
+	  try {
+		const response = await fetch('http://localhost:5500/catalogo');
+		if (!response.ok) throw new Error('Error al obtener los datos del catálogo');
+		
+		const catalogo = await response.json();
+		const tableBody = document.getElementById('catalogoTableBody');
+	
+		// Limpia el contenido de la tabla antes de agregar nuevos datos
+		tableBody.innerHTML = '';
+	
+		catalogo.forEach((item, index) => {
+		  const row = document.createElement('tr');
+		  row.innerHTML = `
+			<td>${index + 1}</td>
+			<td>${item.idCatalogo}</td>
+			<td>${item.nombre}</td>
+			<td>${item.marca}</td>
+			<td>${item.modelo}</td>
+			<td>${item.descripcion}</td>
+			<td>${item.tipo}</td>
+		  `;
+		  tableBody.appendChild(row);
+		});
+	  } catch (error) {
+		console.error('Error:', error);
+	  }
+	});
+	</script>
+	
