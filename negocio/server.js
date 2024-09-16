@@ -38,6 +38,10 @@ app.post('/login', usuarioNegocio.loginUsuario);
 const newDispos = require('./newDispos');
 app.post('/registerDevice', newDispos.registrarDispositivo);
 
+// Ruta para sacar catalogo
+const cata= require('./catalogo'); 
+app.get('/obteCatalogo', cata.obtenerCatalogo);
+
 // Iniciar servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

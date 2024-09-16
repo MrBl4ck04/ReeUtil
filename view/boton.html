@@ -18,26 +18,45 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #catalogoContainer {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <button id="connectButton">Conectar a MongoDB</button>
+    <div>
+        <button id="connectButton">Sacar Catálogo</button>
+        <div id="catalogoContainer"></div> <!-- Contenedor para mostrar los datos -->
+    </div>
 
     <script>
-        document.getElementById('connectButton').addEventListener('click', async function() {
-            try {
-                const response = await fetch('http://127.0.0.1:3000/conectar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const result = await response.json();
-                alert(result.message);
-            } catch (error) {
-                console.error('Error al conectar:', error);
-                alert('Error al conectar con MongoDB.');
-            }
+        // Esperar a que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connectButton').addEventListener('click', async () => {
+                try {
+                    // Hacer una solicitud GET al backend para obtener los datos del catálogo
+                    const response = await fetch('http://localhost:5500/obteCatalogo');
+                    const data = await response.json();
+
+                    // Mostrar los datos en el contenedor
+                    const catalogoContainer = document.getElementById('catalogoContainer');
+                    catalogoContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevos datos
+
+                    data.forEach(item => {
+                        const itemElement = document.createElement('div');
+                        itemElement.innerHTML = `
+                            <h3>${item.nombre} (${item.modelo})</h3>
+                            <p><strong>Marca:</strong> ${item.marca}</p>
+                            <p><strong>Tipo:</strong> ${item.tipo}</p>
+                            <p><strong>Descripción:</strong> ${item.descripcion}</p>
+                            <hr>
+                        `;
+                        catalogoContainer.appendChild(itemElement);
+                    });
+                } catch (error) {
+                    console.error("Error obteniendo datos del catálogo:", error);
+                }
+            });
         });
     </script>
 </body>
