@@ -44,7 +44,69 @@
 						<li><a href="#">Inicio</a></li>
 						<li><a href="#">Dispositivos</a></li>
 						<li><a href="#">Cotizacion</a></li>
-						<li><a href="#">Solicitud de evaluacion</a></li>
+						<li><a href="#" id="openModal">Solicitud de evaluación</a></li>
+								<div id="modal" class="modal">
+									<div class="modal-content">
+									<span id="closeModal" class="close">&times;</span>
+									<h2>¿Cuál es el dispositivo que desea solicitar?</h2>
+									<div class="modal-card-container">
+										<div class="card-modal">
+											<div class="container-img-modal">
+												<img src="u1.png" alt="Galaxy Buds" />
+											</div>
+											<div class="content-modal">
+												<h3>Galaxy Buds</h3>
+												<span>01 Septiembre 2024</span>
+												<p>
+													Lorem ipsum dolor sit amet consectetur adipisicing elit.
+												</p>
+												<div class="btn-solicitar">Solicitar</div>
+											</div>
+										</div>
+										<div class="card-modal">
+											<div class="container-img-modal">
+												<img src="u1.png" alt="Galaxy Buds" />
+											</div>
+											<div class="content-modal">
+												<h3>Galaxy Buds</h3>
+												<span>01 Septiembre 2024</span>
+												<p>
+													Lorem ipsum dolor sit amet consectetur adipisicing elit.
+												</p>
+												<div class="btn-solicitar">Solicitar</div>
+											</div>
+										</div>
+										<div class="card-modal">
+											<div class="container-img-modal">
+												<img src="u1.png" alt="Lavadora" />
+											</div>
+											<div class="content-modal">
+												<h3>Galaxy Buds</h3>
+												<span>02 Septiembre 2024</span>
+												<p>
+													Lorem ipsum dolor sit amet consectetur adipisicing elit.
+												</p>
+												<div class="btn-solicitar">Solicitar</div>
+											</div>
+										</div>
+										<div class="card-modal">
+											<div class="container-img-modal">
+												<img src="u.png" alt="Cafetera" />
+											</div>
+											<div class="content-modal">
+												<h3>Galaxy Buds</h3>
+												<span>03 Septiembre 2024</span>
+												<p>
+													Lorem ipsum dolor sit amet consectetur adipisicing elit.
+												</p>
+												<div class="btn-solicitar">Solicitar</div>
+											</div>
+										</div>
+										
+									</div>
+									
+									</div>
+								</div>
 						<li><a href="#">Más</a></li>
 					</ul>
 
@@ -57,7 +119,32 @@
 				</nav>
 			</div>
 		</header>
-
+			<!-- Modal para Formulario -->
+			<div id="solicitudModal" class="modal FormS-modal">
+				<div class="modal-content FormS-modal-content">
+				<span id="closeSolicitudModal" class="close FormS-close">&times;</span>
+				<h2>Solicitar Dispositivo</h2>
+				<form class="FormS-form">
+					<label for="equipo">Equipo Solicitado:</label>
+					<input type="text" id="equipo" name="equipo" value="XXX" readonly />
+					
+					<label for="imagen">Subir Imagen:</label>
+					<input type="file" id="imagen" name="imagen" />
+			
+					<label for="estado">Estado del Dispositivo:</label>
+					<input type="text" id="estado" name="estado" placeholder="Describe el estado del dispositivo" />
+			
+					<label for="detalles">Detalles:</label>
+					<textarea id="detalles" name="detalles" rows="4" placeholder="Proporcione más detalles..."></textarea>
+			
+					<label for="fecha">Fecha:</label>
+					<input type="date" id="fecha" name="fecha" />
+			
+					<button type="submit" class="FormS-submit">Enviar Solicitud</button>
+				</form>
+				</div>
+			</div>
+  
 		<section class="banner">
 			<div class="content-banner">
 				<p>Reinicio de dispositivos</p>
@@ -449,5 +536,6 @@
 			src="https://kit.fontawesome.com/81581fb069.js"
 			crossorigin="anonymous"
 		></script>
+		<script src="solicitudes.js"></script>
 	</body>
 </html>
