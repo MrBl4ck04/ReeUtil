@@ -42,3 +42,16 @@ app.post('/registerDevice', newDispos.registrarDispositivo);
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+
+// Importar modelo del catálogo
+const Catalogo = require('./catalogo');
+
+// Ruta para obtener los datos del catálogo
+app.get('/catalogo', async (req, res) => { // Cambiado POST a GET
+  try {
+    const catalogo = await Catalogo.find({});
+    res.json(catalogo);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los datos del catálogo' });
+  }
+});
