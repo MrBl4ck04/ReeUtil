@@ -280,6 +280,12 @@
 									viewButton.addEventListener('click', () => {
 										mostrarModalProducto(producto);
 									});
+
+									track.appendChild(card);
+									const Button = card.querySelector('.add-cart');
+									Button.addEventListener('click', () => {
+										mostrarModal();
+									});
 								});
 								iniciarCarrusel();
 							}
@@ -381,6 +387,23 @@
 									}
 								};
 							}
+
+							function mostrarModal() {
+								const modal = document.getElementById('modal');
+								modal.style.display = 'block';  
+							}
+							function cerrarModal() {
+								const modal = document.getElementById('modal');
+								modal.style.display = 'none';  
+							}
+							document.getElementById('closeModal').addEventListener('click', cerrarModal);
+
+							window.addEventListener('click', function (event) {
+								const modal = document.getElementById('modal');
+								if (event.target === modal) {
+									cerrarModal();  
+								}
+							});
 						</script>
 					</div>
 				</div>
