@@ -392,17 +392,17 @@
 							}
 
 							function mostrarModal() {
-								const modal = document.getElementById('modal');
+								const modal = document.getElementById('solicitudModal');
 								modal.style.display = 'block';  
 							}
 							function cerrarModal() {
-								const modal = document.getElementById('modal');
+								const modal = document.getElementById('solicitudModal');
 								modal.style.display = 'none';  
 							}
 							document.getElementById('closeModal').addEventListener('click', cerrarModal);
 
 							window.addEventListener('click', function (event) {
-								const modal = document.getElementById('modal');
+								const modal = document.getElementById('solicitudModal');
 								if (event.target === modal) {
 									cerrarModal();  
 								}
