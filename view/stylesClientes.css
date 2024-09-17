@@ -1329,3 +1329,29 @@ html {
     background-color: #fff;      /* Fondo blanco para las opciones */
     color: #333;                 /* Color de texto de las opciones */
 }
+
+.mensaje-oculto {
+    display: none; /* Ocultar inicialmente */
+}
+
+/* Estilo para mensaje de éxito */
+.mensaje-exito {
+    display: block; /* Mostrar */
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Estilo para mensaje de error */
+.mensaje-error {
+    display: block; /* Mostrar */
+    background-color: #f44336;
+    color: white;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    text-align: center;
+}

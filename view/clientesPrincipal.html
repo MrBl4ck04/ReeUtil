@@ -123,13 +123,14 @@
 		<div class="modal-content FormS-modal-content">
 			<span id="closeSolicitudModal" class="close FormS-close">&times;</span>
 			<h2>Solicitar Dispositivo</h2>
+			<div id="mensaje" class="mensaje-oculto"></div>
 			<form id="solicitudForm" class="FormS-form">
 				<label for="equipo">Equipo Solicitado:</label>
 				<input type="text" id="equipo" name="equipo" readonly />
 				<input type="hidden" id="idCatalogo" name="idCatalogo" />
 
 				<label for="imagen">Subir Imagen:</label>
-
+				<!--<input type="file" id="imagen" name="imagen" />-->
 
 				<label for="estado">Estado del Dispositivo:</label>
 				<select id="estado" name="estado">
@@ -158,14 +159,15 @@
 			if (data.fecha) {
 				data.fecha = new Date(data.fecha).toISOString();
 			}
+
 			const idUsuario = localStorage.getItem('idUsuario');
 			console.log('idUsuario en localStorage:', idUsuario);
 
 			if (idUsuario) {
 				data.idUsuario = idUsuario; // Agregar el idUsuario al objeto `data`
 			} else {
-				console.error('idUsuario no encontrado en localStorage');
-				return; // Detener la ejecución si no se encuentra el idUsuario
+				mostrarMensaje('idUsuario no encontrado en localStorage', 'error');
+				return;
 			}
 
 			try {
@@ -176,13 +178,42 @@
 					},
 					body: JSON.stringify(data)
 				});
+
 				const result = await response.json();
-				console.log('Datos enviados correctamente:', result);
+
+				if (response.ok) {
+					mostrarMensaje('Datos enviados correctamente', 'exito');
+				} else {
+					mostrarMensaje('Error al enviar los datos: ' + result.message, 'error');
+				}
 
 			} catch (error) {
-				console.error('Error en la solicitud:', error);
+				mostrarMensaje('Error en la solicitud: ' + error.message, 'error');
 			}
 		});
+		function mostrarMensaje(mensaje, tipo) {
+			const mensajeDiv = document.getElementById('mensaje');
+
+			// Cambiar el texto del mensaje
+			mensajeDiv.textContent = mensaje;
+
+			// Quitar las clases previas y asignar la clase según el tipo
+			if (tipo === 'exito') {
+				mensajeDiv.classList.remove('mensaje-error');
+				mensajeDiv.classList.add('mensaje-exito');
+			} else if (tipo === 'error') {
+				mensajeDiv.classList.remove('mensaje-exito');
+				mensajeDiv.classList.add('mensaje-error');
+			}
+
+			// Asegurarse de que el mensaje esté visible
+			mensajeDiv.style.display = 'block';
+
+			// Ocultar el mensaje después de 5 segundos
+			setTimeout(() => {
+				mensajeDiv.style.display = 'none';
+			}, 5000);
+		}
 	</script>
 
 	<section class="banner">
