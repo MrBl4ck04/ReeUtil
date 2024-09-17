@@ -43,8 +43,8 @@ const cata= require('./catalogoClientes');
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
 // Ruta para solicitar Evaluacion
-const eva = require('./cotizardisp');
-app.post('/evaluacion', eva.evadisp);
+const cot = require('./cotizardisp');
+app.post('/envcotizacion', cot.env);
 
 // Iniciar servidor
 app.listen(port, () => {

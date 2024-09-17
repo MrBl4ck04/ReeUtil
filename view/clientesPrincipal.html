@@ -134,9 +134,9 @@
 
 				<label for="estado">Estado del Dispositivo:</label>
 				<select id="estado" name="estado">
-					<option value="operativo">Operativo</option>
-					<option value="regular">Regular</option>
-					<option value="no_funcional">No Funcional</option>
+					<option value="Operativo">Operativo</option>
+					<option value="Regular">Regular</option>
+					<option value="No_funcional">No Funcional</option>
 				</select>
 
 				<label for="detalles">Detalles:</label>
@@ -171,7 +171,7 @@
 			}
 
 			try {
-				const response = await fetch('http://localhost:5500/evaluacion', {
+				const response = await fetch('http://localhost:5500/envcotizacion', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
