@@ -42,6 +42,10 @@ app.post('/registerDevice', newDispos.registrarDispositivo);
 const cata= require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
+// Ruta para solicitar Evaluacion
+const eva = require('./cotizardisp');
+app.post('/evaluacion', eva.evadisp);
+
 // Iniciar servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

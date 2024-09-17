@@ -1304,3 +1304,28 @@ html {
 	text-decoration: none;
 	cursor: pointer;
   }
+
+  #estado {
+    width: 100%;                /* Ancho completo del contenedor */
+    padding: 10px;              /* Espacio interno */
+    border: 2px solid #ccc;      /* Borde */
+    border-radius: 5px;          /* Bordes redondeados */
+    background-color: #f9f9f9;   /* Color de fondo */
+    font-size: 12px;             /* Tamaño de fuente */
+    color: #333;                 /* Color de texto */
+    margin-bottom: 15px;         /* Margen inferior */
+    transition: border-color 0.3s; /* Transición para el borde */
+}
+
+/* Cambiar borde al enfocar */
+#estado:focus {
+    border-color: #007bff;       /* Color de borde al enfocar */
+    outline: none;               /* Quitar el outline por defecto */
+}
+
+/* Estilo de los elementos de la lista desplegable */
+#estado option {
+    padding: 10px;               /* Espaciado de las opciones */
+    background-color: #fff;      /* Fondo blanco para las opciones */
+    color: #333;                 /* Color de texto de las opciones */
+}

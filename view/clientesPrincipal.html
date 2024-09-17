@@ -123,15 +123,20 @@
 		<div class="modal-content FormS-modal-content">
 			<span id="closeSolicitudModal" class="close FormS-close">&times;</span>
 			<h2>Solicitar Dispositivo</h2>
-			<form class="FormS-form">
+			<form id="solicitudForm" class="FormS-form">
 				<label for="equipo">Equipo Solicitado:</label>
-				<input type="text" id="equipo" name="equipo" value="XXX" readonly />
+				<input type="text" id="equipo" name="equipo" readonly />
+				<input type="hidden" id="idCatalogo" name="idCatalogo" />
 
 				<label for="imagen">Subir Imagen:</label>
-				<input type="file" id="imagen" name="imagen" />
+
 
 				<label for="estado">Estado del Dispositivo:</label>
-				<input type="text" id="estado" name="estado" placeholder="Describe el estado del dispositivo" />
+				<select id="estado" name="estado">
+					<option value="operativo">Operativo</option>
+					<option value="regular">Regular</option>
+					<option value="no_funcional">No Funcional</option>
+				</select>
 
 				<label for="detalles">Detalles:</label>
 				<textarea id="detalles" name="detalles" rows="4" placeholder="Proporcione más detalles..."></textarea>
@@ -143,6 +148,42 @@
 			</form>
 		</div>
 	</div>
+	<script>
+		document.getElementById('solicitudForm').addEventListener('submit', async function (event) {
+			event.preventDefault();
+
+			const formData = new FormData(this);
+			const data = Object.fromEntries(formData.entries());
+
+			if (data.fecha) {
+				data.fecha = new Date(data.fecha).toISOString();
+			}
+			const idUsuario = localStorage.getItem('idUsuario');
+			console.log('idUsuario en localStorage:', idUsuario);
+
+			if (idUsuario) {
+				data.idUsuario = idUsuario; // Agregar el idUsuario al objeto `data`
+			} else {
+				console.error('idUsuario no encontrado en localStorage');
+				return; // Detener la ejecución si no se encuentra el idUsuario
+			}
+
+			try {
+				const response = await fetch('http://localhost:5500/evaluacion', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(data)
+				});
+				const result = await response.json();
+				console.log('Datos enviados correctamente:', result);
+
+			} catch (error) {
+				console.error('Error en la solicitud:', error);
+			}
+		});
+	</script>
 
 	<section class="banner">
 		<div class="content-banner">
@@ -285,7 +326,7 @@
 									track.appendChild(card);
 									const Button = card.querySelector('.add-cart');
 									Button.addEventListener('click', () => {
-										mostrarModal();
+										mostrarModal(producto.nombre, producto.idCatalogo);
 									});
 								});
 								iniciarCarrusel();
@@ -374,7 +415,7 @@
 								//modalImg.src = producto.imagen;
 								modalName.textContent = productos.nombre;
 								modalDescription.textContent = productos.descripcion;
-								modalMarca.textContent=productos.marca;
+								modalMarca.textContent = productos.marca;
 								modalType.textContent = productos.tipo;
 
 								modal.style.display = 'block';
@@ -391,20 +432,34 @@
 								};
 							}
 
-							function mostrarModal() {
+							function mostrarModal(nombreEquipo, idCatalogo) {
 								const modal = document.getElementById('solicitudModal');
-								modal.style.display = 'block';  
+								const equipoInput = document.getElementById('equipo');
+								const idCatalogoInput = document.getElementById('idCatalogo'); // Suponiendo que tienes un campo oculto en el formulario para idCatalogo
+
+								// Asigna el nombre del equipo al campo de texto
+								equipoInput.value = nombreEquipo;
+
+								// Asigna el idCatalogo al campo oculto en el formulario
+								idCatalogoInput.value = idCatalogo;
+
+								modal.style.display = 'block';
 							}
+
+							// Función para cerrar el modal
 							function cerrarModal() {
 								const modal = document.getElementById('solicitudModal');
-								modal.style.display = 'none';  
+								modal.style.display = 'none';
 							}
+
+							// Asocia el evento de cerrar modal al botón de cierre
 							document.getElementById('closeModal').addEventListener('click', cerrarModal);
 
+							// Cerrar modal al hacer clic fuera de él
 							window.addEventListener('click', function (event) {
 								const modal = document.getElementById('solicitudModal');
 								if (event.target === modal) {
-									cerrarModal();  
+									cerrarModal();
 								}
 							});
 						</script>
