@@ -81,3 +81,26 @@ app.delete('/catalogo/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar el dispositivo' });
   }
 });
+
+// Ruta para modificar un dispositivo del catálogo (PUT)
+app.put('/catalogo/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, marca, modelo, tipo } = req.body;
+
+  try {
+    const dispositivoModificado = await Catalogo.findByIdAndUpdate(
+      id,
+      { nombre, descripcion, marca, modelo, tipo },
+      { new: true } // Retornar el documento modificado
+    );
+
+    if (!dispositivoModificado) {
+      return res.status(404).json({ message: 'Dispositivo no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Dispositivo modificado con éxito' });
+  } catch (error) {
+    console.error('Error al modificar el dispositivo:', error);
+    res.status(500).json({ error: 'Error al modificar el dispositivo' });
+  }
+});
