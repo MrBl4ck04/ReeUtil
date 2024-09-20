@@ -535,67 +535,72 @@
   </div>
   
   <script>
+
+	let idDispositivoModificar = null; 
   // Función para abrir el modal y cargar los datos del dispositivo
-  function modificarDispositivo(id) {
-	fetch(`http://localhost:5500/catalogo/${id}`)
+	function modificarDispositivo(id) {
+	idDispositivoModificar = id;
+	fetch(`http://localhost:5500/catalogo/${idDispositivoModificar}`)
 		.then(response => {
 		if (!response.ok) {
-		throw new Error('Dispositivo no encontrado');
+			throw new Error('Dispositivo no encontrado');
 		}
 		return response.json();
-	})
-	  .then(data => {
+		})
+		.then(data => {
 		document.getElementById('modificarIdDispositivo').value = id;
 		document.getElementById('modificarNombre').value = data.nombre;
 		document.getElementById('modificarDescripcion').value = data.descripcion;
 		document.getElementById('modificarMarca').value = data.marca;
 		document.getElementById('modificarModelo').value = data.modelo;
 		document.getElementById('modificarTipo').value = data.tipo;
-  
+
 		const myModal = new bootstrap.Modal(document.getElementById('modalModificarDispositivo'));
 		myModal.show();
-	  })
-	  .catch(error => {
-    console.error('Error:', error);
-    mostrarNotificacion('Ocurrió un error al buscar el dispositivo');
-  });
-  }
+		})
+		.catch(error => {
+		console.error('Error:', error);
+		mostrarNotificacion('Ocurrió un error al buscar el dispositivo');
+		});
+	}
+
   
   // Función para enviar los cambios del dispositivo modificado
   document.getElementById('modificarDeviceForm').addEventListener('submit', async function(event) {
-	event.preventDefault();
-  
-	const id = document.getElementById('modificarIdDispositivo').value;
-	const nombre = document.getElementById('modificarNombre').value;
-	const descripcion = document.getElementById('modificarDescripcion').value;
-	const marca = document.getElementById('modificarMarca').value;
-	const modelo = document.getElementById('modificarModelo').value;
-	const tipo = document.getElementById('modificarTipo').value;
-  
-	const dispositivo = { nombre, descripcion, marca, modelo, tipo };
-  
-	try {
-	  const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
-		method: 'PUT',
-		headers: {
-		  'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(dispositivo),
-	  });
-  
-	  if (response.ok) {
-		mostrarNotificacion('Dispositivo modificado con éxito');
-		setTimeout(() => {
-		  location.reload();
-		}, 2000);
-	  } else {
-		mostrarNotificacion('Error al modificar el dispositivo');
-	  }
-	} catch (error) {
-	  console.error('Error:', error);
-	  mostrarNotificacion('Ocurrió un error al modificar el dispositivo');
-	}
-  });
+  event.preventDefault();
+
+  const id = document.getElementById('modificarIdDispositivo').value;
+  const nombre = document.getElementById('modificarNombre').value;
+  const descripcion = document.getElementById('modificarDescripcion').value;
+  const marca = document.getElementById('modificarMarca').value;
+  const modelo = document.getElementById('modificarModelo').value;
+  const tipo = document.getElementById('modificarTipo').value;
+
+  const dispositivo = { nombre, descripcion, marca, modelo, tipo };
+
+  try {
+    const response = await fetch(`http://localhost:5500/catalogo/${idDispositivoModificar}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dispositivo),
+    });
+
+    if (response.ok) {
+      mostrarNotificacion('Dispositivo modificado con éxito');
+      setTimeout(() => {
+        location.reload(); // Recarga la página tras un pequeño retraso
+      }, 2000);
+    } else {
+      mostrarNotificacion('Error al modificar el dispositivo');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('Ocurrió un error al modificar el dispositivo');
+  }
+});
+
   </script>
   
   

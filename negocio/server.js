@@ -91,7 +91,7 @@ app.put('/catalogo/:id', async (req, res) => {
     const dispositivoModificado = await Catalogo.findByIdAndUpdate(
       id,
       { nombre, descripcion, marca, modelo, tipo },
-      { new: true } // Retornar el documento modificado
+      { new: true } // Esto retorna el documento modificado
     );
 
     if (!dispositivoModificado) {
@@ -104,3 +104,4 @@ app.put('/catalogo/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al modificar el dispositivo' });
   }
 });
+
