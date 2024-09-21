@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
+const moment = require('moment-timezone'); 
 
 const cotizarSchema = new mongoose.Schema({
     cotizacion: { type: Number, default: null }, 
     detalles: String,
     estadoCotizaci: { type: String, default: 'En Curso'}, 
     estadoDisposit: String,
-    fecha: { type: Date, default: Date.now },
+    fecha: { type: Date, default: Date.now }, 
     idCatalogo: { type: Number, default: null }, 
     idUsuario: { type: Number, default: null }, 
     imagen: String 
@@ -29,10 +30,12 @@ const env = async (req, res) => {
     }
   
     try {
+      const fechaLocal = moment().tz('America/La_Paz').toDate(); 
+
       const enviarcot = new Cotizacion({
         detalles: detalles,
         estadoDisposit: estado,
-        fecha: new Date(),
+        fecha: fechaLocal, 
         idCatalogo: idCatalogo,
         idUsuario: idUsuario,
         imagen: 'sadas' 
