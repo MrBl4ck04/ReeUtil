@@ -1,129 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0"
-		/>
-		<title>ReeUtil</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="stylesAdmin.css" />
-		<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-	</head>
-	<body>
-		<header>
-			<div class="container-hero">
-				<div class="container hero">
-					<div class="customer-support">
-						<i class="fa-solid fa-recycle"></i>
-						<div class="content-customer-support">
-							<span class="text">Recicla tu dispositivo</span>
-						</div>
-					</div>
 
-					<div class="container-logo">
-                        <i class="fa-solid fa-cog"></i>
-						<h1 class="logo"><a href="/">ReeUtil-Administrador</a></h1>
-					</div>
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ReeUtil</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="stylesAdmin.css" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-					<div class="container-user">
-						<i class="fa-solid fa-user"></i>
-						<i class="fa-solid fa-basket-shopping"></i>
-						<div class="content-shopping-cart">
-							<span class="text">Procesos</span>
-							<span class="number">(0)</span>
-						</div>
+<body>
+	<header>
+		<div class="container-hero">
+			<div class="container hero">
+				<div class="customer-support">
+					<i class="fa-solid fa-recycle"></i>
+					<div class="content-customer-support">
+						<span class="text">Recicla tu dispositivo</span>
+					</div>
+				</div>
+
+				<div class="container-logo">
+					<i class="fa-solid fa-cog"></i>
+					<h1 class="logo"><a href="/">ReeUtil-Administrador</a></h1>
+				</div>
+
+				<div class="container-user">
+					<i class="fa-solid fa-user"></i>
+					<i class="fa-solid fa-basket-shopping"></i>
+					<div class="content-shopping-cart">
+						<span class="text">Procesos</span>
+						<span class="number">(0)</span>
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<div class="container-navbar">
-				<nav class="navbar container">
-					<i class="fa-solid fa-bars"></i>
-					<ul class="menu">
-						<li><a href="#">Inicio</a></li>
-						<li><a href="#" data-toggle="modal" data-target="#modalRegisterDevice">Catálogo</a></li>
-						<li><a href="#">Solicitud de evaluacion</a></li>
-					</ul>
+		<div class="container-navbar">
+			<nav class="navbar container">
+				<i class="fa-solid fa-bars"></i>
+				<ul class="menu">
+					<li><a href="#">Inicio</a></li>
+					<li><a href="#" data-toggle="modal" data-target="#modalRegisterDevice">Catálogo</a></li>
+					<li><a href="#">Solicitud de evaluacion</a></li>
+				</ul>
 
-				</nav>
-			</div>
-			<!-- Modal para registrar dispositivos -->
-			<div class="modal fade" id="modalRegisterDevice" tabindex="-1" role="dialog" aria-labelledby="modalRegisterDeviceLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
+			</nav>
+		</div>
+		<!-- Modal para registrar dispositivos -->
+		<div class="modal fade" id="modalRegisterDevice" tabindex="-1" role="dialog"
+			aria-labelledby="modalRegisterDeviceLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-					<h5 class="modal-title" id="modalRegisterDeviceLabel">Registrar Dispositivo</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
+						<h5 class="modal-title" id="modalRegisterDeviceLabel">Registrar Dispositivo</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
 					</div>
 					<div class="modal-body">
-					<form id="registerDeviceForm">
-						<div class="form-group">
-						<label for="nombre">Nombre del dispositivo</label>
-						<input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del dispositivo" required>
-						</div>
-						<div class="form-group">
-						<label for="descripcion">Descripción</label>
-						<input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="Descripción" required>
-						</div>
-						<div class="form-group">
-						<label for="marca">Marca</label>
-						<input type="text" class="form-control" id="marca" name="marca" placeholder="Marca" required>
-						</div>
-						<div class="form-group">
-						<label for="modelo">Modelo</label>
-						<input type="text" class="form-control" id="modelo" name="modelo" placeholder="Modelo" required>
-						</div>
-						<div class="form-group">
-						<label for="tipo">Tipo</label>
-						<input type="text" class="form-control" id="tipo" name="tipo" placeholder="Tipo" required>
-						</div>
-						<div class="form-group">
-						<label for="imagenProdu">Imagen del dispositivo</label>
-						<input type="file" class="form-control-file" id="imagenProdu" name="imagenProdu" accept="image/*" required>
-						</div>
-						<button type="submit" id="submitButton" class="btn btn-primary">Registrar Dispositivo</button>
-					</form>
-					<div id="deviceMessage" class="alert alert-success mt-3" style="display: none;">Dispositivo registrado con éxito</div>
-					<div id="deviceErrorMessage" class="alert alert-danger mt-3" style="display: none;">Error al registrar el dispositivo</div>
+						<form id="registerDeviceForm">
+							<div class="form-group">
+								<label for="nombre">Nombre del dispositivo</label>
+								<input type="text" class="form-control" id="nombre" name="nombre"
+									placeholder="Nombre del dispositivo" required>
+							</div>
+							<div class="form-group">
+								<label for="descripcion">Descripción</label>
+								<input type="text" class="form-control" id="descripcion" name="descripcion"
+									placeholder="Descripción" required>
+							</div>
+							<div class="form-group">
+								<label for="marca">Marca</label>
+								<input type="text" class="form-control" id="marca" name="marca" placeholder="Marca"
+									required>
+							</div>
+							<div class="form-group">
+								<label for="modelo">Modelo</label>
+								<input type="text" class="form-control" id="modelo" name="modelo" placeholder="Modelo"
+									required>
+							</div>
+							<div class="form-group">
+								<label for="tipo">Tipo</label>
+								<input type="text" class="form-control" id="tipo" name="tipo" placeholder="Tipo"
+									required>
+							</div>
+							<div class="form-group">
+								<label for="imagenProdu">Imagen del dispositivo</label>
+								<input type="file" class="form-control-file" id="imagenProdu" name="imagenProdu"
+									accept="image/*" required>
+							</div>
+							<button type="submit" id="submitButton" class="btn btn-primary">Registrar
+								Dispositivo</button>
+						</form>
+						<div id="deviceMessage" class="alert alert-success mt-3" style="display: none;">Dispositivo
+							registrado con éxito</div>
+						<div id="deviceErrorMessage" class="alert alert-danger mt-3" style="display: none;">Error al
+							registrar el dispositivo</div>
 					</div>
 				</div>
-				</div>
 			</div>
-			<script>
+		</div>
+		<script>
 			document.getElementById('registerDeviceForm').addEventListener('submit', async function (event) {
-			event.preventDefault();
-			
-			const formData = new FormData(this);
-			const fileInput = document.getElementById('imagenProdu');
-			const file = fileInput.files[0];
+				event.preventDefault();
 
-			// Verificar el idUsuario en localStorage
-			const idUsuario = localStorage.getItem('idUsuario');
-			console.log('idUsuario en localStorage:', idUsuario); // Aquí verificamos el valor de idUsuario
-			
-			if (idUsuario) {
-				formData.append('idUsuario', idUsuario); // Añadir idUsuario a FormData
-			} else {
-				console.error('idUsuario no encontrado en localStorage');
-				return; // Salir si no se encuentra el idUsuario
-			}
+				const formData = new FormData(this);
+				const fileInput = document.getElementById('imagenProdu');
+				const file = fileInput.files[0];
 
-			if (file) {
-				// Convertir archivo a Base64
-				const reader = new FileReader();
-				reader.readAsDataURL(file);
-				
-				reader.onload = async function () {
-					const base64String = reader.result.replace(/^data:.+;base64,/, '');
-					
-					// Agregar la cadena Base64 al FormData
-					formData.set('imagenProdu', base64String);
+				// Verificar el idUsuario en localStorage
+				const idUsuario = localStorage.getItem('idUsuario');
+				console.log('idUsuario en localStorage:', idUsuario); // Aquí verificamos el valor de idUsuario
 
+				if (idUsuario) {
+					formData.append('idUsuario', idUsuario); // Añadir idUsuario a FormData
+				} else {
+					console.error('idUsuario no encontrado en localStorage');
+					return; // Salir si no se encuentra el idUsuario
+				}
+
+				if (file) {
+					// Convertir archivo a Base64
+					const reader = new FileReader();
+					reader.readAsDataURL(file);
+
+					reader.onload = async function () {
+						const base64String = reader.result.replace(/^data:.+;base64,/, '');
+
+						// Agregar la cadena Base64 al FormData
+						formData.set('imagenProdu', base64String);
+
+						try {
+							const response = await fetch('http://localhost:5500/registerDevice', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(Object.fromEntries(formData.entries()))
+							});
+
+							if (response.ok) {
+								document.getElementById('deviceMessage').style.display = 'block';
+								document.getElementById('deviceErrorMessage').style.display = 'none';
+								document.getElementById('registerDeviceForm').reset();
+							} else {
+								document.getElementById('deviceErrorMessage').style.display = 'block';
+								document.getElementById('deviceMessage').style.display = 'none';
+							}
+						} catch (error) {
+							document.getElementById('deviceErrorMessage').style.display = 'block';
+							document.getElementById('deviceMessage').style.display = 'none';
+							console.error('Error:', error);
+						}
+					};
+
+					reader.onerror = function (error) {
+						document.getElementById('deviceErrorMessage').style.display = 'block';
+						document.getElementById('deviceMessage').style.display = 'none';
+						console.error('Error al leer el archivo:', error);
+					};
+				} else {
 					try {
 						const response = await fetch('http://localhost:5500/registerDevice', {
 							method: 'POST',
@@ -146,197 +185,159 @@
 						document.getElementById('deviceMessage').style.display = 'none';
 						console.error('Error:', error);
 					}
-				};
-				
-				reader.onerror = function (error) {
-					document.getElementById('deviceErrorMessage').style.display = 'block';
-					document.getElementById('deviceMessage').style.display = 'none';
-					console.error('Error al leer el archivo:', error);
-				};
-			} else {
-				try {
-					const response = await fetch('http://localhost:5500/registerDevice', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(Object.fromEntries(formData.entries()))
-					});
-
-					if (response.ok) {
-						document.getElementById('deviceMessage').style.display = 'block';
-						document.getElementById('deviceErrorMessage').style.display = 'none';
-						document.getElementById('registerDeviceForm').reset(); 
-					} else {
-						document.getElementById('deviceErrorMessage').style.display = 'block';
-						document.getElementById('deviceMessage').style.display = 'none';
-					}
-				} catch (error) {
-					document.getElementById('deviceErrorMessage').style.display = 'block';
-					document.getElementById('deviceMessage').style.display = 'none';
-					console.error('Error:', error);
 				}
-			}
-		});
+			});
 
-			</script>
+		</script>
 
-  
-		</header>
 
-		<section class="banner">
-			<div class="content-banner">
-				<h2>ReeUtil <br />Sigue ayudando al<br /> medio ambiente</h2>
+	</header>
+
+	<section class="banner">
+		<div class="content-banner">
+			<h2>ReeUtil <br />Sigue ayudando al<br /> medio ambiente</h2>
+		</div>
+	</section>
+
+	<main class="main-content">
+		<section class="container container-features">
+			<div class="card-feature">
+				<i class="fa-solid fa-recycle"></i>
+				<div class="feature-content">
+					<span>Reciclar ayuda al medio ambiente</span>
+					<p>Dando un reinicio a tu disposito </p>
+				</div>
+			</div>
+			<div class="card-feature">
+				<i class="fa-solid fa-wallet"></i>
+				<div class="feature-content">
+					<span>Tan fácil en la web</span>
+					<p>Cotiza tus dispositivos atraves de la web</p>
+				</div>
+			</div>
+			<div class="card-feature">
+				<i class="fa-solid fa-gift"></i>
+				<div class="feature-content">
+					<span>Ofertas y regalos</span>
+					<p>Ofrece bonos especiales con regalo</p>
+				</div>
+			</div>
+			<div class="card-feature">
+				<i class="fa-solid fa-headset"></i>
+				<div class="feature-content">
+					<span>Servicio al cliente 24/7</span>
+					<p>Atencion de alta calidad</p>
+				</div>
 			</div>
 		</section>
 
-		<main class="main-content">
-			<section class="container container-features">
-				<div class="card-feature">
-                    <i class="fa-solid fa-recycle"></i>
-					<div class="feature-content">
-						<span>Reciclar ayuda al medio ambiente</span>
-						<p>Dando un reinicio a tu disposito </p>
-					</div>
+		<section class="container blogs">
+			<div class="d-flex align-items-center">
+				<h1 class="heading-1 mb-0">Solicitudes en cola</h1>
+			</div>
+			<table class="table table-striped bg-white fs-5">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>ID Catalogo</th>
+						<th>Fecha solicitud</th>
+						<th>Estado cotización</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody id="solicitudesTableBody">
+				</tbody>
+			</table>
+		</section>
+
+
+		<!-- Modal Cotizar-->
+		<div id="modalSol" class="modalSol">
+			<div class="modalSol-content">
+				<span class="close" onclick="closeModal()">&times;</span>
+				<div class="modalSol-header">
+					<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
+					<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
 				</div>
-				<div class="card-feature">
-					<i class="fa-solid fa-wallet"></i>
-					<div class="feature-content">
-						<span>Tan fácil en la web</span>
-						<p>Cotiza tus dispositivos atraves de la web</p>
-					</div>
+				<form>
+					<label for="equipo">Nombre:</label><br>
+					<input type="text" id="equipo" name="equipo"><br><br>
+
+					<label for="estadoCotizacion">Modelo:</label><br>
+					<input type="text" id="modelo" name="modelo"><br><br>
+
+					<label for="estado">Estado del dispositivo según el cliente:</label><br>
+					<input type="text" id="estado" name="estado"><br><br>
+
+					<label for="detalles">Detalles:</label><br>
+					<textarea id="detalles" name="detalles"></textarea><br><br>
+
+					<label for="fecha">Fecha de la solicitud:</label><br>
+					<input type="text" id="fecha" name="fecha"><br><br>
+
+					<label for="cotizacion">Cotización:</label><br>
+					<input type="text" id="cotizacion" name="cotizacion"><br><br>
+
+					<button type="submit" class="btn-enviar">Enviar</button>
+				</form>
+			</div>
+		</div>
+		<!-- Modal de REGLAS -->
+		<div id="modalReglas" class="modalReglas">
+			<div class="modalReglas-content">
+				<span class="close" onclick="closeRulesModal()">&times;</span>
+				<h3>Seleccionar tipo de dispositivo</h3>
+				<select id="tipoDispositivo" onchange="mostrarReglas()">
+					<option value="default">-- Seleccione un tipo --</option>
+					<option value="smartphones">Smartphones</option>
+					<option value="televisores">Televisores</option>
+					<option value="electrodomesticos">Electrodomésticos</option>
+				</select>
+				<div id="reglasArea" class="reglas-texto">
+					<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
+					<p id="reglas"></p>
 				</div>
-				<div class="card-feature">
-					<i class="fa-solid fa-gift"></i>
-					<div class="feature-content">
-						<span>Ofertas y regalos</span>
-						<p>Ofrece bonos especiales con regalo</p>
-					</div>
-				</div>
-				<div class="card-feature">
-					<i class="fa-solid fa-headset"></i>
-					<div class="feature-content">
-						<span>Servicio al cliente 24/7</span>
-						<p>Atencion de alta calidad</p>
-					</div>
-				</div>
-			</section>
+			</div>
+		</div>
 
-				<section class="container blogs">
-					<div class="d-flex align-items-center">
-						<h1 class="heading-1 mb-0">Solicitudes en cola</h1>
-					</div>
-					<table class="table table-striped bg-white fs-5">
-						<thead>
-						<tr>
-							<th>#</th>
-							<th>ID Dispositivo</th>
-							<th>ID Catalogo</th>
-							<th>Fecha solicitud</th>
-							<th>Estado cotización</th>
-							<th>Acciones</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr>
-							<td>1</td>
-							<td>1 Y</td>
-							<td>1</td>
-							<td>10-05-2024</td>
-							<td>Se hizo la compra del dispositivo</td>
-							<td><button class="btn-cotizar" onclick="openModalSol()">Cotizar</button></td>
-						</tr>
-						</tbody>
-					</table>
-				</section>
+		<script>
+			function openModalSol() {
+				document.getElementById("modalSol").style.display = "block";
+			}
 
-<!-- Modal Cotizar-->
-<div id="modalSol" class="modalSol">
-  <div class="modalSol-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <div class="modalSol-header">
-      <h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
-	  <span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
-    </div>
-    <form>
-      <label for="equipo">Nombre:</label><br>
-      <input type="text" id="equipo" name="equipo"><br><br>
-	  
-      <label for="estadoCotizacion">Modelo:</label><br>
-      <input type="text" id="modelo" name="modelo"><br><br>
+			function closeModal() {
+				document.getElementById("modalSol").style.display = "none";
+			}
 
-      <label for="estado">Estado del dispositivo según el cliente:</label><br>
-      <input type="text" id="estado" name="estado"><br><br>
+			window.onclick = function (event) {
+				var modal = document.getElementById("modalSol");
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			}
+		</script>
 
-      <label for="detalles">Detalles:</label><br>
-      <textarea id="detalles" name="detalles"></textarea><br><br>
 
-      <label for="fecha">Fecha de la solicitud:</label><br>
-      <input type="text" id="fecha" name="fecha"><br><br>
-
-      <label for="cotizacion">Cotización:</label><br>
-      <input type="text" id="cotizacion" name="cotizacion"><br><br>
-
-      <button type="submit" class="btn-enviar">Enviar</button>
-    </form>
-  </div>
-</div>
-<!-- Modal de REGLAS -->
-<div id="modalReglas" class="modalReglas">
-	<div class="modalReglas-content">
-		<span class="close" onclick="closeRulesModal()">&times;</span>
-		<h3>Seleccionar tipo de dispositivo</h3>
-	  <select id="tipoDispositivo" onchange="mostrarReglas()">
-		<option value="default">-- Seleccione un tipo --</option>
-		<option value="smartphones">Smartphones</option>
-		<option value="televisores">Televisores</option>
-		<option value="electrodomesticos">Electrodomésticos</option>
-	  </select>
-	  <div id="reglasArea" class="reglas-texto">
-		<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
-		<p id="reglas"></p>
-	  </div>
-	</div>
-  </div>
-  
-<script>
-	function openModalSol() {
-	  document.getElementById("modalSol").style.display = "block";
-	}
-  
-	function closeModal() {
-	  document.getElementById("modalSol").style.display = "none";
-	}
-  
-	window.onclick = function(event) {
-	  var modal = document.getElementById("modalSol");
-	  if (event.target == modal) {
-		modal.style.display = "none";
-	  }
-	}
-  </script>
-  
-            
-              <section class="container blogs mt-5">
-                <div class="d-flex align-items-center">
-                    <h1 class="heading-1 mb-0">Catalogo    </h1>
-                    <span class="add-cart" id="openModal">
-						<i class="fa-solid fa-plus"></i>
-					</span>
-					<script>
-						// Capturar el clic en el span con id "openModal"
-						document.getElementById('openModal').addEventListener('click', function () {
-							// Usar Bootstrap para mostrar el modal
-							var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
-								keyboard: false
-							});
-							myModal.show();
+		<section class="container blogs mt-5">
+			<div class="d-flex align-items-center">
+				<h1 class="heading-1 mb-0">Catalogo </h1>
+				<span class="add-cart" id="openModal">
+					<i class="fa-solid fa-plus"></i>
+				</span>
+				<script>
+					// Capturar el clic en el span con id "openModal"
+					document.getElementById('openModal').addEventListener('click', function () {
+						// Usar Bootstrap para mostrar el modal
+						var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
+							keyboard: false
 						});
-					</script>					
-                  </div>
-				  <table class="table table-striped bg-white fs-5">
-					<thead>
-					  <tr>
+						myModal.show();
+					});
+				</script>
+			</div>
+			<table class="table table-striped bg-white fs-5">
+				<thead>
+					<tr>
 						<th>#</th>
 						<th>ID Catalogo</th>
 						<th>Nombre</th>
@@ -345,280 +346,313 @@
 						<th>Descripción</th>
 						<th>Tipo</th>
 						<th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
-					  </tr>
-					</thead>
-					<tbody id="catalogoTableBody">
-					</tbody>
-				  </table>				  
-              </section>
+					</tr>
+				</thead>
+				<tbody id="catalogoTableBody">
+				</tbody>
+			</table>
+		</section>
 
-              <section class="container blogs">
-                <div class="d-flex align-items-center">
-                    <h1 class="heading-1 mb-0">Acciones en ReeUtil</h1>
-                  </div>
-                <table class="table table-striped bg-white fs-5">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>ID Auditoria</th>
-                      <th>ID Usuario</th>
-                      <th>Acción</th>
-                      <th>Fecha</th>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>1 Y</td>
-                        <td>1</td>
-                        <td>Solicito una evaluacion</td>
-                        <td>10-05-2024</td>
-                      </tr>
-                  </thead>
-                </table>
-              </section>
+		<section class="container blogs">
+			<div class="d-flex align-items-center">
+				<h1 class="heading-1 mb-0">Acciones en ReeUtil</h1>
+			</div>
+			<table class="table table-striped bg-white fs-5">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>ID Auditoria</th>
+						<th>ID Usuario</th>
+						<th>Acción</th>
+						<th>Fecha</th>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>1 Y</td>
+						<td>1</td>
+						<td>Solicito una evaluacion</td>
+						<td>10-05-2024</td>
+					</tr>
+				</thead>
+			</table>
+		</section>
 
-			<section class="container blogs">
-				<h1 class="heading-1">Últimas acciones</h1>
+		<section class="container blogs">
+			<h1 class="heading-1">Últimas acciones</h1>
 
-				<div class="container-blogs">
-					<div class="card-blog">
-						<div class="container-img">
-							<img src="u1.png" alt="Imagen Blog 1" />
-							<div class="button-group-blog">
-								<span>
-									<i class="fa-solid fa-magnifying-glass"></i>
-								</span>
-								<span>
-									<i class="fa-solid fa-link"></i>
-								</span>
-							</div>
-						</div>
-						<div class="content-blog">
-							<h3>Galaxy Buds</h3>
-							<span>01 Septiembre 2024</span>
-							<p>
-								Lorem ipsum dolor sit amet consectetur adipisicing
-								elit. Iste, molestiae! Ratione et, dolore ipsum
-								quaerat iure illum reprehenderit non maxime amet dolor
-								voluptas facilis corporis, consequatur eius est sunt
-								suscipit?
-							</p>
-							<div class="btn-read-more">Leer más</div>
+			<div class="container-blogs">
+				<div class="card-blog">
+					<div class="container-img">
+						<img src="u1.png" alt="Imagen Blog 1" />
+						<div class="button-group-blog">
+							<span>
+								<i class="fa-solid fa-magnifying-glass"></i>
+							</span>
+							<span>
+								<i class="fa-solid fa-link"></i>
+							</span>
 						</div>
 					</div>
-					<div class="card-blog">
-						<div class="container-img">
-							<img src="u2.png" alt="Imagen Blog 2" />
-							<div class="button-group-blog">
-								<span>
-									<i class="fa-solid fa-magnifying-glass"></i>
-								</span>
-								<span>
-									<i class="fa-solid fa-link"></i>
-								</span>
-							</div>
-						</div>
-						<div class="content-blog">
-							<h3>Lavadora,WA456DRHDSU/ZS</h3>
-							<span>02 Septiembre 2024</span>
-							<p>
-								Lorem ipsum dolor sit amet consectetur adipisicing
-								elit. Iste, molestiae! Ratione et, dolore ipsum
-								quaerat iure illum reprehenderit non maxime amet dolor
-								voluptas facilis corporis, consequatur eius est sunt
-								suscipit?
-							</p>
-							<div class="btn-read-more">Leer más</div>
-						</div>
-					</div>
-					<div class="card-blog">
-						<div class="container-img">
-							<img src="u.png" alt="Imagen Blog 3" />
-							<div class="button-group-blog">
-								<span>
-									<i class="fa-solid fa-magnifying-glass"></i>
-								</span>
-								<span>
-									<i class="fa-solid fa-link"></i>
-								</span>
-							</div>
-						</div>
-						<div class="content-blog">
-							<h3>Philips Serie 2200 Cafetera Superautomática</h3>
-							<span>03 Septiembre 2024</span>
-							<p>
-								Lorem ipsum dolor sit amet consectetur adipisicing
-								elit. Iste, molestiae! Ratione et, dolore ipsum
-								quaerat iure illum reprehenderit non maxime amet dolor
-								voluptas facilis corporis, consequatur eius est sunt
-								suscipit?
-							</p>
-							<div class="btn-read-more">Leer más</div>
-						</div>
+					<div class="content-blog">
+						<h3>Galaxy Buds</h3>
+						<span>01 Septiembre 2024</span>
+						<p>
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
+						</p>
+						<div class="btn-read-more">Leer más</div>
 					</div>
 				</div>
-			</section>
-		</main>
-
-		<footer class="footer">
-			<div class="container container-footer">
-				<div class="menu-footer">
-					<div class="contact-info">
-						<p class="title-footer">Información de Contacto</p>
-						<ul>
-							<li>
-								Dirección: lililalalalal
-							</li>
-							<li>Teléfono: 123-456-7890</li>
-							<li>EmaiL: Cookies@support.com</li>
-						</ul>
-						<div class="social-icons">
-							<span class="facebook">
-								<i class="fa-brands fa-facebook-f"></i>
+				<div class="card-blog">
+					<div class="container-img">
+						<img src="u2.png" alt="Imagen Blog 2" />
+						<div class="button-group-blog">
+							<span>
+								<i class="fa-solid fa-magnifying-glass"></i>
 							</span>
-							<span class="twitter">
-								<i class="fa-brands fa-twitter"></i>
-							</span>
-							<span class="youtube">
-								<i class="fa-brands fa-youtube"></i>
-							</span>
-							<span class="pinterest">
-								<i class="fa-brands fa-pinterest-p"></i>
-							</span>
-							<span class="instagram">
-								<i class="fa-brands fa-instagram"></i>
+							<span>
+								<i class="fa-solid fa-link"></i>
 							</span>
 						</div>
 					</div>
-
-					<div class="information">
-						<p class="title-footer">Información</p>
-						<ul>
-							<li><a href="#">Acerca de Nosotros</a></li>
-							<li><a href="#">Información Delivery</a></li>
-							<li><a href="#">Politicas de Privacidad</a></li>
-							<li><a href="#">Términos y condiciones</a></li>
-							<li><a href="#">Contactános</a></li>
-						</ul>
+					<div class="content-blog">
+						<h3>Lavadora,WA456DRHDSU/ZS</h3>
+						<span>02 Septiembre 2024</span>
+						<p>
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
+						</p>
+						<div class="btn-read-more">Leer más</div>
 					</div>
-
-					<div class="my-account">
-						<p class="title-footer">Mi cuenta</p>
-
-						<ul>
-							<li><a href="#">Mi cuenta</a></li>
-							<li><a href="#">Historial de ordenes</a></li>
-							<li><a href="#">Lista de deseos</a></li>
-							<li><a href="#">Boletín</a></li>
-							<li><a href="#">Reembolsos</a></li>
-						</ul>
-					</div>
-
-					<div class="newsletter">
-						<p class="title-footer">Boletín informativo</p>
-
-						<div class="content">
-							<p>
-								Suscríbete y mantente al
-								día con nuevas colecciones y ofertas exclusivas.
-							</p>
-							<input type="email" placeholder="Ingresa el correo aquí...">
-							<button>Suscríbete</button>
+				</div>
+				<div class="card-blog">
+					<div class="container-img">
+						<img src="u.png" alt="Imagen Blog 3" />
+						<div class="button-group-blog">
+							<span>
+								<i class="fa-solid fa-magnifying-glass"></i>
+							</span>
+							<span>
+								<i class="fa-solid fa-link"></i>
+							</span>
 						</div>
+					</div>
+					<div class="content-blog">
+						<h3>Philips Serie 2200 Cafetera Superautomática</h3>
+						<span>03 Septiembre 2024</span>
+						<p>
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
+						</p>
+						<div class="btn-read-more">Leer más</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<div class="container container-footer">
+			<div class="menu-footer">
+				<div class="contact-info">
+					<p class="title-footer">Información de Contacto</p>
+					<ul>
+						<li>
+							Dirección: lililalalalal
+						</li>
+						<li>Teléfono: 123-456-7890</li>
+						<li>EmaiL: Cookies@support.com</li>
+					</ul>
+					<div class="social-icons">
+						<span class="facebook">
+							<i class="fa-brands fa-facebook-f"></i>
+						</span>
+						<span class="twitter">
+							<i class="fa-brands fa-twitter"></i>
+						</span>
+						<span class="youtube">
+							<i class="fa-brands fa-youtube"></i>
+						</span>
+						<span class="pinterest">
+							<i class="fa-brands fa-pinterest-p"></i>
+						</span>
+						<span class="instagram">
+							<i class="fa-brands fa-instagram"></i>
+						</span>
 					</div>
 				</div>
 
-				<div class="copyright">
-					<p>
-						Los cookies &copy; 2024
-					</p>
+				<div class="information">
+					<p class="title-footer">Información</p>
+					<ul>
+						<li><a href="#">Acerca de Nosotros</a></li>
+						<li><a href="#">Información Delivery</a></li>
+						<li><a href="#">Politicas de Privacidad</a></li>
+						<li><a href="#">Términos y condiciones</a></li>
+						<li><a href="#">Contactános</a></li>
+					</ul>
+				</div>
 
+				<div class="my-account">
+					<p class="title-footer">Mi cuenta</p>
+
+					<ul>
+						<li><a href="#">Mi cuenta</a></li>
+						<li><a href="#">Historial de ordenes</a></li>
+						<li><a href="#">Lista de deseos</a></li>
+						<li><a href="#">Boletín</a></li>
+						<li><a href="#">Reembolsos</a></li>
+					</ul>
+				</div>
+
+				<div class="newsletter">
+					<p class="title-footer">Boletín informativo</p>
+
+					<div class="content">
+						<p>
+							Suscríbete y mantente al
+							día con nuevas colecciones y ofertas exclusivas.
+						</p>
+						<input type="email" placeholder="Ingresa el correo aquí...">
+						<button>Suscríbete</button>
+					</div>
 				</div>
 			</div>
-		</footer>
-		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-		<script
-			src="https://kit.fontawesome.com/81581fb069.js"
-			crossorigin="anonymous"
-		></script>
-<!-- Modal de confirmación para eliminar del catalogo-->
- <!-- Modal de Confirmación de Eliminación -->
-<!-- Modal de confirmación para eliminar del catalogo-->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-	  <div class="modal-content">
-		<div class="modal-header">
-		  <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
-		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		  </button>
-		</div>
-		<div class="modal-body">
-		  ¿Estás seguro de que deseas eliminar este dispositivo?
-		</div>
-		<div class="modal-footer">
-		  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-		  <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
-		</div>
-	  </div>
-	</div>
-  </div>
-  
-  
-  <!-- Modal de Notificación -->
-<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
+
+			<div class="copyright">
+				<p>
+					Los cookies &copy; 2024
+				</p>
+
 			</div>
-			<div class="modal-body" id="notificationMessage">
-				<!-- Mensaje se actualizará dinámicamente -->
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+		</div>
+	</footer>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="https://kit.fontawesome.com/81581fb069.js" crossorigin="anonymous"></script>
+	<!-- Modal de confirmación para eliminar del catalogo-->
+	<!-- Modal de Confirmación de Eliminación -->
+	<!-- Modal de confirmación para eliminar del catalogo-->
+	<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+		aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					¿Estás seguro de que deseas eliminar este dispositivo?
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+					<button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-<script src="reglasView.js"></script>
 
-	</body>
+
+	<!-- Modal de Notificación -->
+	<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="notificationMessage">
+					<!-- Mensaje se actualizará dinámicamente -->
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="reglasView.js"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', async () => {
+			try {
+				const response = await fetch('http://localhost:5500/solicitudes');
+				if (!response.ok) throw new Error('Error al obtener las solicitudes');
+
+				const solicitudes = await response.json();
+				const tableBody = document.getElementById('solicitudesTableBody');
+
+				// Limpia el contenido de la tabla antes de agregar nuevos datos
+				tableBody.innerHTML = '';
+
+				solicitudes.forEach((solicitud) => {
+					// Condición: solo mostrar solicitudes con estado de cotización "En Curso"
+					if (solicitud.estadoCotizaci === "En Curso") {
+						const row = document.createElement('tr');
+						row.innerHTML = `
+  <td>${solicitud.idDispositivo || 'N/A'}</td> <!-- Mostrar el ID del dispositivo -->
+  <td>${solicitud.idCatalogo || 'N/A'}</td> <!-- ID Catálogo -->
+  <td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td> <!-- Fecha de la solicitud -->
+  <td>${solicitud.estadoCotizaci || 'N/A'}</td> <!-- Estado de cotización -->
+  <td><button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button></td> <!-- Acciones -->
+`;
+						tableBody.appendChild(row);
+					}
+				});
+			} catch (error) {
+				console.error('Error:', error);
+			}
+		});
+	</script>
+
+
+</body>
+
 </html>
 
 <script>
 	document.addEventListener('DOMContentLoaded', async () => {
-	  try {
-		const response = await fetch('http://localhost:5500/catalogo');
-		if (!response.ok) throw new Error('Error al obtener los datos del catálogo');
-		
-		const catalogo = await response.json();
-		const tableBody = document.getElementById('catalogoTableBody');
-	
-		// Limpia el contenido de la tabla antes de agregar nuevos datos
-		tableBody.innerHTML = '';
-	
-		catalogo.forEach((item, index) => {
-		  const row = document.createElement('tr');
-		  row.innerHTML = `
-			<td>${index + 1}</td>
-			<td>${item.idCatalogo}</td>
-			<td>${item.nombre}</td>
-			<td>${item.marca}</td>
-			<td>${item.modelo}</td>
-			<td>${item.descripcion}</td>
-			<td>${item.tipo}</td>
-			<td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
-		  `;
-		  tableBody.appendChild(row);
-		});
-	  } catch (error) {
-		console.error('Error:', error);
-	  }
+		try {
+			const response = await fetch('http://localhost:5500/catalogo');
+			if (!response.ok) throw new Error('Error al obtener los datos del catálogo');
+
+			const catalogo = await response.json();
+			const tableBody = document.getElementById('catalogoTableBody');
+
+			// Limpia el contenido de la tabla antes de agregar nuevos datos
+			tableBody.innerHTML = '';
+
+			catalogo.forEach((item, index) => {
+				const row = document.createElement('tr');
+				row.innerHTML = `
+<td>${index + 1}</td>
+<td>${item.idCatalogo}</td>
+<td>${item.nombre}</td>
+<td>${item.marca}</td>
+<td>${item.modelo}</td>
+<td>${item.descripcion}</td>
+<td>${item.tipo}</td>
+<td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+`;
+				tableBody.appendChild(row);
+			});
+		} catch (error) {
+			console.error('Error:', error);
+		}
 	});
 
 	// Función para eliminar un dispositivo por ID
@@ -653,7 +687,7 @@
 				if (response.ok) {
 					// Mostrar el modal de notificación con el mensaje de éxito
 					mostrarNotificacion('Dispositivo eliminado con éxito');
-					
+
 					// Recargar la página después de un pequeño retraso para dar tiempo de ver la notificación
 					setTimeout(() => {
 						location.reload(); // Recargar la página para actualizar la tabla
@@ -670,6 +704,3 @@
 		}
 	});
 </script>
-
-
-	

@@ -48,10 +48,23 @@ const env = async (req, res) => {
   
     } catch (err) {
       console.error('Error al guardar en MongoDB:', err);
-      res.status(500).json({ error: `Error al registrar el dispositivo: ${err.message}` });
+      res.status(500).json({ error: Error });
     }
 };
 
+
+const obtenerSolicitudes = async (req, res) => {
+  try {
+    const solicitudes = await Cotizacion.find({}); // Obtiene todas las cotizaciones
+    res.status(200).json(solicitudes); // Envía las cotizaciones en formato JSON
+  } catch (err) {
+    console.error('Error al obtener las solicitudes:', err);
+    res.status(500).json({ error: 'Error al obtener las solicitudes' });
+  }
+};
+
+
 module.exports = {
-  env
+  env,
+  obtenerSolicitudes
 };

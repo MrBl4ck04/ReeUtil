@@ -22,7 +22,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     console.error('Error al conectar a MongoDB Atlas:', error);
   });
 
-// Middleware
+// Middleware para habilitar CORS
 app.use(cors());
 
 // Importar las rutas de usuario
@@ -38,21 +38,21 @@ app.post('/login', usuarioNegocio.loginUsuario);
 const newDispos = require('./newDispos');
 app.post('/registerDevice', newDispos.registrarDispositivo);
 
-// Ruta para sacar catalogo
-const cata= require('./catalogoClientes'); 
+// Ruta para sacar catálogo
+const cata = require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
-// Ruta para solicitar Evaluacion
+// Ruta para solicitar Evaluación
 const cot = require('./cotizardisp');
 app.post('/envcotizacion', cot.env);
 
-// Iniciar servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-});
+// NUEVA RUTA para obtener todas las solicitudes de cotización
+app.get('/solicitudes', cot.obtenerSolicitudes);
 
 // Importar modelo del catálogo
 const Catalogo = require('./catalogo');
+
+
 
 // Ruta para obtener los datos del catálogo (GET)
 app.get('/catalogo', async (req, res) => {
@@ -80,4 +80,9 @@ app.delete('/catalogo/:id', async (req, res) => {
     console.error('Error al eliminar el dispositivo:', error);
     res.status(500).json({ error: 'Error al eliminar el dispositivo' });
   }
+});
+
+// Iniciar el servidor
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
 });
