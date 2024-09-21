@@ -1,7 +1,7 @@
 // Obtener elementos
 const openModal = document.getElementById('openModal');
-const modal = document.getElementById('modal');
-const closeModal = document.getElementById('closeModal');
+const modal = document.getElementById('solicitudModal');
+const closeModal = document.getElementById('closeSolicitudModal');
 
 // Abrir modal
 openModal.addEventListener('click', function (event) {

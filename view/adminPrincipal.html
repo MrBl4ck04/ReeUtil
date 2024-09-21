@@ -222,29 +222,103 @@
 				</div>
 			</section>
 
-            <section class="container blogs">
-                <div class="d-flex align-items-center">
-                    <h1 class="heading-1 mb-0">Solicitudes en cola</h1>
-                  </div>
-                <table class="table table-striped bg-white fs-5">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>ID Evaluacion</th>
-                      <th>ID Dispositivo</th>
-                      <th>Fecha evaluacion</th>
-                      <th>Resultados</th>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>1 Y</td>
-                        <td>1</td>
-                        <td>10-05-2024</td>
-                        <td>Se hizo la compra del dispositivos</td>
-                      </tr>
-                  </thead>
-                </table>
-              </section>
+				<section class="container blogs">
+					<div class="d-flex align-items-center">
+						<h1 class="heading-1 mb-0">Solicitudes en cola</h1>
+					</div>
+					<table class="table table-striped bg-white fs-5">
+						<thead>
+						<tr>
+							<th>#</th>
+							<th>ID Evaluación</th>
+							<th>ID Dispositivo</th>
+							<th>Fecha evaluación</th>
+							<th>Resultados</th>
+							<th>Acciones</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td>1</td>
+							<td>1 Y</td>
+							<td>1</td>
+							<td>10-05-2024</td>
+							<td>Se hizo la compra del dispositivo</td>
+							<td><button class="btn-cotizar" onclick="openModalSol()">Cotizar</button></td>
+						</tr>
+						</tbody>
+					</table>
+				</section>
+
+<!-- Modal Cotizar-->
+<div id="modalSol" class="modalSol">
+  <div class="modalSol-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="modalSol-header">
+      <h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
+	  <span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
+    </div>
+    <form>
+      <label for="equipo">Equipo a cotizar:</label><br>
+      <input type="text" id="equipo" name="equipo"><br><br>
+
+      <label for="estado">Estado del dispositivo según el cliente:</label><br>
+      <input type="text" id="estado" name="estado"><br><br>
+
+      <label for="detalles">Detalles:</label><br>
+      <textarea id="detalles" name="detalles"></textarea><br><br>
+
+      <label for="fecha">Fecha de la solicitud:</label><br>
+      <input type="date" id="fecha" name="fecha"><br><br>
+
+      <label for="cotizacion">Cotización:</label><br>
+      <input type="text" id="cotizacion" name="cotizacion"><br><br>
+
+      <label for="estadoCotizacion">Estado de Cotización:</label><br>
+      <input type="text" id="estadoCotizacion" name="estadoCotizacion"><br><br>
+
+	  <label for="fecha">Fecha de envio de la cotización:</label><br>
+      <input type="date" id="fecha" name="fecha"><br><br>
+
+      <button type="submit" class="btn-enviar">Enviar</button>
+    </form>
+  </div>
+</div>
+<!-- Modal de REGLAS -->
+<div id="modalReglas" class="modalReglas">
+	<div class="modalReglas-content">
+		<span class="close" onclick="closeRulesModal()">&times;</span>
+		<h3>Seleccionar tipo de dispositivo</h3>
+	  <select id="tipoDispositivo" onchange="mostrarReglas()">
+		<option value="default">-- Seleccione un tipo --</option>
+		<option value="smartphones">Smartphones</option>
+		<option value="televisores">Televisores</option>
+		<option value="electrodomesticos">Electrodomésticos</option>
+	  </select>
+	  <div id="reglasArea" class="reglas-texto">
+		<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
+		<p id="reglas"></p>
+	  </div>
+	</div>
+  </div>
+  
+<script>
+	function openModalSol() {
+	  document.getElementById("modalSol").style.display = "block";
+	}
+  
+	function closeModal() {
+	  document.getElementById("modalSol").style.display = "none";
+	}
+  
+	window.onclick = function(event) {
+	  var modal = document.getElementById("modalSol");
+	  if (event.target == modal) {
+		modal.style.display = "none";
+	  }
+	}
+  </script>
+  
             
               <section class="container blogs mt-5">
                 <div class="d-flex align-items-center">
@@ -514,6 +588,8 @@
 		</div>
 	</div>
 </div>
+<script src="reglasView.js"></script>
+
 	</body>
 </html>
 
