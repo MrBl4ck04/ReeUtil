@@ -203,6 +203,7 @@ html {
     border-color: #216869;
 }
 
+
 /* ********************************** */
 /*               BANNER               */
 /* ********************************** */
@@ -1202,3 +1203,74 @@ html {
 	font-size: 20px;
 	cursor: pointer;
   }
+ /* Estilo para el Modal de Confirmación de Eliminación */
+#confirmDeleteModal .modal-content {
+    background-color: #f8d7da; /* Fondo claro con un toque de rojo */
+    border: 1px solid #f5c6cb; /* Borde más oscuro */
+    border-radius: 10px;
+}
+
+#confirmDeleteModal .modal-header {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+}
+
+#confirmDeleteModal .modal-title {
+    font-weight: bold;
+}
+
+/* Estilo para el cuerpo del modal de confirmación */
+#confirmDeleteModal .modal-body {
+    font-size: 1.1rem;
+    color: #721c24; /* Color del texto de advertencia */
+}
+
+/* Estilo para los botones del modal de confirmación */
+#confirmDeleteModal .btn {
+    width: 100%; /* Botones más largos */
+    font-size: 1rem; /* Mismo tamaño de fuente */
+    padding: 10px; /* Aumentar el padding para más espacio */
+}
+
+#confirmDeleteModal .btn-secondary {
+    background-color: #6c757d; /* Gris */
+    color: white;
+}
+
+#confirmDeleteModal .btn-danger {
+    background-color: #c82333; /* Rojo oscuro */
+}
+
+/* Estilo para el Modal de Notificación */
+#notificationModal .modal-content {
+    background-color: #9CC5A1; /* Fondo claro con un toque de azul */
+    border: 1px solid #216869; /* Borde más oscuro */
+    border-radius: 10px;
+}
+
+#notificationModal .modal-header {
+    background-color: #216869; /* Azul */
+    color: white;
+}
+
+#notificationModal .modal-title {
+    font-weight: bold;
+}
+
+/* Estilo para el cuerpo del modal de notificación */
+#notificationModal .modal-body {
+    font-size: 1.1rem;
+    color: #0c5460; /* Color del texto de notificación */
+}
+
+/* Estilo para los botones del modal de notificación */
+#notificationModal .btn {
+    width: 100%; /* Botones más largos */
+    font-size: 1rem; /* Mismo tamaño de fuente */
+    padding: 10px; /* Aumentar el padding para más espacio */
+}
+
+#notificationModal .btn-primary {
+    background-color: var(--primary-color); /* Azul */
+    color: white;
+}
