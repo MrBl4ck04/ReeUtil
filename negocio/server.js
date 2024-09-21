@@ -82,6 +82,10 @@ app.delete('/catalogo/:id', async (req, res) => {
   }
 });
 
+// Ruta para actualizar la cotización de un dispositivo
+app.post('/actualizarCotizacion', cot.actualizarCotizacion);
+
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

@@ -63,8 +63,39 @@ const obtenerSolicitudes = async (req, res) => {
   }
 };
 
+// Función para actualizar la cotización de un dispositivo
+const actualizarCotizacion = async (req, res) => {
+  const { idDispositivo, cotizacion } = req.body;
+
+  if (!idDispositivo || cotizacion === undefined) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+
+  try {
+    // Busca el dispositivo por su id y actualiza el campo cotizacion
+    const dispositivoActualizado = await Cotizacion.findOneAndUpdate(
+      { idDispositivo: idDispositivo }, // Busca por idDispositivo
+      { $set: { cotizacion: cotizacion } }, // Actualiza el campo cotización
+      { new: true } // Retorna el documento actualizado
+    );
+
+    if (!dispositivoActualizado) {
+      return res.status(404).json({ error: 'Dispositivo no encontrado' });
+    }
+
+    console.log('Cotización actualizada:', dispositivoActualizado);
+    res.status(200).json({ message: 'Cotización actualizada exitosamente', dispositivo: dispositivoActualizado });
+  } catch (err) {
+    console.error('Error al actualizar la cotización:', err);
+    res.status(500).json({ error: 'Error al actualizar la cotización' });
+  }
+};
 
 module.exports = {
   env,
-  obtenerSolicitudes
+  obtenerSolicitudes,
+  actualizarCotizacion // Exportar la nueva función
 };
+
+
+

@@ -242,6 +242,7 @@
 						<th>ID Catalogo</th>
 						<th>Fecha solicitud</th>
 						<th>Estado cotización</th>
+						<th>Cotización</th> <!-- Nueva columna -->
 						<th>Acciones</th>
 					</tr>
 				</thead>
@@ -338,7 +339,7 @@
 			<table class="table table-striped bg-white fs-5">
 				<thead>
 					<tr>
-						<th>#</th>
+						<th>ID Dispositivo</th>
 						<th>ID Catalogo</th>
 						<th>Nombre</th>
 						<th>Marca</th>
@@ -600,23 +601,56 @@
 				tableBody.innerHTML = '';
 
 				solicitudes.forEach((solicitud) => {
-					// Condición: solo mostrar solicitudes con estado de cotización "En Curso"
-					if (solicitud.estadoCotizaci === "En Curso") {
-						const row = document.createElement('tr');
-						row.innerHTML = `
-  <td>${solicitud.idDispositivo || 'N/A'}</td> <!-- Mostrar el ID del dispositivo -->
-  <td>${solicitud.idCatalogo || 'N/A'}</td> <!-- ID Catálogo -->
-  <td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td> <!-- Fecha de la solicitud -->
-  <td>${solicitud.estadoCotizaci || 'N/A'}</td> <!-- Estado de cotización -->
-  <td><button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button></td> <!-- Acciones -->
-`;
-						tableBody.appendChild(row);
-					}
-				});
+    // Condición: solo mostrar solicitudes con estado de cotización "En Curso"
+    if (solicitud.estadoCotizaci === "En Curso") {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${solicitud.idDispositivo || 'N/A'}</td> <!-- Mostrar el ID del dispositivo -->
+            <td>${solicitud.idCatalogo || 'N/A'}</td> <!-- ID Catálogo -->
+            <td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td> <!-- Fecha de la solicitud -->
+            <td>${solicitud.estadoCotizaci || 'N/A'}</td> <!-- Estado de cotización -->
+            <td><input type="text" class="form-control" id="cotizacion-${solicitud.idDispositivo}" placeholder="Ingrese cotización"></td> <!-- Nueva columna Cotización -->
+            <td>
+                <button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button>
+                <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo}')">Guardar</button> <!-- Botón Guardar -->
+            </td> <!-- Acciones -->
+        `;
+        tableBody.appendChild(row);
+    }
+});
+
+
 			} catch (error) {
 				console.error('Error:', error);
 			}
 		});
+
+
+		// Nueva función para guardar la cotización
+		function guardarCotizacion(idDispositivo) {
+    const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
+
+    fetch('http://localhost:5500/actualizarCotizacion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            idDispositivo: idDispositivo,
+            cotizacion: cotizacion
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert('Cotización guardada exitosamente');
+        } else {
+            alert('Error al guardar la cotización');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 	</script>
 
 
