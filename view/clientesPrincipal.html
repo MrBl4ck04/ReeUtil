@@ -79,10 +79,6 @@
 
 				<label for="detalles">Detalles:</label>
 				<textarea id="detalles" name="detalles" rows="4" placeholder="Proporcione más detalles..."></textarea>
-
-				<label for="fecha">Fecha:</label>
-				<input type="date" id="fecha" name="fecha" />
-
 				<button type="submit" class="FormS-submit">Enviar Solicitud</button>
 			</form>
 		</div>
@@ -93,11 +89,6 @@
 
 			const formData = new FormData(this);
 			const data = Object.fromEntries(formData.entries());
-
-			if (data.fecha) {
-				data.fecha = new Date(data.fecha).toISOString();
-			}
-
 			const idUsuario = localStorage.getItem('idUsuario');
 			console.log('idUsuario en localStorage:', idUsuario);
 
