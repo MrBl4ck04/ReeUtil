@@ -230,10 +230,10 @@
 						<thead>
 						<tr>
 							<th>#</th>
-							<th>ID Evaluación</th>
 							<th>ID Dispositivo</th>
-							<th>Fecha evaluación</th>
-							<th>Resultados</th>
+							<th>ID Catalogo</th>
+							<th>Fecha solicitud</th>
+							<th>Estado cotización</th>
 							<th>Acciones</th>
 						</tr>
 						</thead>
@@ -259,8 +259,11 @@
 	  <span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
     </div>
     <form>
-      <label for="equipo">Equipo a cotizar:</label><br>
+      <label for="equipo">Nombre:</label><br>
       <input type="text" id="equipo" name="equipo"><br><br>
+	  
+      <label for="estadoCotizacion">Modelo:</label><br>
+      <input type="text" id="modelo" name="modelo"><br><br>
 
       <label for="estado">Estado del dispositivo según el cliente:</label><br>
       <input type="text" id="estado" name="estado"><br><br>
@@ -269,16 +272,10 @@
       <textarea id="detalles" name="detalles"></textarea><br><br>
 
       <label for="fecha">Fecha de la solicitud:</label><br>
-      <input type="date" id="fecha" name="fecha"><br><br>
+      <input type="text" id="fecha" name="fecha"><br><br>
 
       <label for="cotizacion">Cotización:</label><br>
       <input type="text" id="cotizacion" name="cotizacion"><br><br>
-
-      <label for="estadoCotizacion">Estado de Cotización:</label><br>
-      <input type="text" id="estadoCotizacion" name="estadoCotizacion"><br><br>
-
-	  <label for="fecha">Fecha de envio de la cotización:</label><br>
-      <input type="date" id="fecha" name="fecha"><br><br>
 
       <button type="submit" class="btn-enviar">Enviar</button>
     </form>
