@@ -72,10 +72,10 @@ const actualizarCotizacion = async (req, res) => {
   }
 
   try {
-    // Busca el dispositivo por su id y actualiza el campo cotizacion
+    // Busca el dispositivo por su id y actualiza los campos cotizacion y estadoCotizaci
     const dispositivoActualizado = await Cotizacion.findOneAndUpdate(
       { idDispositivo: idDispositivo }, // Busca por idDispositivo
-      { $set: { cotizacion: cotizacion } }, // Actualiza el campo cotización
+      { $set: { cotizacion: cotizacion, estadoCotizaci: 'Pendiente' } }, // Actualiza cotizacion y estadoCotizaci
       { new: true } // Retorna el documento actualizado
     );
 
@@ -83,13 +83,14 @@ const actualizarCotizacion = async (req, res) => {
       return res.status(404).json({ error: 'Dispositivo no encontrado' });
     }
 
-    console.log('Cotización actualizada:', dispositivoActualizado);
-    res.status(200).json({ message: 'Cotización actualizada exitosamente', dispositivo: dispositivoActualizado });
+    console.log('Cotización y estado actualizados:', dispositivoActualizado);
+    res.status(200).json({ message: 'Cotización y estado actualizados exitosamente', dispositivo: dispositivoActualizado });
   } catch (err) {
     console.error('Error al actualizar la cotización:', err);
     res.status(500).json({ error: 'Error al actualizar la cotización' });
   }
 };
+
 
 module.exports = {
   env,

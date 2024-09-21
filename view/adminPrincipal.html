@@ -626,7 +626,6 @@
 		});
 
 
-		// Nueva función para guardar la cotización
 		function guardarCotizacion(idDispositivo) {
     const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
 
@@ -644,12 +643,15 @@
     .then(data => {
         if (data.message) {
             alert('Cotización guardada exitosamente');
+            // Recargar la página después de guardar exitosamente
+            window.location.reload();
         } else {
             alert('Error al guardar la cotización');
         }
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 	</script>
 
