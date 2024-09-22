@@ -565,6 +565,49 @@
 		</div>
 	</div>
 
+	<!-- Modal para modificar dispositivos -->
+	<div class="modal fade" id="modalModificarDevice" tabindex="-1" role="dialog"
+	aria-labelledby="modalModificarDeviceLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	<div class="modal-content">
+	<div class="modal-header">
+	<h5 class="modal-title" id="modalModificarDeviceLabel">Modificar Dispositivo</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+	</div>
+	<div class="modal-body">
+	<form id="modifyDeviceForm">
+		<input type="hidden" id="dispositivoId" name="dispositivoId">
+
+		<div class="form-group">
+		<label for="nombreModificar">Nombre del dispositivo</label>
+		<input type="text" class="form-control" id="nombreModificar" name="nombre">
+		</div>
+		<div class="form-group">
+		<label for="descripcionModificar">Descripción</label>
+		<input type="text" class="form-control" id="descripcionModificar" name="descripcion">
+		</div>
+		<div class="form-group">
+		<label for="marcaModificar">Marca</label>
+		<input type="text" class="form-control" id="marcaModificar" name="marca">
+		</div>
+		<div class="form-group">
+		<label for="modeloModificar">Modelo</label>
+		<input type="text" class="form-control" id="modeloModificar" name="modelo">
+		</div>
+		<div class="form-group">
+		<label for="tipoModificar">Tipo</label>
+		<input type="text" class="form-control" id="tipoModificar" name="tipo">
+		</div>
+		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+	</form>
+	</div>
+	</div>
+	</div>
+	</div>
+
+
 
 	<!-- Modal de Notificación -->
 	<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
@@ -683,6 +726,7 @@
 <td>${item.descripcion}</td>
 <td>${item.tipo}</td>
 <td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+<td><button class="btn btn-modificar" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
 `;
 				tableBody.appendChild(row);
 			});
@@ -702,6 +746,55 @@
 		});
 		myModal.show(); // Mostrar el modal de confirmación
 	}
+
+	function abrirModalModificar(id, nombre, descripcion, marca, modelo, tipo) {
+    // Poner los valores en los campos del modal
+    document.getElementById('dispositivoId').value = id;
+    document.getElementById('nombreModificar').value = nombre || '';
+    document.getElementById('descripcionModificar').value = descripcion || '';
+    document.getElementById('marcaModificar').value = marca || '';
+    document.getElementById('modeloModificar').value = modelo || '';
+    document.getElementById('tipoModificar').value = tipo || '';
+
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarDevice'));
+    modal.show();
+  }
+
+  // Enviar los cambios al backend cuando se presione "Guardar Cambios"
+  document.getElementById('modifyDeviceForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const id = document.getElementById('dispositivoId').value;
+    const formData = new FormData(this);
+
+    // Solo envía los campos que fueron modificados
+    const updatedData = {};
+    for (const [key, value] of formData.entries()) {
+      if (value) {
+        updatedData[key] = value;
+      }
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        alert('Dispositivo actualizado exitosamente');
+        window.location.reload(); // Recargar la página
+      } else {
+        alert('Error al actualizar el dispositivo');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  });
 
 	// Función para mostrar el modal de notificación
 	function mostrarNotificacion(mensaje) {

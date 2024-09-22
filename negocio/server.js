@@ -82,6 +82,29 @@ app.delete('/catalogo/:id', async (req, res) => {
   }
 });
 
+// Ruta para modificar un dispositivo del catálogo (PUT)
+app.put('/catalogo/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, marca, modelo, tipo, imagenProdu } = req.body;
+
+  try {
+    const dispositivoActualizado = await Catalogo.findByIdAndUpdate(
+      id, 
+      { nombre, descripcion, marca, modelo, tipo, imagenProdu },
+      { new: true }
+    );
+
+    if (!dispositivoActualizado) {
+      return res.status(404).json({ message: 'Dispositivo no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Dispositivo actualizado con éxito', dispositivo: dispositivoActualizado });
+  } catch (error) {
+    console.error('Error al actualizar el dispositivo:', error);
+    res.status(500).json({ error: 'Error al actualizar el dispositivo' });
+  }
+});
+
 // Ruta para actualizar la cotización de un dispositivo
 app.post('/actualizarCotizacion', cot.actualizarCotizacion);
 
