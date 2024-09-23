@@ -109,6 +109,29 @@ app.put('/catalogo/:id', async (req, res) => {
 app.post('/actualizarCotizacion', cot.actualizarCotizacion);
 
 
+const Regla = require('./reglas'); // Importa el modelo de Reglas
+let contadorReglas = 1; // Esto es solo un ejemplo, debes asegurarte de autoincrementar correctamente.
+
+app.post('/reglas', async (req, res) => {
+    const { idCatalogo, nombreRegla, descripcionRE } = req.body;
+
+    try {
+        const nuevaRegla = new Regla({
+            idReglas: contadorReglas++, // Incrementa el contador
+            nombreRegla,
+            descripcionRE,
+            idCatalogo,
+        });
+
+        await nuevaRegla.save();
+        res.status(201).json({ message: 'Regla agregada exitosamente', regla: nuevaRegla });
+    } catch (error) {
+        console.error('Error al agregar la regla:', error);
+        res.status(500).json({ error: 'Error al agregar la regla' });
+    }
+});
+
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

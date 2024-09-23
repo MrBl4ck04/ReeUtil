@@ -604,6 +604,38 @@
 	</div>
 	</div>
 
+	<script>
+		document.getElementById('reglasForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+    const dispositivoId = document.getElementById('dispositivoId').value;
+    const nombreRegla = document.getElementById('nombreRegla').value;
+    const descripcionRegla = document.getElementById('descripcionRegla').value;
+
+    try {
+        const response = await fetch('http://localhost:5500/reglas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idCatalogo: dispositivoId, // El ID del dispositivo asociado
+                nombreRegla,
+                descripcionRE: descripcionRegla,
+            }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Regla agregada exitosamente');
+        } else {
+            console.error('Error:', result);
+            alert('Error al agregar la regla');
+        }
+    } catch (error) {
+        console.error('Error al enviar los datos:', error);
+    }
+});
+	</script>
 
 
 	<!-- Modal de Notificación -->
