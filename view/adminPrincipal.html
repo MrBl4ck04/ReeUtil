@@ -252,37 +252,71 @@
 		</section>
 
 
-		<!-- Modal Cotizar-->
-		<div id="modalSol" class="modalSol">
-			<div class="modalSol-content">
-				<span class="close" onclick="closeModal()">&times;</span>
-				<div class="modalSol-header">
-					<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
-					<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
+				<!-- Modal Cotizar-->
+				<div id="modalSol" class="modalSol">
+					<div class="modalSol-content">
+						<span class="close" onclick="closeModal()">&times;</span>
+						<div class="modalSol-header">
+							<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
+							<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
+						</div>
+						<form>
+							<label for="equipo">Nombre:</label><br>
+							<input type="text" id="equipo" name="equipo"><br><br>
+		
+							<label for="estadoCotizacion">Modelo:</label><br>
+							<input type="text" id="modelo" name="modelo"><br><br>
+		
+							<label for="estado">Estado del dispositivo según el cliente:</label><br>
+							<input type="text" id="estado" name="estado"><br><br>
+		
+							<label for="detalles">Detalles:</label><br>
+							<textarea id="detalles" name="detalles"></textarea><br><br>
+		
+							<label for="fecha">Fecha de la solicitud:</label><br>
+							<input type="text" id="fecha" name="fecha"><br><br>
+		
+							<label for="cotizacion">Cotización:</label><br>
+							<input type="text" id="cotizacion" name="cotizacion"><br><br>
+		
+							<button type="submit" class="btn-enviar">Enviar</button>
+						</form>
+					</div>
 				</div>
-				<form>
-					<label for="equipo">Nombre:</label><br>
-					<input type="text" id="equipo" name="equipo"><br><br>
-
-					<label for="estadoCotizacion">Modelo:</label><br>
-					<input type="text" id="modelo" name="modelo"><br><br>
-
-					<label for="estado">Estado del dispositivo según el cliente:</label><br>
-					<input type="text" id="estado" name="estado"><br><br>
-
-					<label for="detalles">Detalles:</label><br>
-					<textarea id="detalles" name="detalles"></textarea><br><br>
-
-					<label for="fecha">Fecha de la solicitud:</label><br>
-					<input type="text" id="fecha" name="fecha"><br><br>
-
-					<label for="cotizacion">Cotización:</label><br>
-					<input type="text" id="cotizacion" name="cotizacion"><br><br>
-
-					<button type="submit" class="btn-enviar">Enviar</button>
-				</form>
-			</div>
-		</div>
+				<!-- Modal de REGLAS -->
+				<div id="modalReglas" class="modalReglas">
+					<div class="modalReglas-content">
+						<span class="close" onclick="closeRulesModal()">&times;</span>
+						<h3>Seleccionar tipo de dispositivo</h3>
+						<select id="tipoDispositivo" onchange="mostrarReglas()">
+							<option value="default">-- Seleccione un tipo --</option>
+							<option value="smartphones">Smartphones</option>
+							<option value="televisores">Televisores</option>
+							<option value="electrodomesticos">Electrodomésticos</option>
+						</select>
+						<div id="reglasArea" class="reglas-texto">
+							<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
+							<p id="reglas"></p>
+						</div>
+					</div>
+				</div>
+		
+				<script>
+					function openModalSol() {
+						document.getElementById("modalSol").style.display = "block";
+					}
+		
+					function closeModal() {
+						document.getElementById("modalSol").style.display = "none";
+					}
+		
+					window.onclick = function (event) {
+						var modal = document.getElementById("modalSol");
+						if (event.target == modal) {
+							modal.style.display = "none";
+						}
+					}
+				</script>
 
 
 
@@ -574,13 +608,13 @@
 	</div>
 	</div>
 
-	<!-- Modal para modificar dispositivos -->
-	<div class="modal fade" id="modalReglas" tabindex="-1" role="dialog"
-	aria-labelledby="modalReglasLabel" aria-hidden="true">
+	<!-- Modal para agregar Reglas -->
+	<div class="modal fade" id="modalReglasAgregar" tabindex="-1" role="dialog"
+	aria-labelledby="modalReglasAgregarLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 	<div class="modal-content">
 	<div class="modal-header">
-	<h5 class="modal-title" id="modalReglas">Agregar Reglas</h5>
+	<h5 class="modal-title" id="modalReglasAgregar">Agregar Reglas</h5>
 	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>
@@ -797,7 +831,7 @@
     document.getElementById('nombreModificar').value = nombre || '';
     document.getElementById('descripcionModificar').value = descripcion || '';
     // Abrir el modal
-    const modal = new bootstrap.Modal(document.getElementById('modalReglas'));
+    const modal = new bootstrap.Modal(document.getElementById('modalReglasAgregar'));
     modal.show();
   }
 
