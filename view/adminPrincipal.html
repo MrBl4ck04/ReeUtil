@@ -354,6 +354,7 @@
 			</table>
 		</section>
 
+		<!-- Tabla de dispositivos aceptados -->
 		<section class="container blogs mt-5">
 			<div class="d-flex align-items-center">
 				<h1 class="heading-1 mb-0">Cotizaciones Aceptadas</h1>
@@ -369,11 +370,10 @@
 						<th>Acciones</th> <!-- Nueva columna para acciones -->
 					</tr>
 				</thead>
-				<tbody id="aceptadasTableBody">
-				</tbody>
+				<tbody id="aceptadasTableBody"></tbody>
 			</table>
 		</section>
-		
+
 		<!-- Modal de confirmación para cambios de estado -->
 		<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
@@ -392,89 +392,83 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<script>
-			document.addEventListener('DOMContentLoaded', async () => {
-				await cargarCotizacionesAceptadas();
-			});
-		
-			async function cargarCotizacionesAceptadas() {
-				try {
-					const response = await fetch('http://localhost:5500/solicitudes');
-					if (!response.ok) throw new Error('Error al obtener las solicitudes');
-		
-					const solicitudes = await response.json();
-					const tableBody = document.getElementById('aceptadasTableBody');
-		
-					// Limpia el contenido de la tabla antes de agregar nuevos datos
-					tableBody.innerHTML = '';
-		
-					solicitudes.forEach((solicitud) => {
-						// Solo mostrar solicitudes con estado de cotización "Aceptado"
-						if (solicitud.estadoCotizaci === "aceptado") {
-							const row = document.createElement('tr');
-							row.innerHTML = `
-								<td>${solicitud.idDispositivo || 'N/A'}</td>
-								<td>${solicitud.idCatalogo || 'N/A'}</td>
-								<td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td>
-								<td class="estadoCotizaci">${solicitud.estadoCotizaci || 'N/A'}</td>
-								<td>${solicitud.cotizacion || 'N/A'}</td> <!-- Mostrar cotización -->
-								<td>
-									<button class="btn btn-danger" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para reciclar')">Reciclar</button>
-									<button class="btn btn-success" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para vender')">Vender</button>
-								</td>
-							`;
-							tableBody.appendChild(row);
-						}
-					});
-				} catch (error) {
-					console.error('Error al cargar cotizaciones aceptadas:', error);
-				}
-			}
-		
-			let idDispositivoActualizar = null; // Variable global para almacenar el ID del dispositivo a actualizar
-			let nuevoEstado = ''; // Variable global para almacenar el nuevo estado
-		
-			function abrirModalCambiarEstado(idDispositivo, estado) {
-				idDispositivoActualizar = idDispositivo;
-				nuevoEstado = estado;
-				const myModal = new bootstrap.Modal(document.getElementById('confirmUpdateModal'), {
-					keyboard: false
+		document.addEventListener('DOMContentLoaded', async () => {
+			await cargarCotizacionesAceptadas();
+		});
+
+		let idDispositivoGlobal = '';
+		let nuevoEstadoGlobal = '';
+
+		async function cargarCotizacionesAceptadas() {
+			try {
+				const response = await fetch('http://localhost:5500/solicitudes');
+				if (!response.ok) throw new Error('Error al obtener las solicitudes');
+
+				const solicitudes = await response.json();
+				const tableBody = document.getElementById('aceptadasTableBody');
+
+				// Limpia el contenido de la tabla antes de agregar nuevos datos
+				tableBody.innerHTML = '';
+
+				solicitudes.forEach((solicitud) => {
+					if (solicitud.estadoCotizaci === "aceptado") {
+						const row = document.createElement('tr');
+						row.innerHTML = `
+							<td>${solicitud.idDispositivo || 'N/A'}</td>
+							<td>${solicitud.idCatalogo || 'N/A'}</td>
+							<td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td>
+							<td class="estadoCotizaci">${solicitud.estadoCotizaci || 'N/A'}</td>
+							<td>${solicitud.cotizacion || 'N/A'}</td>
+							<td>
+								<button class="btn btn-danger" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para reciclar')">Reciclar</button>
+								<button class="btn btn-success" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para vender')">Vender</button>
+							</td>
+						`;
+						tableBody.appendChild(row);
+					}
 				});
-				myModal.show();
-		
-				document.getElementById('confirmChangeButton').onclick = async function () {
-					await cambiarEstado(idDispositivoActualizar, nuevoEstado);
-					myModal.hide(); // Ocultar el modal
-				};
+			} catch (error) {
+				console.error('Error al cargar cotizaciones aceptadas:', error);
 			}
-		
-			async function cambiarEstado(idDispositivo, nuevoEstado) {
-				console.log('ID Dispositivo:', idDispositivo);
-				try {
-					const response = await fetch(`http://localhost:5500/cotizaciones/${idDispositivo}`, {
-						method: 'PATCH',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ estadoCotizaci: nuevoEstado })
-					});
-		
-					if (!response.ok) throw new Error('Error al actualizar la cotización');
-		
-					// Actualiza el estado en la tabla
-					const rows = document.querySelectorAll('#aceptadasTableBody tr');
-					rows.forEach(row => {
-						if (row.cells[0].textContent == idDispositivo) {
-							row.querySelector('.estadoCotizaci').textContent = nuevoEstado;
-						}
-					});
-					console.log(`Dispositivo ${idDispositivo} marcado como ${nuevoEstado}.`);
-				} catch (error) {
-					console.error('Error al cambiar el estado del dispositivo:', error);
+		}
+
+		function abrirModalCambiarEstado(idDispositivo, nuevoEstado) {
+			idDispositivoGlobal = idDispositivo;
+			nuevoEstadoGlobal = nuevoEstado;
+			const modal = new bootstrap.Modal(document.getElementById('confirmUpdateModal'));
+			modal.show();
+		}
+
+		document.getElementById('confirmChangeButton').addEventListener('click', async () => {
+			await cambiarEstadoDispositivo(idDispositivoGlobal, nuevoEstadoGlobal);
+		});
+
+		async function cambiarEstadoDispositivo(idDispositivo, nuevoEstado) {
+			try {
+				const response = await fetch('http://localhost:5500/actualizarEstado', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ idDispositivo, nuevoEstado })
+				});
+
+				const data = await response.json();
+				if (data.message) {
+					alert('Estado actualizado exitosamente');
+					window.location.reload();
+				} else {
+					alert('Error al actualizar el estado');
 				}
+			} catch (error) {
+				console.error('Error al actualizar el estado:', error);
 			}
+		}
 		</script>
+
+
 		
 		
 
