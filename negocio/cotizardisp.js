@@ -52,6 +52,16 @@ const env = async (req, res) => {
     }
 };
 
+// Función para obtener las cotizaciones aceptadas
+const obtenerCotizacionesAceptadas = async (req, res) => {
+  try {
+      const solicitudesAceptadas = await Cotizacion.find({ estadoCotizaci: 'Aceptado' }); // Filtra por estado "Aceptado"
+      res.status(200).json(solicitudesAceptadas); // Envía las cotizaciones aceptadas en formato JSON
+  } catch (err) {
+      console.error('Error al obtener las cotizaciones aceptadas:', err);
+      res.status(500).json({ error: 'Error al obtener las cotizaciones aceptadas' });
+  }
+};
 
 const obtenerSolicitudes = async (req, res) => {
   try {
@@ -95,6 +105,7 @@ const actualizarCotizacion = async (req, res) => {
 module.exports = {
   env,
   obtenerSolicitudes,
+  obtenerCotizacionesAceptadas,
   actualizarCotizacion // Exportar la nueva función
 };
 

@@ -108,6 +108,33 @@ app.put('/catalogo/:id', async (req, res) => {
 // Ruta para actualizar la cotización de un dispositivo
 app.post('/actualizarCotizacion', cot.actualizarCotizacion);
 
+const Cotizacion = require('./cotizacion');
+
+app.patch('/cotizaciones/:idDispositivo', async (req, res) => {
+  try {
+      const { estadoCotizaci } = req.body;
+      const { idDispositivo } = req.params;
+
+      const cotizacion = await Cotizacion.findOneAndUpdate(
+          { idDispositivo: Number(idDispositivo) }, 
+          { estadoCotizaci },
+          { new: true }
+      );
+      console.log(cotizacion);
+
+      if (!cotizacion) {
+          return res.status(404).send({ message: 'Cotización no encontrada' });
+      }
+
+      res.send(cotizacion);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: 'Error interno del servidor', error: error.message });
+  }
+});
+
+
+
 
 // Iniciar el servidor
 app.listen(port, () => {
