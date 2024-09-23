@@ -42,17 +42,19 @@ app.post('/registerDevice', newDispos.registrarDispositivo);
 const cata = require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
+// Ruta para sacar cotizaciones pendientes
+const coti = require('./obtenercoti'); 
+app.get('/obteCoti', coti.obtenercoti);
+
 // Ruta para solicitar Evaluación
 const cot = require('./cotizardisp');
 app.post('/envcotizacion', cot.env);
 
-// NUEVA RUTA para obtener todas las solicitudes de cotización
+// Ruta para obtener todas las solicitudes de cotización
 app.get('/solicitudes', cot.obtenerSolicitudes);
 
 // Importar modelo del catálogo
 const Catalogo = require('./catalogo');
-
-
 
 // Ruta para obtener los datos del catálogo (GET)
 app.get('/catalogo', async (req, res) => {
@@ -105,8 +107,8 @@ app.put('/catalogo/:id', async (req, res) => {
   }
 });
 
-// Ruta para actualizar la cotización de un dispositivo
-app.post('/actualizarCotizacion', cot.actualizarCotizacion);
+// Importar el modelo Cotizacion de cotizardisp.js
+const { Cotizacion } = require('./cotizardisp');
 
 // Ruta para actualizar el estado del dispositivo (Para reciclar o Para vender)
 app.post('/actualizarEstado', cot.actualizarEstadoDispositivo);
@@ -134,6 +136,31 @@ app.post('/reglas', async (req, res) => {
     }
 });
 
+// Ruta para actualizar la cotización de un dispositivo
+app.post('/actualizarCotizacion', async (req, res) => {
+  const { id, estadoCotizaci } = req.body; // Obtenemos el ID y el nuevo estado
+
+  console.log('ID recibido:', id); // Verificamos si el ID llega correctamente
+  console.log('Estado recibido:', estadoCotizaci);
+
+  try {
+    // Buscar la cotización por su ID y actualizar su estado
+    const cotizacionActualizada = await Cotizacion.findByIdAndUpdate(
+      id, 
+      { estadoCotizaci }, // Actualizamos solo el campo 'estadoCotizaci'
+      { new: true } // Para que retorne la cotización actualizada
+    );
+
+    if (!cotizacionActualizada) {
+      return res.status(404).json({ message: 'Cotización no encontrada' });
+    }
+
+    res.status(200).json({ message: 'Estado de cotización actualizado correctamente', cotizacion: cotizacionActualizada });
+  } catch (error) {
+    console.error('Error al actualizar la cotización:', error);
+    res.status(500).json({ error: 'Error al actualizar la cotización' });
+  }
+});
 
 // Iniciar el servidor
 app.listen(port, () => {

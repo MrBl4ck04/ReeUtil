@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 const moment = require('moment-timezone'); 
 
+// Definición del esquema de cotización
 const cotizarSchema = new mongoose.Schema({
     cotizacion: { type: Number, default: null }, 
     detalles: String,
-    estadoCotizaci: { type: String, default: 'En Curso'}, 
+    estadoCotizaci: { type: String, default: 'En Curso' }, 
     estadoDisposit: String,
     fecha: { type: Date, default: Date.now }, 
     idCatalogo: { type: Number, default: null }, 
@@ -15,10 +16,13 @@ const cotizarSchema = new mongoose.Schema({
   versionKey: false 
 });
 
+// Plugin para auto-incrementar el campo idDispositivo
 cotizarSchema.plugin(AutoIncrement, { inc_field: 'idDispositivo' });
 
+// Definir el modelo de cotización
 const Cotizacion = mongoose.model('dispositivos', cotizarSchema);
 
+// Función para enviar la cotización
 const env = async (req, res) => {
     console.log('Datos recibidos en el servidor:', req.body);
   
@@ -38,7 +42,7 @@ const env = async (req, res) => {
         fecha: fechaLocal, 
         idCatalogo: idCatalogo,
         idUsuario: idUsuario,
-        imagen: 'sadas' 
+        imagen: 'sadas' // Imagen predeterminada (esto puede cambiar según tus necesidades)
       });
   
       await enviarcot.save();
@@ -48,7 +52,7 @@ const env = async (req, res) => {
   
     } catch (err) {
       console.error('Error al guardar en MongoDB:', err);
-      res.status(500).json({ error: Error });
+      res.status(500).json({ error: 'Error al guardar en MongoDB' });
     }
 };
 
@@ -63,6 +67,7 @@ const obtenerCotizacionesAceptadas = async (req, res) => {
   }
 };
 
+// Función para obtener todas las solicitudes de cotización
 const obtenerSolicitudes = async (req, res) => {
   try {
     const solicitudes = await Cotizacion.find({}); // Obtiene todas las cotizaciones
@@ -131,13 +136,12 @@ const actualizarEstadoDispositivo = async (req, res) => {
 
 
 
+// Exportar las funciones y el modelo Cotizacion
 module.exports = {
+  Cotizacion,  // Exportar el modelo de Cotizacion para ser usado en server.js
   env,
   obtenerSolicitudes,
   obtenerCotizacionesAceptadas,
   actualizarEstadoDispositivo,
   actualizarCotizacion // Exportar la nueva función
 };
-
-
-
