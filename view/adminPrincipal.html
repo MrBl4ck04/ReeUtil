@@ -283,40 +283,7 @@
 				</form>
 			</div>
 		</div>
-		<!-- Modal de REGLAS -->
-		<div id="modalReglas" class="modalReglas">
-			<div class="modalReglas-content">
-				<span class="close" onclick="closeRulesModal()">&times;</span>
-				<h3>Seleccionar tipo de dispositivo</h3>
-				<select id="tipoDispositivo" onchange="mostrarReglas()">
-					<option value="default">-- Seleccione un tipo --</option>
-					<option value="smartphones">Smartphones</option>
-					<option value="televisores">Televisores</option>
-					<option value="electrodomesticos">Electrodomésticos</option>
-				</select>
-				<div id="reglasArea" class="reglas-texto">
-					<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
-					<p id="reglas"></p>
-				</div>
-			</div>
-		</div>
 
-		<script>
-			function openModalSol() {
-				document.getElementById("modalSol").style.display = "block";
-			}
-
-			function closeModal() {
-				document.getElementById("modalSol").style.display = "none";
-			}
-
-			window.onclick = function (event) {
-				var modal = document.getElementById("modalSol");
-				if (event.target == modal) {
-					modal.style.display = "none";
-				}
-			}
-		</script>
 
 
 		<section class="container blogs mt-5">
@@ -607,6 +574,36 @@
 	</div>
 	</div>
 
+	<!-- Modal para modificar dispositivos -->
+	<div class="modal fade" id="modalReglas" tabindex="-1" role="dialog"
+	aria-labelledby="modalReglasLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	<div class="modal-content">
+	<div class="modal-header">
+	<h5 class="modal-title" id="modalReglas">Agregar Reglas</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+	</div>
+	<div class="modal-body">
+	<form id="reglasForm">
+		<input type="hidden" id="dispositivoId" name="dispositivoId">
+
+		<div class="form-group">
+		<label for="nombreRegla">Nombre de la regla</label>
+		<input type="text" class="form-control" id="nombreRegla" name="nombre">
+		</div>
+		<div class="form-group">
+		<label for="descripcionRegla">Descripción</label>
+		<input type="text" class="form-control" id="descripcionRegla" name="descripcion">
+		</div>
+		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+	</form>
+	</div>
+	</div>
+	</div>
+	</div>
+
 
 
 	<!-- Modal de Notificación -->
@@ -727,6 +724,7 @@
 <td>${item.tipo}</td>
 <td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
 <td><button class="btn btn-modificar" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
+<td><button class="btn btn-regla" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
 `;
 				tableBody.appendChild(row);
 			});
@@ -761,7 +759,19 @@
     modal.show();
   }
 
+  function abrirModalRegla(id, nombre, descripcion) {
+    // Poner los valores en los campos del modal
+    document.getElementById('dispositivoId').value = id;
+    document.getElementById('nombreModificar').value = nombre || '';
+    document.getElementById('descripcionModificar').value = descripcion || '';
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalReglas'));
+    modal.show();
+  }
+
   // Enviar los cambios al backend cuando se presione "Guardar Cambios"
+
+
   document.getElementById('modifyDeviceForm').addEventListener('submit', async function (event) {
     event.preventDefault();
 
