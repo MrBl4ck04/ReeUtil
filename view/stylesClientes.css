@@ -1460,3 +1460,35 @@ html {
         font-size: 1.2rem;
     }
 }
+
+/* Botones Aceptar y Rechazar */
+.btn-aceptar, .btn-rechazar {
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Botón Aceptar */
+.btn-aceptar {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+
+/* Botón Rechazar */
+.btn-rechazar {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+}
+
+/* Hover en los botones */
+.btn-aceptar:hover {
+    background-color: #218838;
+}
+
+.btn-rechazar:hover {
+    background-color: #c82333;
+}

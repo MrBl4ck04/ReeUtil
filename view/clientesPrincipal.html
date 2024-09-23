@@ -81,7 +81,7 @@
 		const cotizacionModal = document.getElementById("cotizacionModal");
 		const openCotizacionModalButton = document.getElementById("openCotizacionModal");
 		const closeCotizacionModalButton = document.getElementsByClassName("closeCotizacionModal")[0];
-
+	
 		// Function to fetch data from API
 		async function cargar() {
 			try {
@@ -91,11 +91,11 @@
 						'Content-Type': 'application/json'
 					}
 				});
-
+	
 				if (!response.ok) {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
-
+	
 				const productos = await response.json();  
 				return productos;
 			} catch (error) {
@@ -103,50 +103,114 @@
 				return null;  
 			}
 		}
+	
 		openCotizacionModalButton.addEventListener("click", async () => {
 			const tableBody = document.querySelector("#cotizacionTable tbody");
 			tableBody.innerHTML = ""; 
 			const productos = await cargar();
-
+	
 			if (!productos) {
-				console.error('No productos data available or an error occurred.');
+				console.error('No hay productos disponibles o ha ocurrido un error.');
 				return; 
 			}
+	
 			const filteredData = productos.filter(data => data.estadoCotizaci === "Pendiente");
 			if (filteredData.length === 0) {
-				console.log('No products with estadoCotizacion as "Pendiente".');
+				console.log('No hay productos con estado de cotización "Pendiente".');
 			}
+	
 			filteredData.forEach(data => {
 				const row = document.createElement("tr");
+	
 				row.innerHTML = `
-            <td>${data.cotizacion}</td>
-            <td>${data.detalles}</td>
-            <td>${data.estadoCotizaci}</td>
-            <td>${data.estadoDisposit}</td>
-            <td>${new Date(data.fecha).toLocaleDateString()}</td>
-            <td>${data.idCatalogo}</td>
-            <td>${data.idUsuario}</td>
-        `;
+					<td>${data.cotizacion || 'N/A'}</td>
+					<td>${data.detalles || 'Sin detalles'}</td>
+					<td>${data.estadoCotizaci}</td>
+					<td>${data.estadoDisposit}</td>
+					<td>${new Date(data.fecha).toLocaleDateString()}</td>
+					<td>${data.idCatalogo}</td>
+					<td>${data.idUsuario}</td>
+					<td>
+						<button class="btn-aceptar">Aceptar</button>
+						<button class="btn-rechazar">Rechazar</button>
+					</td>
+				`;
 				tableBody.appendChild(row);
+	
+				// Event listener para el botón "Aceptar"
+				const btnAceptar = row.querySelector(".btn-aceptar");
+				btnAceptar.addEventListener("click", async () => {
+					try {
+						const response = await fetch('http://localhost:5500/actualizarCotizacion', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ id: data._id, estadoCotizaci: 'aceptado' }) // Asegúrate de enviar el _id correctamente
+						});
+	
+						const result = await response.json(); // Capturamos la respuesta del servidor
+	
+						if (response.ok) {
+							alert('Cotización aceptada');
+							data.estadoCotizaci = 'aceptado';
+							row.querySelector('td:nth-child(3)').innerText = 'aceptado'; // Actualizar el estado en la tabla
+						} else {
+							console.error('Error del servidor:', result);
+							alert(`Error al aceptar la cotización: ${result.error || 'Error desconocido'}`);
+						}
+					} catch (error) {
+						console.error('Error al aceptar la cotización:', error);
+						alert('Error de conexión al aceptar la cotización');
+					}
+				});
+	
+				// Event listener para el botón "Rechazar"
+				const btnRechazar = row.querySelector(".btn-rechazar");
+				btnRechazar.addEventListener("click", async () => {
+					try {
+						const response = await fetch('http://localhost:5500/actualizarCotizacion', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ id: data._id, estadoCotizaci: 'rechazado' }) // Asegúrate de enviar el _id correctamente
+						});
+	
+						const result = await response.json(); // Capturamos la respuesta del servidor
+	
+						if (response.ok) {
+							alert('Cotización rechazada');
+							data.estadoCotizaci = 'rechazado';
+							row.querySelector('td:nth-child(3)').innerText = 'rechazado'; // Actualizar el estado en la tabla
+						} else {
+							console.error('Error del servidor:', result);
+							alert(`Error al rechazar la cotización: ${result.error || 'Error desconocido'}`);
+						}
+					} catch (error) {
+						console.error('Error al rechazar la cotización:', error);
+						alert('Error de conexión al rechazar la cotización');
+					}
+				});
 			});
-
-			// Show the modal
+	
+			// Mostrar el modal
 			cotizacionModal.style.display = "block";
 		});
-
+	
 		// Close the modal when the 'x' is clicked
 		closeCotizacionModalButton.addEventListener("click", () => {
 			cotizacionModal.style.display = "none";
 		});
-
+	
 		// Close modal if user clicks outside the modal content
 		window.onclick = function (event) {
 			if (event.target == cotizacionModal) {
 				cotizacionModal.style.display = "none";
 			}
 		}
-
 	</script>
+	
 
 	<!-- Modal para Formulario -->
 	<div id="solicitudModal" class="modal FormS-modal">
