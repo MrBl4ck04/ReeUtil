@@ -853,28 +853,33 @@
 		function guardarCotizacion(idDispositivo) {
     const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
 
+    // Asegúrate de que el idDispositivo está siendo pasado correctamente
+    console.log("ID Dispositivo:", idDispositivo);
+    console.log("Cotización:", cotizacion);
+
     fetch('http://localhost:5500/actualizarCotizacion', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            idDispositivo: idDispositivo,
-            cotizacion: cotizacion
+            idDispositivo: idDispositivo, // Asegúrate de pasar el idDispositivo correctamente
+            cotizacion: cotizacion,
+            estadoCotizaci: 'Pendiente'  // Cambia el estado de 'En Curso' a 'Pendiente'
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.message) {
             alert('Cotización guardada exitosamente');
-            // Recargar la página después de guardar exitosamente
-            window.location.reload();
+            window.location.reload(); // Recargar la página tras guardar exitosamente
         } else {
             alert('Error al guardar la cotización');
         }
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 
 	</script>

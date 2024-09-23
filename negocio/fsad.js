@@ -137,32 +137,6 @@ app.post('/reglas', async (req, res) => {
 });
 
 // Ruta para actualizar la cotización de un dispositivo
-app.post('/actualizarCotizacionDP', async (req, res) => {
-  const { id, estadoCotizaci } = req.body; // Obtenemos el ID y el nuevo estado
-
-  console.log('ID recibido:', id); // Verificamos si el ID llega correctamente
-  console.log('Estado recibido:', estadoCotizaci);
-
-  try {
-    // Buscar la cotización por su ID y actualizar su estado
-    const cotizacionActualizada = await Cotizacion.findByIdAndUpdate(
-      id, 
-      { estadoCotizaci }, // Actualizamos solo el campo 'estadoCotizaci'
-      { new: true } // Para que retorne la cotización actualizada
-    );
-
-    if (!cotizacionActualizada) {
-      return res.status(404).json({ message: 'Cotización no encontrada' });
-    }
-
-    res.status(200).json({ message: 'Estado de cotización actualizado correctamente', cotizacion: cotizacionActualizada });
-  } catch (error) {
-    console.error('Error al actualizar la cotización:', error);
-    res.status(500).json({ error: 'Error al actualizar la cotización' });
-  }
-});
-
-
 app.post('/actualizarCotizacion', async (req, res) => {
   const { idDispositivo, cotizacion, estadoCotizaci } = req.body; // Obtenemos los valores del body
 
@@ -192,7 +166,6 @@ app.post('/actualizarCotizacion', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar la cotización' });
   }
 });
-
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

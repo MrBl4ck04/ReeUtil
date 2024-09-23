@@ -141,7 +141,7 @@
 				const btnAceptar = row.querySelector(".btn-aceptar");
 				btnAceptar.addEventListener("click", async () => {
 					try {
-						const response = await fetch('http://localhost:5500/actualizarCotizacion', {
+						const response = await fetch('http://localhost:5500/actualizarCotizacionDP', {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
