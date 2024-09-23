@@ -42,7 +42,7 @@
 				<ul class="menu">
 					<li><a href="#">Inicio</a></li>
 					<li><a href="#">Dispositivos</a></li>
-					<li><a href="#">Cotizacion</a></li>
+					<li><a href="#" id="openCotizacionModal">Cotizacion</a></li>
 					<li><a href="#" id="openModal">Solicitud de evaluación</a></li>
 					<li><a href="#">Más</a></li>
 				</ul>
@@ -56,6 +56,98 @@
 			</nav>
 		</div>
 	</header>
+	<div id="cotizacionModal" class="modal">
+		<div class="modal-content">
+			<span class="closeCotizacionModal">&times;</span>
+			<h2>Detalles de Cotización</h2>
+			<table id="cotizacionTable" border="1">
+				<thead>
+					<tr>
+						<th>Cotización</th>
+						<th>Detalles</th>
+						<th>Estado Cotización</th>
+						<th>Estado Dispositivo</th>
+						<th>Fecha</th>
+						<th>Id Catálogo</th>
+						<th>Id Usuario</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script>
+		const cotizacionModal = document.getElementById("cotizacionModal");
+		const openCotizacionModalButton = document.getElementById("openCotizacionModal");
+		const closeCotizacionModalButton = document.getElementsByClassName("closeCotizacionModal")[0];
+
+		// Function to fetch data from API
+		async function cargar() {
+			try {
+				const response = await fetch('http://localhost:5500/obteCoti', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+
+				const productos = await response.json();  
+				return productos;
+			} catch (error) {
+				console.error('Error al obtener productos:', error);
+				return null;  
+			}
+		}
+		openCotizacionModalButton.addEventListener("click", async () => {
+			const tableBody = document.querySelector("#cotizacionTable tbody");
+			tableBody.innerHTML = ""; 
+			const productos = await cargar();
+
+			if (!productos) {
+				console.error('No productos data available or an error occurred.');
+				return; 
+			}
+			const filteredData = productos.filter(data => data.estadoCotizaci === "Pendiente");
+			if (filteredData.length === 0) {
+				console.log('No products with estadoCotizacion as "Pendiente".');
+			}
+			filteredData.forEach(data => {
+				const row = document.createElement("tr");
+				row.innerHTML = `
+            <td>${data.cotizacion}</td>
+            <td>${data.detalles}</td>
+            <td>${data.estadoCotizaci}</td>
+            <td>${data.estadoDisposit}</td>
+            <td>${new Date(data.fecha).toLocaleDateString()}</td>
+            <td>${data.idCatalogo}</td>
+            <td>${data.idUsuario}</td>
+        `;
+				tableBody.appendChild(row);
+			});
+
+			// Show the modal
+			cotizacionModal.style.display = "block";
+		});
+
+		// Close the modal when the 'x' is clicked
+		closeCotizacionModalButton.addEventListener("click", () => {
+			cotizacionModal.style.display = "none";
+		});
+
+		// Close modal if user clicks outside the modal content
+		window.onclick = function (event) {
+			if (event.target == cotizacionModal) {
+				cotizacionModal.style.display = "none";
+			}
+		}
+
+	</script>
+
 	<!-- Modal para Formulario -->
 	<div id="solicitudModal" class="modal FormS-modal">
 		<div class="modal-content FormS-modal-content">

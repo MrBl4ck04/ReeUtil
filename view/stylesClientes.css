@@ -1355,3 +1355,16 @@ html {
     border-radius: 5px;
     text-align: center;
 }
+.closeCotizacionModal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.closeCotizacionModal:hover,
+.closeCotizacionModal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

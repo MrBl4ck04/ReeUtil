@@ -42,6 +42,10 @@ app.post('/registerDevice', newDispos.registrarDispositivo);
 const cata = require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
 
+// Ruta para sacar cotizaciones pendientes
+const coti = require('./obtenercoti'); 
+app.get('/obteCoti', coti.obtenercoti);
+
 // Ruta para solicitar Evaluación
 const cot = require('./cotizardisp');
 app.post('/envcotizacion', cot.env);
