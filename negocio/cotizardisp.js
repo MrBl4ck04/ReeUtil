@@ -52,6 +52,16 @@ const env = async (req, res) => {
     }
 };
 
+// Función para obtener las cotizaciones aceptadas
+const obtenerCotizacionesAceptadas = async (req, res) => {
+  try {
+      const solicitudesAceptadas = await Cotizacion.find({ estadoCotizaci: 'Aceptado' }); // Filtra por estado "Aceptado"
+      res.status(200).json(solicitudesAceptadas); // Envía las cotizaciones aceptadas en formato JSON
+  } catch (err) {
+      console.error('Error al obtener las cotizaciones aceptadas:', err);
+      res.status(500).json({ error: 'Error al obtener las cotizaciones aceptadas' });
+  }
+};
 
 const obtenerSolicitudes = async (req, res) => {
   try {
@@ -91,10 +101,41 @@ const actualizarCotizacion = async (req, res) => {
   }
 };
 
+const actualizarEstadoDispositivo = async (req, res) => {
+  const { idDispositivo, nuevoEstado } = req.body;
+
+  if (!idDispositivo || !nuevoEstado) {
+      return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+
+  try {
+      // Busca el dispositivo por su id y actualiza el estado
+      const dispositivoActualizado = await Cotizacion.findOneAndUpdate(
+          { idDispositivo: idDispositivo }, // Busca por idDispositivo
+          { $set: { estadoCotizaci: nuevoEstado } }, // Actualiza solo el estado
+          { new: true } // Retorna el documento actualizado
+      );
+
+      if (!dispositivoActualizado) {
+          return res.status(404).json({ error: 'Dispositivo no encontrado' });
+      }
+
+      console.log('Estado actualizado:', dispositivoActualizado);
+      res.status(200).json({ message: 'Estado actualizado exitosamente', dispositivo: dispositivoActualizado });
+  } catch (err) {
+      console.error('Error al actualizar el estado:', err);
+      res.status(500).json({ error: 'Error al actualizar el estado' });
+  }
+};
+
+
+
 
 module.exports = {
   env,
   obtenerSolicitudes,
+  obtenerCotizacionesAceptadas,
+  actualizarEstadoDispositivo,
   actualizarCotizacion // Exportar la nueva función
 };
 

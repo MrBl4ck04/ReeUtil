@@ -108,6 +108,9 @@ app.put('/catalogo/:id', async (req, res) => {
 // Ruta para actualizar la cotización de un dispositivo
 app.post('/actualizarCotizacion', cot.actualizarCotizacion);
 
+// Ruta para actualizar el estado del dispositivo (Para reciclar o Para vender)
+app.post('/actualizarEstado', cot.actualizarEstadoDispositivo);
+
 
 const Regla = require('./reglas'); // Importa el modelo de Reglas
 let contadorReglas = 1; // Esto es solo un ejemplo, debes asegurarte de autoincrementar correctamente.
