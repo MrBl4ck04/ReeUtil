@@ -5,7 +5,8 @@ const formidable = require('formidable');
 const path = require('path'); // Importar el módulo path
 const app = express();
 const port = 5500;
-
+const { Types } = require('mongoose'); // Agregar esta línea al principio
+const { ObjectId } = require('mongodb');
 // Middleware para manejar JSON y formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -192,6 +193,32 @@ app.post('/actualizarCotizacion', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar la cotización' });
   }
 });
+app.get('/reglas/:idCatalogo', async (req, res) => {
+  const { idCatalogo } = req.params;
+  
+  console.log('Buscando reglas para idCatalogo:', idCatalogo); // Verifica el ID recibido
+
+  // Asegúrate de que el idCatalogo sea un ObjectId válido
+  if (!ObjectId.isValid(idCatalogo)) {
+    return res.status(400).json({ message: 'ID de catálogo no válido' });
+  }
+
+  try {
+    const reglas = await Regla.find({ idCatalogo: ObjectId(idCatalogo) });
+
+    if (!reglas || reglas.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron reglas para este catálogo.' });
+    }
+
+    res.json(reglas);
+  } catch (error) {
+    console.error('Error al obtener las reglas:', error);
+    res.status(500).json({ message: 'Error al obtener las reglas' });
+  }
+});
+
+
+
 
 // Iniciar el servidor
 app.listen(port, () => {
