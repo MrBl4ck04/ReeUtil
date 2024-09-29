@@ -58,13 +58,26 @@ const Catalogo = require('./catalogo');
 
 // Ruta para obtener los datos del catálogo (GET)
 app.get('/catalogo', async (req, res) => {
+  const { tipo } = req.query;  
   try {
-    const catalogo = await Catalogo.find({});
+    const query = tipo ? { tipo } : {};  
+    const catalogo = await Catalogo.find(query);
     res.json(catalogo);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los datos del catálogo' });
   }
 });
+
+// Ruta para obtener los tipos únicos de la colección
+app.get('/tipos', async (req, res) => {
+  try {
+    const tipos = await Catalogo.distinct('tipo'); 
+    res.json(tipos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los tipos' });
+  }
+});
+
 
 // Ruta para eliminar un dispositivo del catálogo (DELETE)
 app.delete('/catalogo/:id', async (req, res) => {

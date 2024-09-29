@@ -252,106 +252,117 @@
 		</section>
 
 
-				<!-- Modal Cotizar-->
-				<div id="modalSol" class="modalSol">
-					<div class="modalSol-content">
-						<span class="close" onclick="closeModal()">&times;</span>
-						<div class="modalSol-header">
-							<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
-							<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
-						</div>
-						<form>
-							<label for="equipo">Nombre:</label><br>
-							<input type="text" id="equipo" name="equipo"><br><br>
-		
-							<label for="estadoCotizacion">Modelo:</label><br>
-							<input type="text" id="modelo" name="modelo"><br><br>
-		
-							<label for="estado">Estado del dispositivo según el cliente:</label><br>
-							<input type="text" id="estado" name="estado"><br><br>
-		
-							<label for="detalles">Detalles:</label><br>
-							<textarea id="detalles" name="detalles"></textarea><br><br>
-		
-							<label for="fecha">Fecha de la solicitud:</label><br>
-							<input type="text" id="fecha" name="fecha"><br><br>
-		
-							<label for="cotizacion">Cotización:</label><br>
-							<input type="text" id="cotizacion" name="cotizacion"><br><br>
-		
-							<button type="submit" class="btn-enviar">Enviar</button>
-						</form>
-					</div>
+		<!-- Modal Cotizar-->
+		<div id="modalSol" class="modalSol">
+			<div class="modalSol-content">
+				<span class="close" onclick="closeModal()">&times;</span>
+				<div class="modalSol-header">
+					<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
+					<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
 				</div>
-				<!-- Modal de REGLAS -->
-				<div id="modalReglas" class="modalReglas">
-					<div class="modalReglas-content">
-						<span class="close" onclick="closeRulesModal()">&times;</span>
-						<h3>Seleccionar tipo de dispositivo</h3>
-						<select id="tipoDispositivo" onchange="mostrarReglas()">
-							<option value="default">-- Seleccione un tipo --</option>
-							<option value="smartphones">Smartphones</option>
-							<option value="televisores">Televisores</option>
-							<option value="electrodomesticos">Electrodomésticos</option>
-						</select>
-						<div id="reglasArea" class="reglas-texto">
-							<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
-							<p id="reglas"></p>
-						</div>
-					</div>
+				<form>
+					<label for="equipo">Nombre:</label><br>
+					<input type="text" id="equipo" name="equipo"><br><br>
+
+					<label for="estadoCotizacion">Modelo:</label><br>
+					<input type="text" id="modelo" name="modelo"><br><br>
+
+					<label for="estado">Estado del dispositivo según el cliente:</label><br>
+					<input type="text" id="estado" name="estado"><br><br>
+
+					<label for="detalles">Detalles:</label><br>
+					<textarea id="detalles" name="detalles"></textarea><br><br>
+
+					<label for="fecha">Fecha de la solicitud:</label><br>
+					<input type="text" id="fecha" name="fecha"><br><br>
+
+					<label for="cotizacion">Cotización:</label><br>
+					<input type="text" id="cotizacion" name="cotizacion"><br><br>
+
+					<button type="submit" class="btn-enviar">Enviar</button>
+				</form>
+			</div>
+		</div>
+		<!-- Modal de REGLAS -->
+		<div id="modalReglas" class="modalReglas">
+			<div class="modalReglas-content">
+				<span class="close" onclick="closeRulesModal()">&times;</span>
+				<h3>Seleccionar tipo de dispositivo</h3>
+				<select id="tipoDispositivo" onchange="mostrarReglas()">
+					<option value="default">-- Seleccione un tipo --</option>
+					<option value="smartphones">Smartphones</option>
+					<option value="televisores">Televisores</option>
+					<option value="electrodomesticos">Electrodomésticos</option>
+				</select>
+				<div id="reglasArea" class="reglas-texto">
+					<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
+					<p id="reglas"></p>
 				</div>
-		
-				<script>
-					function openModalSol() {
-						document.getElementById("modalSol").style.display = "block";
-					}
-		
-					function closeModal() {
-						document.getElementById("modalSol").style.display = "none";
-					}
-		
-					window.onclick = function (event) {
-						var modal = document.getElementById("modalSol");
-						if (event.target == modal) {
-							modal.style.display = "none";
-						}
-					}
-				</script>
+			</div>
+		</div>
+
+		<script>
+			function openModalSol() {
+				document.getElementById("modalSol").style.display = "block";
+			}
+
+			function closeModal() {
+				document.getElementById("modalSol").style.display = "none";
+			}
+
+			window.onclick = function (event) {
+				var modal = document.getElementById("modalSol");
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			}
+		</script>
 
 
 
 		<section class="container blogs mt-5">
 			<div class="d-flex align-items-center">
-				<h1 class="heading-1 mb-0">Catalogo </h1>
+				<h1 class="heading-1 mb-0">Catalogo</h1>
 				<span class="add-cart" id="openModal">
 					<i class="fa-solid fa-plus"></i>
 				</span>
-				<script>
-					// Capturar el clic en el span con id "openModal"
-					document.getElementById('openModal').addEventListener('click', function () {
-						// Usar Bootstrap para mostrar el modal
-						var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
-							keyboard: false
-						});
-						myModal.show();
-					});
-				</script>
+				<div class="ms-5 d-flex">
+					<button type="button" class="btn btn-success me-2" id="filterTipo">Tipo</button>
+					<button type="button" class="btn btn-success me-2">Reciclaje</button>
+					<button type="button" class="btn btn-success">Vender</button>
+				</div>
 			</div>
+
+			<!-- Modal para seleccionar tipo -->
+			<div class="modal fade" id="tipoModal" tabindex="-1" aria-labelledby="tipoModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="tipoModalLabel">Seleccionar Tipo</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<ul id="tipoList" class="list-group">
+								<!-- Aquí se llenarán los tipos dinámicamente -->
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<table class="table table-striped bg-white fs-5">
 				<thead>
 					<tr>
-						<th>ID Dispositivo</th>
 						<th>ID Catalogo</th>
 						<th>Nombre</th>
 						<th>Marca</th>
 						<th>Modelo</th>
 						<th>Descripción</th>
 						<th>Tipo</th>
-						<th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
+						<th>Acciones</th>
 					</tr>
 				</thead>
-				<tbody id="catalogoTableBody">
-				</tbody>
+				<tbody id="catalogoTableBody"></tbody>
 			</table>
 		</section>
 
@@ -376,7 +387,8 @@
 		</section>
 
 		<!-- Modal de confirmación para cambios de estado -->
-		<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+			aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -395,28 +407,28 @@
 		</div>
 
 		<script>
-		document.addEventListener('DOMContentLoaded', async () => {
-			await cargarCotizacionesAceptadas();
-		});
+			document.addEventListener('DOMContentLoaded', async () => {
+				await cargarCotizacionesAceptadas();
+			});
 
-		let idDispositivoGlobal = '';
-		let nuevoEstadoGlobal = '';
+			let idDispositivoGlobal = '';
+			let nuevoEstadoGlobal = '';
 
-		async function cargarCotizacionesAceptadas() {
-			try {
-				const response = await fetch('http://localhost:5500/solicitudes');
-				if (!response.ok) throw new Error('Error al obtener las solicitudes');
+			async function cargarCotizacionesAceptadas() {
+				try {
+					const response = await fetch('http://localhost:5500/solicitudes');
+					if (!response.ok) throw new Error('Error al obtener las solicitudes');
 
-				const solicitudes = await response.json();
-				const tableBody = document.getElementById('aceptadasTableBody');
+					const solicitudes = await response.json();
+					const tableBody = document.getElementById('aceptadasTableBody');
 
-				// Limpia el contenido de la tabla antes de agregar nuevos datos
-				tableBody.innerHTML = '';
+					// Limpia el contenido de la tabla antes de agregar nuevos datos
+					tableBody.innerHTML = '';
 
-				solicitudes.forEach((solicitud) => {
-					if (solicitud.estadoCotizaci === "aceptado") {
-						const row = document.createElement('tr');
-						row.innerHTML = `
+					solicitudes.forEach((solicitud) => {
+						if (solicitud.estadoCotizaci === "aceptado") {
+							const row = document.createElement('tr');
+							row.innerHTML = `
 							<td>${solicitud.idDispositivo || 'N/A'}</td>
 							<td>${solicitud.idCatalogo || 'N/A'}</td>
 							<td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td>
@@ -427,51 +439,51 @@
 								<button class="btn btn-success" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para vender')">Vender</button>
 							</td>
 						`;
-						tableBody.appendChild(row);
-					}
-				});
-			} catch (error) {
-				console.error('Error al cargar cotizaciones aceptadas:', error);
-			}
-		}
-
-		function abrirModalCambiarEstado(idDispositivo, nuevoEstado) {
-			idDispositivoGlobal = idDispositivo;
-			nuevoEstadoGlobal = nuevoEstado;
-			const modal = new bootstrap.Modal(document.getElementById('confirmUpdateModal'));
-			modal.show();
-		}
-
-		document.getElementById('confirmChangeButton').addEventListener('click', async () => {
-			await cambiarEstadoDispositivo(idDispositivoGlobal, nuevoEstadoGlobal);
-		});
-
-		async function cambiarEstadoDispositivo(idDispositivo, nuevoEstado) {
-			try {
-				const response = await fetch('http://localhost:5500/actualizarEstado', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ idDispositivo, nuevoEstado })
-				});
-
-				const data = await response.json();
-				if (data.message) {
-					alert('Estado actualizado exitosamente');
-					window.location.reload();
-				} else {
-					alert('Error al actualizar el estado');
+							tableBody.appendChild(row);
+						}
+					});
+				} catch (error) {
+					console.error('Error al cargar cotizaciones aceptadas:', error);
 				}
-			} catch (error) {
-				console.error('Error al actualizar el estado:', error);
 			}
-		}
+
+			function abrirModalCambiarEstado(idDispositivo, nuevoEstado) {
+				idDispositivoGlobal = idDispositivo;
+				nuevoEstadoGlobal = nuevoEstado;
+				const modal = new bootstrap.Modal(document.getElementById('confirmUpdateModal'));
+				modal.show();
+			}
+
+			document.getElementById('confirmChangeButton').addEventListener('click', async () => {
+				await cambiarEstadoDispositivo(idDispositivoGlobal, nuevoEstadoGlobal);
+			});
+
+			async function cambiarEstadoDispositivo(idDispositivo, nuevoEstado) {
+				try {
+					const response = await fetch('http://localhost:5500/actualizarEstado', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ idDispositivo, nuevoEstado })
+					});
+
+					const data = await response.json();
+					if (data.message) {
+						alert('Estado actualizado exitosamente');
+						window.location.reload();
+					} else {
+						alert('Error al actualizar el estado');
+					}
+				} catch (error) {
+					console.error('Error al actualizar el estado:', error);
+				}
+			}
 		</script>
 
 
-		
-		
+
+
 
 		<section class="container blogs">
 			<div class="d-flex align-items-center">
@@ -686,107 +698,107 @@
 
 	<!-- Modal para modificar dispositivos -->
 	<div class="modal fade" id="modalModificarDevice" tabindex="-1" role="dialog"
-	aria-labelledby="modalModificarDeviceLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-	<div class="modal-content">
-	<div class="modal-header">
-	<h5 class="modal-title" id="modalModificarDeviceLabel">Modificar Dispositivo</h5>
-	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		<span aria-hidden="true">&times;</span>
-	</button>
-	</div>
-	<div class="modal-body">
-	<form id="modifyDeviceForm">
-		<input type="hidden" id="dispositivoId" name="dispositivoId">
+		aria-labelledby="modalModificarDeviceLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalModificarDeviceLabel">Modificar Dispositivo</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="modifyDeviceForm">
+						<input type="hidden" id="dispositivoId" name="dispositivoId">
 
-		<div class="form-group">
-		<label for="nombreModificar">Nombre del dispositivo</label>
-		<input type="text" class="form-control" id="nombreModificar" name="nombre">
+						<div class="form-group">
+							<label for="nombreModificar">Nombre del dispositivo</label>
+							<input type="text" class="form-control" id="nombreModificar" name="nombre">
+						</div>
+						<div class="form-group">
+							<label for="descripcionModificar">Descripción</label>
+							<input type="text" class="form-control" id="descripcionModificar" name="descripcion">
+						</div>
+						<div class="form-group">
+							<label for="marcaModificar">Marca</label>
+							<input type="text" class="form-control" id="marcaModificar" name="marca">
+						</div>
+						<div class="form-group">
+							<label for="modeloModificar">Modelo</label>
+							<input type="text" class="form-control" id="modeloModificar" name="modelo">
+						</div>
+						<div class="form-group">
+							<label for="tipoModificar">Tipo</label>
+							<input type="text" class="form-control" id="tipoModificar" name="tipo">
+						</div>
+						<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+					</form>
+				</div>
+			</div>
 		</div>
-		<div class="form-group">
-		<label for="descripcionModificar">Descripción</label>
-		<input type="text" class="form-control" id="descripcionModificar" name="descripcion">
-		</div>
-		<div class="form-group">
-		<label for="marcaModificar">Marca</label>
-		<input type="text" class="form-control" id="marcaModificar" name="marca">
-		</div>
-		<div class="form-group">
-		<label for="modeloModificar">Modelo</label>
-		<input type="text" class="form-control" id="modeloModificar" name="modelo">
-		</div>
-		<div class="form-group">
-		<label for="tipoModificar">Tipo</label>
-		<input type="text" class="form-control" id="tipoModificar" name="tipo">
-		</div>
-		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
-	</form>
-	</div>
-	</div>
-	</div>
 	</div>
 
 	<!-- Modal para agregar Reglas -->
 	<div class="modal fade" id="modalReglasAgregar" tabindex="-1" role="dialog"
-	aria-labelledby="modalReglasAgregarLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-	<div class="modal-content">
-	<div class="modal-header">
-	<h5 class="modal-title" id="modalReglasAgregar">Agregar Reglas</h5>
-	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		<span aria-hidden="true">&times;</span>
-	</button>
-	</div>
-	<div class="modal-body">
-	<form id="reglasForm">
-		<input type="hidden" id="dispositivoId" name="dispositivoId">
+		aria-labelledby="modalReglasAgregarLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalReglasAgregar">Agregar Reglas</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="reglasForm">
+						<input type="hidden" id="dispositivoId" name="dispositivoId">
 
-		<div class="form-group">
-		<label for="nombreRegla">Nombre de la regla</label>
-		<input type="text" class="form-control" id="nombreRegla" name="nombre">
+						<div class="form-group">
+							<label for="nombreRegla">Nombre de la regla</label>
+							<input type="text" class="form-control" id="nombreRegla" name="nombre">
+						</div>
+						<div class="form-group">
+							<label for="descripcionRegla">Descripción</label>
+							<input type="text" class="form-control" id="descripcionRegla" name="descripcion">
+						</div>
+						<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+					</form>
+				</div>
+			</div>
 		</div>
-		<div class="form-group">
-		<label for="descripcionRegla">Descripción</label>
-		<input type="text" class="form-control" id="descripcionRegla" name="descripcion">
-		</div>
-		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
-	</form>
-	</div>
-	</div>
-	</div>
 	</div>
 
 	<script>
 		document.getElementById('reglasForm').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Evitar el comportamiento por defecto del formulario
-    const dispositivoId = document.getElementById('dispositivoId').value;
-    const nombreRegla = document.getElementById('nombreRegla').value;
-    const descripcionRegla = document.getElementById('descripcionRegla').value;
+			event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+			const dispositivoId = document.getElementById('dispositivoId').value;
+			const nombreRegla = document.getElementById('nombreRegla').value;
+			const descripcionRegla = document.getElementById('descripcionRegla').value;
 
-    try {
-        const response = await fetch('http://localhost:5500/reglas', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                idCatalogo: dispositivoId, // El ID del dispositivo asociado
-                nombreRegla,
-                descripcionRE: descripcionRegla,
-            }),
-        });
+			try {
+				const response = await fetch('http://localhost:5500/reglas', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						idCatalogo: dispositivoId, // El ID del dispositivo asociado
+						nombreRegla,
+						descripcionRE: descripcionRegla,
+					}),
+				});
 
-        const result = await response.json();
-        if (response.ok) {
-            alert('Regla agregada exitosamente');
-        } else {
-            console.error('Error:', result);
-            alert('Error al agregar la regla');
-        }
-    } catch (error) {
-        console.error('Error al enviar los datos:', error);
-    }
-});
+				const result = await response.json();
+				if (response.ok) {
+					alert('Regla agregada exitosamente');
+				} else {
+					console.error('Error:', result);
+					alert('Error al agregar la regla');
+				}
+			} catch (error) {
+				console.error('Error al enviar los datos:', error);
+			}
+		});
 	</script>
 
 
@@ -825,10 +837,10 @@
 				tableBody.innerHTML = '';
 
 				solicitudes.forEach((solicitud) => {
-    // Condición: solo mostrar solicitudes con estado de cotización "En Curso"
-    if (solicitud.estadoCotizaci === "En Curso") {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+					// Condición: solo mostrar solicitudes con estado de cotización "En Curso"
+					if (solicitud.estadoCotizaci === "En Curso") {
+						const row = document.createElement('tr');
+						row.innerHTML = `
             <td>${solicitud.idDispositivo || 'N/A'}</td> <!-- Mostrar el ID del dispositivo -->
             <td>${solicitud.idCatalogo || 'N/A'}</td> <!-- ID Catálogo -->
             <td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td> <!-- Fecha de la solicitud -->
@@ -839,9 +851,9 @@
                 <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo}')">Guardar</button> <!-- Botón Guardar -->
             </td> <!-- Acciones -->
         `;
-        tableBody.appendChild(row);
-    }
-});
+						tableBody.appendChild(row);
+					}
+				});
 
 
 			} catch (error) {
@@ -851,34 +863,34 @@
 
 
 		function guardarCotizacion(idDispositivo) {
-    const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
+			const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
 
-    // Asegúrate de que el idDispositivo está siendo pasado correctamente
-    console.log("ID Dispositivo:", idDispositivo);
-    console.log("Cotización:", cotizacion);
+			// Asegúrate de que el idDispositivo está siendo pasado correctamente
+			console.log("ID Dispositivo:", idDispositivo);
+			console.log("Cotización:", cotizacion);
 
-    fetch('http://localhost:5500/actualizarCotizacion', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            idDispositivo: idDispositivo, // Asegúrate de pasar el idDispositivo correctamente
-            cotizacion: cotizacion,
-            estadoCotizaci: 'Pendiente'  // Cambia el estado de 'En Curso' a 'Pendiente'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert('Cotización guardada exitosamente');
-            window.location.reload(); // Recargar la página tras guardar exitosamente
-        } else {
-            alert('Error al guardar la cotización');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+			fetch('http://localhost:5500/actualizarCotizacion', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					idDispositivo: idDispositivo, // Asegúrate de pasar el idDispositivo correctamente
+					cotizacion: cotizacion,
+					estadoCotizaci: 'Pendiente'  // Cambia el estado de 'En Curso' a 'Pendiente'
+				})
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.message) {
+						alert('Cotización guardada exitosamente');
+						window.location.reload(); // Recargar la página tras guardar exitosamente
+					} else {
+						alert('Error al guardar la cotización');
+					}
+				})
+				.catch(error => console.error('Error:', error));
+		}
 
 
 
@@ -904,16 +916,15 @@
 			catalogo.forEach((item, index) => {
 				const row = document.createElement('tr');
 				row.innerHTML = `
-<td>${index + 1}</td>
 <td>${item.idCatalogo}</td>
 <td>${item.nombre}</td>
 <td>${item.marca}</td>
 <td>${item.modelo}</td>
 <td>${item.descripcion}</td>
 <td>${item.tipo}</td>
-<td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
-<td><button class="btn btn-modificar" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
-<td><button class="btn btn-regla" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
+<td><button class="btn btn-danger" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+<td><button class="btn btn-primary" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
+<td><button class="btn btn-secondary" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
 `;
 				tableBody.appendChild(row);
 			});
@@ -935,65 +946,65 @@
 	}
 
 	function abrirModalModificar(id, nombre, descripcion, marca, modelo, tipo) {
-    // Poner los valores en los campos del modal
-    document.getElementById('dispositivoId').value = id;
-    document.getElementById('nombreModificar').value = nombre || '';
-    document.getElementById('descripcionModificar').value = descripcion || '';
-    document.getElementById('marcaModificar').value = marca || '';
-    document.getElementById('modeloModificar').value = modelo || '';
-    document.getElementById('tipoModificar').value = tipo || '';
+		// Poner los valores en los campos del modal
+		document.getElementById('dispositivoId').value = id;
+		document.getElementById('nombreModificar').value = nombre || '';
+		document.getElementById('descripcionModificar').value = descripcion || '';
+		document.getElementById('marcaModificar').value = marca || '';
+		document.getElementById('modeloModificar').value = modelo || '';
+		document.getElementById('tipoModificar').value = tipo || '';
 
-    // Abrir el modal
-    const modal = new bootstrap.Modal(document.getElementById('modalModificarDevice'));
-    modal.show();
-  }
+		// Abrir el modal
+		const modal = new bootstrap.Modal(document.getElementById('modalModificarDevice'));
+		modal.show();
+	}
 
-  function abrirModalRegla(id, nombre, descripcion) {
-    // Poner los valores en los campos del modal
-    document.getElementById('dispositivoId').value = id;
-    document.getElementById('nombreModificar').value = nombre || '';
-    document.getElementById('descripcionModificar').value = descripcion || '';
-    // Abrir el modal
-    const modal = new bootstrap.Modal(document.getElementById('modalReglasAgregar'));
-    modal.show();
-  }
+	function abrirModalRegla(id, nombre, descripcion) {
+		// Poner los valores en los campos del modal
+		document.getElementById('dispositivoId').value = id;
+		document.getElementById('nombreModificar').value = nombre || '';
+		document.getElementById('descripcionModificar').value = descripcion || '';
+		// Abrir el modal
+		const modal = new bootstrap.Modal(document.getElementById('modalReglasAgregar'));
+		modal.show();
+	}
 
-  // Enviar los cambios al backend cuando se presione "Guardar Cambios"
+	// Enviar los cambios al backend cuando se presione "Guardar Cambios"
 
 
-  document.getElementById('modifyDeviceForm').addEventListener('submit', async function (event) {
-    event.preventDefault();
+	document.getElementById('modifyDeviceForm').addEventListener('submit', async function (event) {
+		event.preventDefault();
 
-    const id = document.getElementById('dispositivoId').value;
-    const formData = new FormData(this);
+		const id = document.getElementById('dispositivoId').value;
+		const formData = new FormData(this);
 
-    // Solo envía los campos que fueron modificados
-    const updatedData = {};
-    for (const [key, value] of formData.entries()) {
-      if (value) {
-        updatedData[key] = value;
-      }
-    }
+		// Solo envía los campos que fueron modificados
+		const updatedData = {};
+		for (const [key, value] of formData.entries()) {
+			if (value) {
+				updatedData[key] = value;
+			}
+		}
 
-    try {
-      const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-      });
+		try {
+			const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(updatedData),
+			});
 
-      if (response.ok) {
-        alert('Dispositivo actualizado exitosamente');
-        window.location.reload(); // Recargar la página
-      } else {
-        alert('Error al actualizar el dispositivo');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  });
+			if (response.ok) {
+				alert('Dispositivo actualizado exitosamente');
+				window.location.reload(); // Recargar la página
+			} else {
+				alert('Error al actualizar el dispositivo');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	});
 
 	// Función para mostrar el modal de notificación
 	function mostrarNotificacion(mensaje) {
@@ -1031,4 +1042,74 @@
 			}
 		}
 	});
+
+
+	// Función para poblar la tabla
+	function populateTable(data) {
+		const tableBody = document.getElementById('catalogoTableBody');
+		tableBody.innerHTML = ''; // Limpiar contenido anterior
+		data.forEach(item => {
+			const row = `<td>${item.idCatalogo}</td>
+<td>${item.nombre}</td>
+<td>${item.marca}</td>
+<td>${item.modelo}</td>
+<td>${item.descripcion}</td>
+<td>${item.tipo}</td>
+<td><button class="btn btn-danger" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+<td><button class="btn btn-primary" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
+<td><button class="btn btn-secondary" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
+`;
+			tableBody.innerHTML += row;
+		});
+	}
+
+	// Función para poblar la lista de tipos
+    function populateTipoList(tipos) {
+      const tipoList = document.getElementById('tipoList');
+      tipoList.innerHTML = ''; // Limpiar lista anterior
+      tipos.forEach(tipo => {
+        const listItem = `<li class="list-group-item list-group-item-action" data-tipo="${tipo}">
+          ${tipo}
+        </li>`;
+        tipoList.innerHTML += listItem;
+      });
+
+      // Añadir event listeners a cada ítem
+      document.querySelectorAll('#tipoList li').forEach(item => {
+        item.addEventListener('click', function () {
+          const selectedTipo = this.getAttribute('data-tipo');
+          filterByTipo(selectedTipo); // Filtrar por el tipo seleccionado
+          var myModal = bootstrap.Modal.getInstance(document.getElementById('tipoModal'));
+          myModal.hide(); // Cerrar el modal
+        });
+      });
+    }
+
+    // Función para filtrar la tabla por tipo
+    function filterByTipo(tipo) {
+      // Enviar petición al servidor para filtrar por tipo
+      fetch(`http://localhost:5500/catalogo?tipo=${tipo}`)
+        .then(response => response.json())
+        .then(data => populateTable(data))
+        .catch(error => console.error('Error al obtener los datos:', error));
+    }
+
+    // Capturar clic en el botón "Tipo" y abrir modal
+    document.getElementById('filterTipo').addEventListener('click', function () {
+      // Obtener los tipos disponibles desde el servidor
+      fetch('http://localhost:5500/tipos')
+        .then(response => response.json())
+        .then(tipos => populateTipoList(tipos))
+        .catch(error => console.error('Error al obtener los tipos:', error));
+
+      // Mostrar el modal
+      var myModal = new bootstrap.Modal(document.getElementById('tipoModal'));
+      myModal.show();
+    });
+
+    // Llamada inicial para cargar la tabla con todos los datos
+    fetch('http://localhost:5500/catalogo')
+      .then(response => response.json())
+      .then(data => populateTable(data))
+      .catch(error => console.error('Error al obtener los datos:', error));
 </script>
