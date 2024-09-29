@@ -11,5 +11,4 @@ const dispositivoSchema = new mongoose.Schema({
     imagen: String
   });
   
-  // Este nombre 'Dispositivo' es el nombre del modelo, pero MongoDB usará la colección 'dispositivos' en plural
-  module.exports = mongoose.models.Dispositivo || mongoose.model('Dispositivo', dispositivoSchema);
+  module.exports = mongoose.model('dispositivo', dispositivoSchema);
