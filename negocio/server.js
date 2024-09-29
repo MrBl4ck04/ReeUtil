@@ -58,10 +58,8 @@ const Catalogo = require('./catalogo');
 
 // Ruta para obtener los datos del catálogo (GET)
 app.get('/catalogo', async (req, res) => {
-  const { tipo } = req.query;  
   try {
-    const query = tipo ? { tipo } : {};  
-    const catalogo = await Catalogo.find(query);
+    const catalogo = await Catalogo.find({});
     res.json(catalogo);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los datos del catálogo' });
@@ -79,25 +77,37 @@ app.get('/tipos', async (req, res) => {
 });
 
 const Dispositivo = require('./dispositivo');
-// Ruta para obtener los dispositivos que están en reciclaje
-app.get('/reciclaje', async (req, res) => {
+
+// Ruta para obtener los datos del catálogo junto con los dispositivos asociados (GET)
+app.get('/inventario', async (req, res) => {
+  const { tipo, estado } = req.query; 
   try {
-    const dispositivosReciclaje = await Dispositivo.find({ estadoCotizaci: 'Para reciclar' });
-    const idsCatalogo = dispositivosReciclaje.map(dispositivo => dispositivo.idCatalogo);
-    const productosReciclaje = await Catalogo.find({ idCatalogo: { $in: idsCatalogo } });
-    res.json(productosReciclaje);
+    const query = tipo ? { tipo } : {};
+    const catalogo = await Catalogo.find(query).lean(); 
+    let resultado = [];
+    for (const item of catalogo) {
+      let dispositivoQuery = { idCatalogo: item.idCatalogo };
+      if (estado) {
+        dispositivoQuery.estadoCotizaci = estado; 
+      }
+      else {
+        dispositivoQuery.estadoCotizaci = { $in: ['Para reciclar', 'Para vender'] };
+      }
+      const dispositivosRelacionados = await Dispositivo.find(dispositivoQuery).lean();
+        dispositivosRelacionados.forEach(dispositivo => {
+          resultado.push({
+            idCatalogo: item.idCatalogo,
+            nombre: item.nombre,
+            marca: item.marca,
+            tipo: item.tipo,
+            idDispositivo: dispositivo.idDispositivo,
+            estadoCotizaci: dispositivo.estadoCotizaci
+          });
+        });
+    }
+    res.json(resultado);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los productos para reciclar' });
-  }
-});
-app.get('/vender', async (req, res) => {
-  try {
-    const dispositivosVender = await Dispositivo.find({ estadoCotizaci: 'Para vender' });
-    const idsCatalogo = dispositivosVender.map(dispositivo => dispositivo.idCatalogo);
-    const productosVender = await Catalogo.find({ idCatalogo: { $in: idsCatalogo } });
-    res.json(productosVender);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los productos para vender' });
+    res.status(500).json({ error: 'Error al obtener los datos del catálogo y dispositivos' });
   }
 });
 // Ruta para eliminar un dispositivo del catálogo (DELETE)
