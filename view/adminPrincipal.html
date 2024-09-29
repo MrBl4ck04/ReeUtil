@@ -319,36 +319,44 @@
 		</script>
 
 
-
+		<div class="modal fade" id="tipoModal" tabindex="-1" aria-labelledby="tipoModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="tipoModalLabel">Seleccionar Tipo</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<ul id="tipoList" class="list-group">
+							<!-- Aquí se llenarán los tipos dinámicamente -->
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
 		<section class="container blogs mt-5">
 			<div class="d-flex align-items-center">
 				<h1 class="heading-1 mb-0">Catalogo</h1>
 				<span class="add-cart" id="openModal">
 					<i class="fa-solid fa-plus"></i>
 				</span>
+				<script>
+					// Capturar el clic en el span con id "openModal"
+					document.getElementById('openModal').addEventListener('click', function () {
+						// Usar Bootstrap para mostrar el modal
+						var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
+							keyboard: false
+						});
+						myModal.show();
+					});
+				</script>
 				<div class="ms-5 d-flex">
 					<button type="button" class="btn btn-success me-2" id="filterTipo">Tipo</button>
-					<button type="button" class="btn btn-success me-2">Reciclaje</button>
-					<button type="button" class="btn btn-success">Vender</button>
+					<button type="button" class="btn btn-success me-2" id="filterReciclaje">Reciclaje</button>
+					<button type="button" class="btn btn-success" id="filterVender">Vender</button>
 				</div>
 			</div>
 
-			<!-- Modal para seleccionar tipo -->
-			<div class="modal fade" id="tipoModal" tabindex="-1" aria-labelledby="tipoModalLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="tipoModalLabel">Seleccionar Tipo</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<ul id="tipoList" class="list-group">
-								<!-- Aquí se llenarán los tipos dinámicamente -->
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
 
 			<table class="table table-striped bg-white fs-5">
 				<thead>
@@ -359,12 +367,64 @@
 						<th>Modelo</th>
 						<th>Descripción</th>
 						<th>Tipo</th>
+						<th>Estado</th>
 						<th>Acciones</th>
 					</tr>
 				</thead>
 				<tbody id="catalogoTableBody"></tbody>
 			</table>
 		</section>
+		<script>
+			// Función para poblar la tabla
+			function Table(data) {
+				const tableBody = document.getElementById('catalogoTableBody');
+				tableBody.innerHTML = ''; // Limpiar contenido anterior
+				data.forEach(item => {
+					const row = `<td>${item.idCatalogo}</td>
+<td>${item.nombre}</td>
+<td>${item.marca}</td>
+<td>${item.modelo}</td>
+<td>${item.descripcion}</td>
+<td>${item.tipo}</td>
+<td><button class="btn btn-danger" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+<td><button class="btn btn-primary" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
+<td><button class="btn btn-secondary" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
+`;
+					tableBody.innerHTML += row;
+				});
+			}
+			// Función para filtrla tabla por reciclaje
+			function filterByReciclaje() {
+				fetch('http://localhost:5500/reciclaje')
+					.then(response => response.json())
+					.then(data => Table(data))  // Llenar la tabla con los datos filtrados
+					.catch(error => console.error('Error al obtener los datos:', error));
+			}
+
+			// Función para filtrar la tabla por vender
+			function filterByVender() {
+				fetch('http://localhost:5500/vender')
+					.then(response => response.json())
+					.then(data => Table(data))  // Llenar la tabla con los datos filtrados
+					.catch(error => console.error('Error al obtener los datos:', error));
+			}
+
+			// Capturar clic en el botón "Reciclaje"
+			document.getElementById('filterReciclaje').addEventListener('click', function () {
+				filterByReciclaje(); // Filtrar productos para reciclaje
+			});
+
+			// Capturar clic en el botón "Vender"
+			document.getElementById('filterVender').addEventListener('click', function () {
+				filterByVender(); // Filtrar productos para vender
+			});
+
+			// Llamada inicial para cargar la tabla con todos los datos
+			fetch('http://localhost:5500/catalogo')
+				.then(response => response.json())
+				.then(data => populateTable(data))
+				.catch(error => console.error('Error al obtener los datos:', error));
+		</script>
 
 		<!-- Tabla de dispositivos aceptados -->
 		<section class="container blogs mt-5">
@@ -1064,52 +1124,52 @@
 	}
 
 	// Función para poblar la lista de tipos
-    function populateTipoList(tipos) {
-      const tipoList = document.getElementById('tipoList');
-      tipoList.innerHTML = ''; // Limpiar lista anterior
-      tipos.forEach(tipo => {
-        const listItem = `<li class="list-group-item list-group-item-action" data-tipo="${tipo}">
+	function populateTipoList(tipos) {
+		const tipoList = document.getElementById('tipoList');
+		tipoList.innerHTML = ''; // Limpiar lista anterior
+		tipos.forEach(tipo => {
+			const listItem = `<li class="list-group-item list-group-item-action" data-tipo="${tipo}">
           ${tipo}
         </li>`;
-        tipoList.innerHTML += listItem;
-      });
+			tipoList.innerHTML += listItem;
+		});
 
-      // Añadir event listeners a cada ítem
-      document.querySelectorAll('#tipoList li').forEach(item => {
-        item.addEventListener('click', function () {
-          const selectedTipo = this.getAttribute('data-tipo');
-          filterByTipo(selectedTipo); // Filtrar por el tipo seleccionado
-          var myModal = bootstrap.Modal.getInstance(document.getElementById('tipoModal'));
-          myModal.hide(); // Cerrar el modal
-        });
-      });
-    }
+		// Añadir event listeners a cada ítem
+		document.querySelectorAll('#tipoList li').forEach(item => {
+			item.addEventListener('click', function () {
+				const selectedTipo = this.getAttribute('data-tipo');
+				filterByTipo(selectedTipo); // Filtrar por el tipo seleccionado
+				var myModal = bootstrap.Modal.getInstance(document.getElementById('tipoModal'));
+				myModal.hide(); // Cerrar el modal
+			});
+		});
+	}
 
-    // Función para filtrar la tabla por tipo
-    function filterByTipo(tipo) {
-      // Enviar petición al servidor para filtrar por tipo
-      fetch(`http://localhost:5500/catalogo?tipo=${tipo}`)
-        .then(response => response.json())
-        .then(data => populateTable(data))
-        .catch(error => console.error('Error al obtener los datos:', error));
-    }
+	// Función para filtrar la tabla por tipo
+	function filterByTipo(tipo) {
+		// Enviar petición al servidor para filtrar por tipo
+		fetch(`http://localhost:5500/catalogo?tipo=${tipo}`)
+			.then(response => response.json())
+			.then(data => populateTable(data))
+			.catch(error => console.error('Error al obtener los datos:', error));
+	}
 
-    // Capturar clic en el botón "Tipo" y abrir modal
-    document.getElementById('filterTipo').addEventListener('click', function () {
-      // Obtener los tipos disponibles desde el servidor
-      fetch('http://localhost:5500/tipos')
-        .then(response => response.json())
-        .then(tipos => populateTipoList(tipos))
-        .catch(error => console.error('Error al obtener los tipos:', error));
+	// Capturar clic en el botón "Tipo" y abrir modal
+	document.getElementById('filterTipo').addEventListener('click', function () {
+		// Obtener los tipos disponibles desde el servidor
+		fetch('http://localhost:5500/tipos')
+			.then(response => response.json())
+			.then(tipos => populateTipoList(tipos))
+			.catch(error => console.error('Error al obtener los tipos:', error));
 
-      // Mostrar el modal
-      var myModal = new bootstrap.Modal(document.getElementById('tipoModal'));
-      myModal.show();
-    });
+		// Mostrar el modal
+		var myModal = new bootstrap.Modal(document.getElementById('tipoModal'));
+		myModal.show();
+	});
 
-    // Llamada inicial para cargar la tabla con todos los datos
-    fetch('http://localhost:5500/catalogo')
-      .then(response => response.json())
-      .then(data => populateTable(data))
-      .catch(error => console.error('Error al obtener los datos:', error));
+	// Llamada inicial para cargar la tabla con todos los datos
+	fetch('http://localhost:5500/catalogo')
+		.then(response => response.json())
+		.then(data => populateTable(data))
+		.catch(error => console.error('Error al obtener los datos:', error));
 </script>

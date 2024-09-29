@@ -78,7 +78,28 @@ app.get('/tipos', async (req, res) => {
   }
 });
 
-
+const Dispositivo = require('./dispositivo');
+// Ruta para obtener los dispositivos que están en reciclaje
+app.get('/reciclaje', async (req, res) => {
+  try {
+    const dispositivosReciclaje = await Dispositivo.find({ estadoCotizaci: 'Para reciclar' });
+    const idsCatalogo = dispositivosReciclaje.map(dispositivo => dispositivo.idCatalogo);
+    const productosReciclaje = await Catalogo.find({ idCatalogo: { $in: idsCatalogo } });
+    res.json(productosReciclaje);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los productos para reciclar' });
+  }
+});
+app.get('/vender', async (req, res) => {
+  try {
+    const dispositivosVender = await Dispositivo.find({ estadoCotizaci: 'Para vender' });
+    const idsCatalogo = dispositivosVender.map(dispositivo => dispositivo.idCatalogo);
+    const productosVender = await Catalogo.find({ idCatalogo: { $in: idsCatalogo } });
+    res.json(productosVender);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los productos para vender' });
+  }
+});
 // Ruta para eliminar un dispositivo del catálogo (DELETE)
 app.delete('/catalogo/:id', async (req, res) => {
   const { id } = req.params;
