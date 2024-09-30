@@ -409,43 +409,27 @@
 							// Función para generar las tarjetas de productos
 							function generarCards(productos) {
 								const track = document.getElementById('carousel-track');
-								if (track) {
-									track.innerHTML = ''; // Clear track before adding products
-								} else {
-									console.error("Element 'carousel-track' not found in the DOM.");
-								}
-
+								track.innerHTML = ''; // Limpia antes de agregar nuevos productos
+								
 								productos.forEach(producto => {
 									const card = document.createElement('div');
 									card.classList.add('card-product');
 
 									card.innerHTML = `
-												<div class="container-img">
-													<img src="prod1.png" alt="${producto.nombre}" />
-													<div class="button-group">
-														<span class="view-product"><i class="fa-regular fa-eye"></i></span>
-													</div>
-												</div>
-												<div class="content-card-product">
-													<h3>${producto.nombre}</h3>
-													<span class="add-cart"><i class="fa-solid fa-basket-shopping"></i></span>
-													<p class="tipo">${producto.tipo}</p>
-												</div>
-											`;
+										<div class="container-img">
+											<img src="data:image/png;base64,${producto.imagenProdu}" alt="${producto.nombre}" />
+											<div class="button-group">
+												<span class="view-product"><i class="fa-regular fa-eye"></i></span>
+											</div>
+										</div>
+										<div class="content-card-product">
+											<h3>${producto.nombre}</h3>
+											<p class="tipo">${producto.tipo}</p>
+										</div>
+									`;
 
 									track.appendChild(card);
-									const viewButton = card.querySelector('.view-product');
-									viewButton.addEventListener('click', () => {
-										mostrarModalProducto(producto);
-									});
-
-									track.appendChild(card);
-									const Button = card.querySelector('.add-cart');
-									Button.addEventListener('click', () => {
-										mostrarModal(producto.nombre, producto.idCatalogo);
-									});
 								});
-								iniciarCarrusel();
 							}
 
 							// Función para iniciar el carrusel
@@ -589,88 +573,6 @@
 			<img src="1.png" alt="Gallery Img1" class="gallery-img-1" /><img src="2.png" alt="Gallery Img2"
 				class="gallery-img-2" /><img src="3.png" alt="Gallery Img3" class="gallery-img-3" /><img src="2.png"
 				alt="Gallery Img4" class="gallery-img-4" /><img src="1.png" alt="Gallery Img5" class="gallery-img-5" />
-		</section>
-
-		<section class="container blogs">
-			<h1 class="heading-1">Últimas acciones</h1>
-
-			<div class="container-blogs">
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u1.png" alt="Imagen Blog 1" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Galaxy Buds</h3>
-						<span>01 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Iste, molestiae! Ratione et, dolore ipsum
-							quaerat iure illum reprehenderit non maxime amet dolor
-							voluptas facilis corporis, consequatur eius est sunt
-							suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u2.png" alt="Imagen Blog 2" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Lavadora,WA456DRHDSU/ZS</h3>
-						<span>02 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Iste, molestiae! Ratione et, dolore ipsum
-							quaerat iure illum reprehenderit non maxime amet dolor
-							voluptas facilis corporis, consequatur eius est sunt
-							suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u.png" alt="Imagen Blog 3" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Philips Serie 2200 Cafetera Superautomática</h3>
-						<span>03 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Iste, molestiae! Ratione et, dolore ipsum
-							quaerat iure illum reprehenderit non maxime amet dolor
-							voluptas facilis corporis, consequatur eius est sunt
-							suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-			</div>
 		</section>
 	</main>
 

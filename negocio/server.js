@@ -39,6 +39,17 @@ app.post('/login', usuarioNegocio.loginUsuario);
 const newDispos = require('./newDispos');
 app.post('/registerDevice', newDispos.registrarDispositivo);
 
+app.post('/registerDevice', async (req, res) => {
+  const { nombre, descripcion, marca, modelo, tipo, imagenProdu } = req.body;
+  try {
+      const nuevoDispositivo = new Catalogo({ nombre, descripcion, marca, modelo, tipo, imagenProdu });
+      await nuevoDispositivo.save();
+      res.status(201).json({ message: 'Dispositivo registrado con éxito' });
+  } catch (error) {
+      res.status(500).json({ error: 'Error al registrar el dispositivo' });
+  }
+});
+
 // Ruta para sacar catálogo
 const cata = require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
@@ -67,6 +78,50 @@ app.get('/catalogo', async (req, res) => {
   }
 });
 
+// Ruta para obtener los tipos únicos de la colección
+app.get('/tipos', async (req, res) => {
+  try {
+    const tipos = await Catalogo.distinct('tipo'); 
+    res.json(tipos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los tipos' });
+  }
+});
+
+const Dispositivo = require('./dispositivo');
+
+// Ruta para obtener los datos del catálogo junto con los dispositivos asociados (GET)
+app.get('/inventario', async (req, res) => {
+  const { tipo, estado } = req.query; 
+  try {
+    const query = tipo ? { tipo } : {};
+    const catalogo = await Catalogo.find(query).lean(); 
+    let resultado = [];
+    for (const item of catalogo) {
+      let dispositivoQuery = { idCatalogo: item.idCatalogo };
+      if (estado) {
+        dispositivoQuery.estadoCotizaci = estado; 
+      }
+      else {
+        dispositivoQuery.estadoCotizaci = { $in: ['Para reciclar', 'Para vender'] };
+      }
+      const dispositivosRelacionados = await Dispositivo.find(dispositivoQuery).lean();
+        dispositivosRelacionados.forEach(dispositivo => {
+          resultado.push({
+            idCatalogo: item.idCatalogo,
+            nombre: item.nombre,
+            marca: item.marca,
+            tipo: item.tipo,
+            idDispositivo: dispositivo.idDispositivo,
+            estadoCotizaci: dispositivo.estadoCotizaci
+          });
+        });
+    }
+    res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los datos del catálogo y dispositivos' });
+  }
+});
 // Ruta para eliminar un dispositivo del catálogo (DELETE)
 app.delete('/catalogo/:id', async (req, res) => {
   const { id } = req.params;
