@@ -6,14 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>ReeUtil</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="stylesAdmin.css" />
-	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-	<!-- Popper.js and Bootstrap JS -->
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -48,11 +43,10 @@
 				<i class="fa-solid fa-bars"></i>
 				<ul class="menu">
 					<li><a href="#">Inicio</a></li>
-					<li>
-						<a href="#" data-toggle="modal" data-target="#modalRegisterDevice">Catálogo</a>
-					</li>
+					<li><a href="#" data-toggle="modal" data-target="#modalRegisterDevice">Catálogo</a></li>
 					<li><a href="#">Solicitud de evaluacion</a></li>
 				</ul>
+
 			</nav>
 		</div>
 		<!-- Modal para registrar dispositivos -->
@@ -61,9 +55,7 @@
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="modalRegisterDeviceLabel">
-							Registrar Dispositivo
-						</h5>
+						<h5 class="modal-title" id="modalRegisterDeviceLabel">Registrar Dispositivo</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -73,169 +65,137 @@
 							<div class="form-group">
 								<label for="nombre">Nombre del dispositivo</label>
 								<input type="text" class="form-control" id="nombre" name="nombre"
-									placeholder="Nombre del dispositivo" required />
+									placeholder="Nombre del dispositivo" required>
 							</div>
 							<div class="form-group">
 								<label for="descripcion">Descripción</label>
 								<input type="text" class="form-control" id="descripcion" name="descripcion"
-									placeholder="Descripción" required />
+									placeholder="Descripción" required>
 							</div>
 							<div class="form-group">
 								<label for="marca">Marca</label>
 								<input type="text" class="form-control" id="marca" name="marca" placeholder="Marca"
-									required />
+									required>
 							</div>
 							<div class="form-group">
 								<label for="modelo">Modelo</label>
 								<input type="text" class="form-control" id="modelo" name="modelo" placeholder="Modelo"
-									required />
+									required>
 							</div>
 							<div class="form-group">
 								<label for="tipo">Tipo</label>
 								<input type="text" class="form-control" id="tipo" name="tipo" placeholder="Tipo"
-									required />
+									required>
 							</div>
 							<div class="form-group">
 								<label for="imagenProdu">Imagen del dispositivo</label>
 								<input type="file" class="form-control-file" id="imagenProdu" name="imagenProdu"
-									accept="image/*" required />
+									accept="image/*" required>
 							</div>
-							<button type="submit" id="submitButton" class="btn btn-primary">
-								Registrar Dispositivo
-							</button>
+							<button type="submit" id="submitButton" class="btn btn-primary">Registrar
+								Dispositivo</button>
 						</form>
-						<div id="deviceMessage" class="alert alert-success mt-3" style="display: none">
-							Dispositivo registrado con éxito
-						</div>
-						<div id="deviceErrorMessage" class="alert alert-danger mt-3" style="display: none">
-							Error al registrar el dispositivo
-						</div>
+						<div id="deviceMessage" class="alert alert-success mt-3" style="display: none;">Dispositivo
+							registrado con éxito</div>
+						<div id="deviceErrorMessage" class="alert alert-danger mt-3" style="display: none;">Error al
+							registrar el dispositivo</div>
 					</div>
 				</div>
 			</div>
 		</div>
 		<script>
-			document
-				.getElementById("registerDeviceForm")
-				.addEventListener("submit", async function (event) {
-					event.preventDefault();
+			document.getElementById('registerDeviceForm').addEventListener('submit', async function (event) {
+				event.preventDefault();
 
-					const formData = new FormData(this);
-					const fileInput = document.getElementById("imagenProdu");
-					const file = fileInput.files[0];
+				const formData = new FormData(this);
+				const fileInput = document.getElementById('imagenProdu');
+				const file = fileInput.files[0];
 
-					// Verificar el idUsuario en localStorage
-					const idUsuario = localStorage.getItem("idUsuario");
-					console.log("idUsuario en localStorage:", idUsuario); // Aquí verificamos el valor de idUsuario
+				// Verificar el idUsuario en localStorage
+				const idUsuario = localStorage.getItem('idUsuario');
+				console.log('idUsuario en localStorage:', idUsuario); // Aquí verificamos el valor de idUsuario
 
-					if (idUsuario) {
-						formData.append("idUsuario", idUsuario); // Añadir idUsuario a FormData
-					} else {
-						console.error("idUsuario no encontrado en localStorage");
-						return; // Salir si no se encuentra el idUsuario
-					}
+				if (idUsuario) {
+					formData.append('idUsuario', idUsuario); // Añadir idUsuario a FormData
+				} else {
+					console.error('idUsuario no encontrado en localStorage');
+					return; // Salir si no se encuentra el idUsuario
+				}
 
-					if (file) {
-						// Convertir archivo a Base64
-						const reader = new FileReader();
-						reader.readAsDataURL(file);
+				if (file) {
+					// Convertir archivo a Base64
+					const reader = new FileReader();
+					reader.readAsDataURL(file);
 
-						reader.onload = async function () {
-							const base64String = reader.result.replace(
-								/^data:.+;base64,/,
-								""
-							);
+					reader.onload = async function () {
+						const base64String = reader.result.replace(/^data:.+;base64,/, '');
 
-							// Agregar la cadena Base64 al FormData
-							formData.set("imagenProdu", base64String);
+						// Agregar la cadena Base64 al FormData
+						formData.set('imagenProdu', base64String);
 
-							try {
-								const response = await fetch(
-									"http://localhost:5500/registerDevice",
-									{
-										method: "POST",
-										headers: {
-											"Content-Type": "application/json",
-										},
-										body: JSON.stringify(
-											Object.fromEntries(formData.entries())
-										),
-									}
-								);
-
-								if (response.ok) {
-									document.getElementById("deviceMessage").style.display =
-										"block";
-									document.getElementById(
-										"deviceErrorMessage"
-									).style.display = "none";
-									document.getElementById("registerDeviceForm").reset();
-								} else {
-									document.getElementById(
-										"deviceErrorMessage"
-									).style.display = "block";
-									document.getElementById("deviceMessage").style.display =
-										"none";
-								}
-							} catch (error) {
-								document.getElementById("deviceErrorMessage").style.display =
-									"block";
-								document.getElementById("deviceMessage").style.display =
-									"none";
-								console.error("Error:", error);
-							}
-						};
-
-						reader.onerror = function (error) {
-							document.getElementById("deviceErrorMessage").style.display =
-								"block";
-							document.getElementById("deviceMessage").style.display = "none";
-							console.error("Error al leer el archivo:", error);
-						};
-					} else {
 						try {
-							const response = await fetch(
-								"http://localhost:5500/registerDevice",
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify(
-										Object.fromEntries(formData.entries())
-									),
-								}
-							);
+							const response = await fetch('http://localhost:5500/registerDevice', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(Object.fromEntries(formData.entries()))
+							});
 
 							if (response.ok) {
-								document.getElementById("deviceMessage").style.display =
-									"block";
-								document.getElementById("deviceErrorMessage").style.display =
-									"none";
-								document.getElementById("registerDeviceForm").reset();
+								document.getElementById('deviceMessage').style.display = 'block';
+								document.getElementById('deviceErrorMessage').style.display = 'none';
+								document.getElementById('registerDeviceForm').reset();
 							} else {
-								document.getElementById("deviceErrorMessage").style.display =
-									"block";
-								document.getElementById("deviceMessage").style.display =
-									"none";
+								document.getElementById('deviceErrorMessage').style.display = 'block';
+								document.getElementById('deviceMessage').style.display = 'none';
 							}
 						} catch (error) {
-							document.getElementById("deviceErrorMessage").style.display =
-								"block";
-							document.getElementById("deviceMessage").style.display = "none";
-							console.error("Error:", error);
+							document.getElementById('deviceErrorMessage').style.display = 'block';
+							document.getElementById('deviceMessage').style.display = 'none';
+							console.error('Error:', error);
 						}
+					};
+
+					reader.onerror = function (error) {
+						document.getElementById('deviceErrorMessage').style.display = 'block';
+						document.getElementById('deviceMessage').style.display = 'none';
+						console.error('Error al leer el archivo:', error);
+					};
+				} else {
+					try {
+						const response = await fetch('http://localhost:5500/registerDevice', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify(Object.fromEntries(formData.entries()))
+						});
+
+						if (response.ok) {
+							document.getElementById('deviceMessage').style.display = 'block';
+							document.getElementById('deviceErrorMessage').style.display = 'none';
+							document.getElementById('registerDeviceForm').reset();
+						} else {
+							document.getElementById('deviceErrorMessage').style.display = 'block';
+							document.getElementById('deviceMessage').style.display = 'none';
+						}
+					} catch (error) {
+						document.getElementById('deviceErrorMessage').style.display = 'block';
+						document.getElementById('deviceMessage').style.display = 'none';
+						console.error('Error:', error);
 					}
-				});
+				}
+			});
+
 		</script>
+
+
 	</header>
 
 	<section class="banner">
 		<div class="content-banner">
-			<h2>
-				ReeUtil <br />Sigue ayudando al<br />
-				medio ambiente
-			</h2>
+			<h2>ReeUtil <br />Sigue ayudando al<br /> medio ambiente</h2>
 		</div>
 	</section>
 
@@ -245,7 +205,7 @@
 				<i class="fa-solid fa-recycle"></i>
 				<div class="feature-content">
 					<span>Reciclar ayuda al medio ambiente</span>
-					<p>Dando un reinicio a tu disposito</p>
+					<p>Dando un reinicio a tu disposito </p>
 				</div>
 			</div>
 			<div class="card-feature">
@@ -282,132 +242,99 @@
 						<th>ID Catalogo</th>
 						<th>Fecha solicitud</th>
 						<th>Estado cotización</th>
-						<th>Cotización</th>
-						<!-- Nueva columna -->
+						<th>Cotización</th> <!-- Nueva columna -->
 						<th>Acciones</th>
 					</tr>
 				</thead>
-				<tbody id="solicitudesTableBody"></tbody>
+				<tbody id="solicitudesTableBody">
+				</tbody>
 			</table>
 		</section>
 
-		<!-- Modal Cotizar-->
-		<div id="modalSol" class="modalSol">
-			<div class="modalSol-content">
-				<span class="close" onclick="closeModal()">&times;</span>
-				<div class="modalSol-header">
-					<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
-					<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
-				</div>
-				<form>
-					<label for="equipo">Nombre:</label><br />
-					<input type="text" id="equipo" name="equipo" /><br /><br />
 
-					<label for="estadoCotizacion">Modelo:</label><br />
-					<input type="text" id="modelo" name="modelo" /><br /><br />
-
-					<label for="estado">Estado del dispositivo según el cliente:</label><br />
-					<input type="text" id="estado" name="estado" /><br /><br />
-
-					<label for="detalles">Detalles:</label><br />
-					<textarea id="detalles" name="detalles"></textarea><br /><br />
-
-					<label for="fecha">Fecha de la solicitud:</label><br />
-					<input type="text" id="fecha" name="fecha" /><br /><br />
-
-					<label for="cotizacion">Cotización:</label><br />
-					<input type="text" id="cotizacion" name="cotizacion" /><br /><br />
-
-					<button type="submit" class="btn-enviar">Enviar</button>
-				</form>
-			</div>
-		</div>
-		<!-- Modal de REGLAS -->
-		<div id="modalReglas" class="modalReglas">
-			<div class="modalReglas-content">
-				<span class="close" onclick="closeRulesModal()">&times;</span>
-				<h3>Seleccionar tipo de dispositivo</h3>
-				<select id="tipoDispositivo" onchange="mostrarReglas()">
-					<option value="default">-- Seleccione un tipo --</option>
-					<option value="smartphones">Smartphones</option>
-					<option value="televisores">Televisores</option>
-					<option value="electrodomesticos">Electrodomésticos</option>
-				</select>
-				<div id="reglasArea" class="reglas-texto">
-					<h4>Reglas de ReeUtil con este tipo de dispositivos:</h4>
-					<p id="reglas"></p>
-				</div>
-			</div>
-		</div>
-
-		<script>
-			function openModalSol() {
-				document.getElementById("modalSol").style.display = "block";
-			}
-
-			function closeModal() {
-				document.getElementById("modalSol").style.display = "none";
-			}
-
-			window.onclick = function (event) {
-				var modal = document.getElementById("modalSol");
-				if (event.target == modal) {
-					modal.style.display = "none";
-				}
-			};
-		</script>
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
-		<div class="modal fade" id="tipoModal" tabindex="-1" aria-labelledby="tipoModalLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="tipoModalLabel">Seleccionar Tipo</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<ul id="tipoList" class="list-group"></ul>
+				<!-- Modal Cotizar-->
+				<div id="modalSol" class="modalSol">
+					<div class="modalSol-content">
+						<span class="close" onclick="closeModal()">&times;</span>
+						<div class="modalSol-header">
+							<h2>MANDAR COTIZACIÓN DEL DISPOSITIVO</h2>
+							<span class="rules-icon" title="REGLAS" onclick="openRulesModal()">&#128196;</span>
+						</div>
+						<form>
+							<label for="equipo">Nombre:</label><br>
+							<input type="text" id="equipo" name="equipo"><br><br>
+		
+							<label for="estadoCotizacion">Modelo:</label><br>
+							<input type="text" id="modelo" name="modelo"><br><br>
+		
+							<label for="estado">Estado del dispositivo según el cliente:</label><br>
+							<input type="text" id="estado" name="estado"><br><br>
+		
+							<label for="detalles">Detalles:</label><br>
+							<textarea id="detalles" name="detalles"></textarea><br><br>
+		
+							<label for="fecha">Fecha de la solicitud:</label><br>
+							<input type="text" id="fecha" name="fecha"><br><br>
+		
+							<label for="cotizacion">Cotización:</label><br>
+							<input type="text" id="cotizacion" name="cotizacion"><br><br>
+		
+							<button type="submit" class="btn-enviar">Enviar</button>
+						</form>
 					</div>
 				</div>
-			</div>
-		</div>
+		
+				<script>
+					function openModalSol() {
+						document.getElementById("modalSol").style.display = "block";
+					}
+		
+					function closeModal() {
+						document.getElementById("modalSol").style.display = "none";
+					}
+		
+					window.onclick = function (event) {
+						var modal = document.getElementById("modalSol");
+						if (event.target == modal) {
+							modal.style.display = "none";
+						}
+					}
+				</script>
+
+
+
 		<section class="container blogs mt-5">
 			<div class="d-flex align-items-center">
-				<h1 class="heading-1 mb-0">Catalogo</h1>
+				<h1 class="heading-1 mb-0">Catalogo </h1>
 				<span class="add-cart" id="openModal">
 					<i class="fa-solid fa-plus"></i>
 				</span>
 				<script>
 					// Capturar el clic en el span con id "openModal"
-					document
-						.getElementById("openModal")
-						.addEventListener("click", function () {
-							// Usar Bootstrap para mostrar el modal
-							var myModal = new bootstrap.Modal(
-								document.getElementById("modalRegisterDevice"),
-								{
-									keyboard: false,
-								}
-							);
-							myModal.show();
+					document.getElementById('openModal').addEventListener('click', function () {
+						// Usar Bootstrap para mostrar el modal
+						var myModal = new bootstrap.Modal(document.getElementById('modalRegisterDevice'), {
+							keyboard: false
 						});
+						myModal.show();
+					});
 				</script>
 			</div>
-
 			<table class="table table-striped bg-white fs-5">
 				<thead>
 					<tr>
+						<th>ID Dispositivo</th>
 						<th>ID Catalogo</th>
 						<th>Nombre</th>
 						<th>Marca</th>
 						<th>Modelo</th>
 						<th>Descripción</th>
 						<th>Tipo</th>
-						<th>Estado</th>
-						<th>Acciones</th>
+						<th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
 					</tr>
 				</thead>
-				<tbody id="catalogoTableBody"></tbody>
+				<tbody id="catalogoTableBody">
+				</tbody>
 			</table>
 		</section>
 
@@ -424,8 +351,7 @@
 						<th>Fecha</th>
 						<th>Estado cotización</th>
 						<th>Cotización</th>
-						<th>Acciones</th>
-						<!-- Nueva columna para acciones -->
+						<th>Acciones</th> <!-- Nueva columna para acciones -->
 					</tr>
 				</thead>
 				<tbody id="aceptadasTableBody"></tbody>
@@ -433,302 +359,102 @@
 		</section>
 
 		<!-- Modal de confirmación para cambios de estado -->
-		<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-			aria-hidden="true">
+		<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="exampleModalLabel">
-							Confirmar Cambio de Estado
-						</h5>
+						<h5 class="modal-title" id="exampleModalLabel">Confirmar Cambio de Estado</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						¿Está seguro de que desea cambiar el estado del dispositivo?
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-							Cancelar
-						</button>
-						<button type="button" class="btn btn-primary" id="confirmChangeButton">
-							Confirmar
-						</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-primary" id="confirmChangeButton">Confirmar</button>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<script>
-			document.addEventListener("DOMContentLoaded", async () => {
-				await cargarCotizacionesAceptadas();
-			});
+		document.addEventListener('DOMContentLoaded', async () => {
+			await cargarCotizacionesAceptadas();
+		});
 
-			let idDispositivoGlobal = "";
-			let nuevoEstadoGlobal = "";
+		let idDispositivoGlobal = '';
+		let nuevoEstadoGlobal = '';
 
-			async function cargarCotizacionesAceptadas() {
-				try {
-					const response = await fetch("http://localhost:5500/solicitudes");
-					if (!response.ok)
-						throw new Error("Error al obtener las solicitudes");
+		async function cargarCotizacionesAceptadas() {
+			try {
+				const response = await fetch('http://localhost:5500/solicitudes');
+				if (!response.ok) throw new Error('Error al obtener las solicitudes');
 
-					const solicitudes = await response.json();
-					const tableBody = document.getElementById("aceptadasTableBody");
+				const solicitudes = await response.json();
+				const tableBody = document.getElementById('aceptadasTableBody');
 
-					// Limpia el contenido de la tabla antes de agregar nuevos datos
-					tableBody.innerHTML = "";
+				// Limpia el contenido de la tabla antes de agregar nuevos datos
+				tableBody.innerHTML = '';
 
-					solicitudes.forEach((solicitud) => {
-						if (solicitud.estadoCotizaci === "aceptado") {
-							const row = document.createElement("tr");
-							row.innerHTML = `
-							<td>${solicitud.idDispositivo || "N/A"}</td>
-							<td>${solicitud.idCatalogo || "N/A"}</td>
-							<td>${solicitud.fecha
-									? new Date(solicitud.fecha).toLocaleDateString()
-									: "N/A"
-								}</td>
-							<td class="estadoCotizaci">${solicitud.estadoCotizaci || "N/A"}</td>
-							<td>${solicitud.cotizacion || "N/A"}</td>
+				solicitudes.forEach((solicitud) => {
+					if (solicitud.estadoCotizaci === "aceptado") {
+						const row = document.createElement('tr');
+						row.innerHTML = `
+							<td>${solicitud.idDispositivo || 'N/A'}</td>
+							<td>${solicitud.idCatalogo || 'N/A'}</td>
+							<td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td>
+							<td class="estadoCotizaci">${solicitud.estadoCotizaci || 'N/A'}</td>
+							<td>${solicitud.cotizacion || 'N/A'}</td>
 							<td>
-								<button class="btn btn-danger" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo
-								}', 'Para reciclar')">Reciclar</button>
-								<button class="btn btn-success" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo
-								}', 'Para vender')">Vender</button>
+								<button class="btn btn-danger" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para reciclar')">Reciclar</button>
+								<button class="btn btn-success" onclick="abrirModalCambiarEstado('${solicitud.idDispositivo}', 'Para vender')">Vender</button>
 							</td>
 						`;
-							tableBody.appendChild(row);
-						}
-					});
-				} catch (error) {
-					console.error("Error al cargar cotizaciones aceptadas:", error);
-				}
+						tableBody.appendChild(row);
+					}
+				});
+			} catch (error) {
+				console.error('Error al cargar cotizaciones aceptadas:', error);
 			}
+		}
 
-			function abrirModalCambiarEstado(idDispositivo, nuevoEstado) {
-				idDispositivoGlobal = idDispositivo;
-				nuevoEstadoGlobal = nuevoEstado;
-				const modal = new bootstrap.Modal(
-					document.getElementById("confirmUpdateModal")
-				);
-				modal.show();
-			}
+		function abrirModalCambiarEstado(idDispositivo, nuevoEstado) {
+			idDispositivoGlobal = idDispositivo;
+			nuevoEstadoGlobal = nuevoEstado;
+			const modal = new bootstrap.Modal(document.getElementById('confirmUpdateModal'));
+			modal.show();
+		}
 
-			document
-				.getElementById("confirmChangeButton")
-				.addEventListener("click", async () => {
-					await cambiarEstadoDispositivo(
-						idDispositivoGlobal,
-						nuevoEstadoGlobal
-					);
+		document.getElementById('confirmChangeButton').addEventListener('click', async () => {
+			await cambiarEstadoDispositivo(idDispositivoGlobal, nuevoEstadoGlobal);
+		});
+
+		async function cambiarEstadoDispositivo(idDispositivo, nuevoEstado) {
+			try {
+				const response = await fetch('http://localhost:5500/actualizarEstado', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ idDispositivo, nuevoEstado })
 				});
 
-			async function cambiarEstadoDispositivo(idDispositivo, nuevoEstado) {
-				try {
-					const response = await fetch(
-						"http://localhost:5500/actualizarEstado",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify({ idDispositivo, nuevoEstado }),
-						}
-					);
-
-					const data = await response.json();
-					if (data.message) {
-						alert("Estado actualizado exitosamente");
-						window.location.reload();
-					} else {
-						alert("Error al actualizar el estado");
-					}
-				} catch (error) {
-					console.error("Error al actualizar el estado:", error);
+				const data = await response.json();
+				if (data.message) {
+					alert('Estado actualizado exitosamente');
+					window.location.reload();
+				} else {
+					alert('Error al actualizar el estado');
 				}
+			} catch (error) {
+				console.error('Error al actualizar el estado:', error);
 			}
+		}
 		</script>
 
-		<div class="modal fade" id="tipoModal" tabindex="-1" aria-labelledby="tipoModalLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="tipoModalLabel">Seleccionar Tipo</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<ul id="tipoList" class="list-group"></ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		<section class="container blogs mt-5">
-			<div class="d-flex align-items-center">
-				<h1 class="heading-1 mb-0">Inventario</h1>
-				<div class="ms-5 d-flex">
-					<button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-						data-bs-target="#tipoModal" id="filterTipo">
-						Tipo
-					</button>
-					<button type="button" class="btn btn-success me-2" id="filterReciclaje">
-						Reciclaje
-					</button>
-					<button type="button" class="btn btn-success" id="filterVender">
-						Vender
-					</button>
-				</div>
-			</div>
-			<table class="table table-striped bg-white fs-5">
-				<thead>
-					<tr>
-						<th>ID Catalogo</th>
-						<th>Nombre</th>
-						<th>Marca</th>
-						<th>Tipo</th>
-						<th>ID Dispositivo</th>
-						<th>Estado</th>
-					</tr>
-				</thead>
-				<tbody id="invTableBody"></tbody>
-			</table>
-			<script>
-				document.addEventListener("DOMContentLoaded", async () => {
-					try {
-						const response = await fetch("http://localhost:5500/inventario");
-						if (!response.ok) throw new Error("Error al obtener los datos del catálogo");
 
-						const catalogo = await response.json();
-						const tableBody = document.getElementById("invTableBody");
-						tableBody.innerHTML = "";
-
-						catalogo.forEach((item) => {
-							const row = document.createElement("tr");
-							row.innerHTML = `
-        <td>${item.idCatalogo}</td>
-        <td>${item.nombre}</td>
-        <td>${item.marca}</td>
-        <td>${item.tipo}</td>
-        <td>${item.idDispositivo || "No disponible"}</td>
-        <td>${item.estadoCotizaci || "No disponible"}</td>
-      `;
-							tableBody.appendChild(row);
-						});
-					} catch (error) {
-						console.error("Error:", error);
-					}
-				});
-
-				document.addEventListener("DOMContentLoaded", () => {
-					let estadoReciclajeActivo = false;
-					let estadoVenderActivo = false;
-
-					document.getElementById("filterTipo").addEventListener("click", async () => {
-						try {
-							const response = await fetch("http://localhost:5500/tipos");
-							if (!response.ok) throw new Error("Error al obtener los tipos");
-
-							const tipos = await response.json();
-							const tipoList = document.getElementById("tipoList");
-							tipoList.innerHTML = "";
-							tipos.forEach((tipo) => {
-								const listItem = document.createElement("li");
-								listItem.className = "list-group-item list-group-item-action";
-								listItem.textContent = tipo;
-								listItem.addEventListener("click", async () => {
-									await filtrarPorTipo(tipo);
-									const tipoModal = bootstrap.Modal.getInstance(
-										document.getElementById("tipoModal")
-									);
-									tipoModal.hide();
-								});
-
-								tipoList.appendChild(listItem);
-							});
-						} catch (error) {
-							console.error("Error:", error);
-						}
-					});
-
-					document.getElementById("filterReciclaje").addEventListener("click", async () => {
-						estadoReciclajeActivo = !estadoReciclajeActivo; // Alternar el estado
-
-						if (estadoReciclajeActivo) {
-							await filtrarPorEstado("Para reciclar");
-						} else {
-							await obtenerInventarioCompleto(); 
-						}
-					});
-
-					document.getElementById("filterVender").addEventListener("click", async () => {
-						estadoVenderActivo = !estadoVenderActivo; // Alternar el estado
-
-						if (estadoVenderActivo) {
-							await filtrarPorEstado("Para vender");
-						} else {
-							await obtenerInventarioCompleto(); 
-						}
-					});
-
-					async function filtrarPorTipo(tipo) {
-						try {
-							const response = await fetch(
-								`http://localhost:5500/inventario?tipo=${tipo}`
-							);
-							if (!response.ok) throw new Error("Error al filtrar por tipo");
-
-							const catalogo = await response.json();
-							actualizarTabla(catalogo);
-						} catch (error) {
-							console.error("Error:", error);
-						}
-					}
-
-					async function filtrarPorEstado(estado) {
-						try {
-							const response = await fetch(
-								`http://localhost:5500/inventario?estado=${estado}`
-							);
-							if (!response.ok) throw new Error(`Error al filtrar por estado ${estado}`);
-
-							const catalogo = await response.json();
-							actualizarTabla(catalogo);
-						} catch (error) {
-							console.error("Error:", error);
-						}
-					}
-
-					async function obtenerInventarioCompleto() {
-						try {
-							const response = await fetch("http://localhost:5500/inventario");
-							if (!response.ok) throw new Error("Error al obtener el inventario completo");
-
-							const catalogo = await response.json();
-							actualizarTabla(catalogo);
-						} catch (error) {
-							console.error("Error:", error);
-						}
-					}
-
-					function actualizarTabla(catalogo) {
-						const tableBody = document.getElementById("invTableBody");
-						tableBody.innerHTML = "";
-
-						catalogo.forEach((item) => {
-							const row = document.createElement("tr");
-							row.innerHTML = `
-        <td>${item.idCatalogo}</td>
-        <td>${item.nombre}</td>
-        <td>${item.marca}</td>
-        <td>${item.tipo}</td>
-        <td>${item.idDispositivo || "No disponible"}</td>
-        <td>${item.estadoCotizaci || "No disponible"}</td>
-      `;
-							tableBody.appendChild(row);
-						});
-					}
-				});
-			</script>
-		</section>
+		
+		
 
 		<section class="container blogs">
 			<div class="d-flex align-items-center">
@@ -774,10 +500,11 @@
 						<h3>Galaxy Buds</h3>
 						<span>01 Septiembre 2024</span>
 						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
 						</p>
 						<div class="btn-read-more">Leer más</div>
 					</div>
@@ -798,10 +525,11 @@
 						<h3>Lavadora,WA456DRHDSU/ZS</h3>
 						<span>02 Septiembre 2024</span>
 						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
 						</p>
 						<div class="btn-read-more">Leer más</div>
 					</div>
@@ -822,10 +550,11 @@
 						<h3>Philips Serie 2200 Cafetera Superautomática</h3>
 						<span>03 Septiembre 2024</span>
 						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Iste, molestiae! Ratione et, dolore ipsum
+							quaerat iure illum reprehenderit non maxime amet dolor
+							voluptas facilis corporis, consequatur eius est sunt
+							suscipit?
 						</p>
 						<div class="btn-read-more">Leer más</div>
 					</div>
@@ -840,7 +569,9 @@
 				<div class="contact-info">
 					<p class="title-footer">Información de Contacto</p>
 					<ul>
-						<li>Dirección: lililalalalal</li>
+						<li>
+							Dirección: lililalalalal
+						</li>
 						<li>Teléfono: 123-456-7890</li>
 						<li>EmaiL: Cookies@support.com</li>
 					</ul>
@@ -891,17 +622,20 @@
 
 					<div class="content">
 						<p>
-							Suscríbete y mantente al día con nuevas colecciones y ofertas
-							exclusivas.
+							Suscríbete y mantente al
+							día con nuevas colecciones y ofertas exclusivas.
 						</p>
-						<input type="email" placeholder="Ingresa el correo aquí..." />
+						<input type="email" placeholder="Ingresa el correo aquí...">
 						<button>Suscríbete</button>
 					</div>
 				</div>
 			</div>
 
 			<div class="copyright">
-				<p>Los cookies &copy; 2024</p>
+				<p>
+					Los cookies &copy; 2024
+				</p>
+
 			</div>
 		</div>
 	</footer>
@@ -917,9 +651,7 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="confirmDeleteModalLabel">
-						Confirmar Eliminación
-					</h5>
+					<h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -928,12 +660,8 @@
 					¿Estás seguro de que deseas eliminar este dispositivo?
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">
-						Cancelar
-					</button>
-					<button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-						Eliminar
-					</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+					<button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
 				</div>
 			</div>
 		</div>
@@ -941,117 +669,109 @@
 
 	<!-- Modal para modificar dispositivos -->
 	<div class="modal fade" id="modalModificarDevice" tabindex="-1" role="dialog"
-		aria-labelledby="modalModificarDeviceLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="modalModificarDeviceLabel">
-						Modificar Dispositivo
-					</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<form id="modifyDeviceForm">
-						<input type="hidden" id="dispositivoId" name="dispositivoId" />
+	aria-labelledby="modalModificarDeviceLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	<div class="modal-content">
+	<div class="modal-header">
+	<h5 class="modal-title" id="modalModificarDeviceLabel">Modificar Dispositivo</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+	</div>
+	<div class="modal-body">
+	<form id="modifyDeviceForm">
+		<input type="hidden" id="dispositivoId" name="dispositivoId">
 
-						<div class="form-group">
-							<label for="nombreModificar">Nombre del dispositivo</label>
-							<input type="text" class="form-control" id="nombreModificar" name="nombre" />
-						</div>
-						<div class="form-group">
-							<label for="descripcionModificar">Descripción</label>
-							<input type="text" class="form-control" id="descripcionModificar" name="descripcion" />
-						</div>
-						<div class="form-group">
-							<label for="marcaModificar">Marca</label>
-							<input type="text" class="form-control" id="marcaModificar" name="marca" />
-						</div>
-						<div class="form-group">
-							<label for="modeloModificar">Modelo</label>
-							<input type="text" class="form-control" id="modeloModificar" name="modelo" />
-						</div>
-						<div class="form-group">
-							<label for="tipoModificar">Tipo</label>
-							<input type="text" class="form-control" id="tipoModificar" name="tipo" />
-						</div>
-						<button type="submit" class="btn btn-primary">
-							Guardar Cambios
-						</button>
-					</form>
-				</div>
-			</div>
+		<div class="form-group">
+		<label for="nombreModificar">Nombre del dispositivo</label>
+		<input type="text" class="form-control" id="nombreModificar" name="nombre">
 		</div>
+		<div class="form-group">
+		<label for="descripcionModificar">Descripción</label>
+		<input type="text" class="form-control" id="descripcionModificar" name="descripcion">
+		</div>
+		<div class="form-group">
+		<label for="marcaModificar">Marca</label>
+		<input type="text" class="form-control" id="marcaModificar" name="marca">
+		</div>
+		<div class="form-group">
+		<label for="modeloModificar">Modelo</label>
+		<input type="text" class="form-control" id="modeloModificar" name="modelo">
+		</div>
+		<div class="form-group">
+		<label for="tipoModificar">Tipo</label>
+		<input type="text" class="form-control" id="tipoModificar" name="tipo">
+		</div>
+		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+	</form>
+	</div>
+	</div>
+	</div>
 	</div>
 
 	<!-- Modal para agregar Reglas -->
 	<div class="modal fade" id="modalReglasAgregar" tabindex="-1" role="dialog"
-		aria-labelledby="modalReglasAgregarLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="modalReglasAgregar">Agregar Reglas</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<form id="reglasForm">
-						<input type="hidden" id="dispositivoId" name="dispositivoId" />
+	aria-labelledby="modalReglasAgregarLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	<div class="modal-content">
+	<div class="modal-header">
+	<h5 class="modal-title" id="modalReglasAgregar">Agregar Reglas</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+	</div>
+	<div class="modal-body">
+	<form id="reglasForm">
+		<input type="hidden" id="dispositivoId" name="dispositivoId">
 
-						<div class="form-group">
-							<label for="nombreRegla">Nombre de la regla</label>
-							<input type="text" class="form-control" id="nombreRegla" name="nombre" />
-						</div>
-						<div class="form-group">
-							<label for="descripcionRegla">Descripción</label>
-							<input type="text" class="form-control" id="descripcionRegla" name="descripcion" />
-						</div>
-						<button type="submit" class="btn btn-primary">
-							Guardar Cambios
-						</button>
-					</form>
-				</div>
-			</div>
+		<div class="form-group">
+		<label for="nombreRegla">Nombre de la regla</label>
+		<input type="text" class="form-control" id="nombreRegla" name="nombre">
 		</div>
+		<div class="form-group">
+		<label for="descripcionRegla">Descripción</label>
+		<input type="text" class="form-control" id="descripcionRegla" name="descripcion">
+		</div>
+		<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+	</form>
+	</div>
+	</div>
+	</div>
 	</div>
 
 	<script>
-		document
-			.getElementById("reglasForm")
-			.addEventListener("submit", async (event) => {
-				event.preventDefault(); // Evitar el comportamiento por defecto del formulario
-				const dispositivoId = document.getElementById("dispositivoId").value;
-				const nombreRegla = document.getElementById("nombreRegla").value;
-				const descripcionRegla =
-					document.getElementById("descripcionRegla").value;
+		document.getElementById('reglasForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+    const dispositivoId = document.getElementById('dispositivoId').value;
+    const nombreRegla = document.getElementById('nombreRegla').value;
+    const descripcionRegla = document.getElementById('descripcionRegla').value;
 
-				try {
-					const response = await fetch("http://localhost:5500/reglas", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({
-							idCatalogo: dispositivoId, // El ID del dispositivo asociado
-							nombreRegla,
-							descripcionRE: descripcionRegla,
-						}),
-					});
+    try {
+        const response = await fetch('http://localhost:5500/reglas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idCatalogo: dispositivoId, // El ID del dispositivo asociado
+                nombreRegla,
+                descripcionRE: descripcionRegla,
+            }),
+        });
 
-					const result = await response.json();
-					if (response.ok) {
-						alert("Regla agregada exitosamente");
-					} else {
-						console.error("Error:", result);
-						alert("Error al agregar la regla");
-					}
-				} catch (error) {
-					console.error("Error al enviar los datos:", error);
-				}
-			});
+        const result = await response.json();
+        if (response.ok) {
+            alert('Regla agregada exitosamente');
+        } else {
+            console.error('Error:', result);
+            alert('Error al agregar la regla');
+        }
+    } catch (error) {
+        console.error('Error al enviar los datos:', error);
+    }
+});
 	</script>
+
 
 	<!-- Modal de Notificación -->
 	<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
@@ -1059,9 +779,7 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="notificationModalLabel">
-						Notificación
-					</h5>
+					<h5 class="modal-title" id="notificationModalLabel">Notificación</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -1070,9 +788,7 @@
 					<!-- Mensaje se actualizará dinámicamente -->
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" data-dismiss="modal">
-						Cerrar
-					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
 				</div>
 			</div>
 		</div>
@@ -1080,113 +796,182 @@
 	<script src="reglasView.js"></script>
 
 	<script>
-		document.addEventListener("DOMContentLoaded", async () => {
+		document.addEventListener('DOMContentLoaded', async () => {
 			try {
-				const response = await fetch("http://localhost:5500/solicitudes");
-				if (!response.ok) throw new Error("Error al obtener las solicitudes");
+				const response = await fetch('http://localhost:5500/solicitudes');
+				if (!response.ok) throw new Error('Error al obtener las solicitudes');
 
 				const solicitudes = await response.json();
-				const tableBody = document.getElementById("solicitudesTableBody");
+				const tableBody = document.getElementById('solicitudesTableBody');
 
 				// Limpia el contenido de la tabla antes de agregar nuevos datos
-				tableBody.innerHTML = "";
+				tableBody.innerHTML = '';
 
 				solicitudes.forEach((solicitud) => {
-					// Condición: solo mostrar solicitudes con estado de cotización "En Curso"
-					if (solicitud.estadoCotizaci === "En Curso") {
-						const row = document.createElement("tr");
-						row.innerHTML = `
-            <td>${solicitud.idDispositivo || "N/A"
-							}</td> <!-- Mostrar el ID del dispositivo -->
-            <td>${solicitud.idCatalogo || "N/A"}</td> <!-- ID Catálogo -->
-            <td>${solicitud.fecha
-								? new Date(solicitud.fecha).toLocaleDateString()
-								: "N/A"
-							}</td> <!-- Fecha de la solicitud -->
-            <td>${solicitud.estadoCotizaci || "N/A"
-							}</td> <!-- Estado de cotización -->
-            <td><input type="text" class="form-control" id="cotizacion-${solicitud.idDispositivo
-							}" placeholder="Ingrese cotización"></td> <!-- Nueva columna Cotización -->
+    // Condición: solo mostrar solicitudes con estado de cotización "En Curso"
+    if (solicitud.estadoCotizaci === "En Curso") {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${solicitud.idDispositivo || 'N/A'}</td> <!-- Mostrar el ID del dispositivo -->
+            <td>${solicitud.idCatalogo || 'N/A'}</td> <!-- ID Catálogo -->
+            <td>${solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : 'N/A'}</td> <!-- Fecha de la solicitud -->
+            <td>${solicitud.estadoCotizaci || 'N/A'}</td> <!-- Estado de cotización -->
+            <td><input type="text" class="form-control" id="cotizacion-${solicitud.idDispositivo}" placeholder="Ingrese cotización"></td> <!-- Nueva columna Cotización -->
             <td>
                 <button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button>
-                <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo
-							}')">Guardar</button> <!-- Botón Guardar -->
-            </td> <!-- Acciones -->
+                <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo}')">Guardar</button> <!-- Botón Guardar -->
+                <button class="btn btn-reglasMostrar" onclick="abrirModalReglas('${solicitud.idCatalogo}')">Mostrar Reglas</button> <!-- Aquí se pasa el ObjectId -->
+				</td> <!-- Acciones -->
         `;
-						tableBody.appendChild(row);
-					}
-				});
+        tableBody.appendChild(row);
+    }
+});
+
+
 			} catch (error) {
-				console.error("Error:", error);
+				console.error('Error:', error);
 			}
 		});
 
+
 		function guardarCotizacion(idDispositivo) {
-			const cotizacion = document.getElementById(
-				`cotizacion-${idDispositivo}`
-			).value;
+    const cotizacion = document.getElementById(`cotizacion-${idDispositivo}`).value;
 
-			// Asegúrate de que el idDispositivo está siendo pasado correctamente
-			console.log("ID Dispositivo:", idDispositivo);
-			console.log("Cotización:", cotizacion);
+    // Asegúrate de que el idDispositivo está siendo pasado correctamente
+    console.log("ID Dispositivo:", idDispositivo);
+    console.log("Cotización:", cotizacion);
 
-			fetch("http://localhost:5500/actualizarCotizacion", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					idDispositivo: idDispositivo, // Asegúrate de pasar el idDispositivo correctamente
-					cotizacion: cotizacion,
-					estadoCotizaci: "Pendiente", // Cambia el estado de 'En Curso' a 'Pendiente'
-				}),
-			})
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.message) {
-						alert("Cotización guardada exitosamente");
-						window.location.reload(); // Recargar la página tras guardar exitosamente
-					} else {
-						alert("Error al guardar la cotización");
-					}
-				})
-				.catch((error) => console.error("Error:", error));
-		}
+    fetch('http://localhost:5500/actualizarCotizacion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            idDispositivo: idDispositivo, // Asegúrate de pasar el idDispositivo correctamente
+            cotizacion: cotizacion,
+            estadoCotizaci: 'Pendiente'  // Cambia el estado de 'En Curso' a 'Pendiente'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert('Cotización guardada exitosamente');
+            window.location.reload(); // Recargar la página tras guardar exitosamente
+        } else {
+            alert('Error al guardar la cotización');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 	</script>
-</body>
 
-</html>
+<!-- Modal para mostrar reglas -->
+<div class="modal fade" id="modalReglasMostrar" tabindex="-1" role="dialog" aria-labelledby="modalReglasMostrarLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalReglasMostrarLabel">Reglas Asociadas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre de Regla</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reglasTableBody">
+                        <!-- Aquí se agregarán las reglas dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-	document.addEventListener("DOMContentLoaded", async () => {
+ function abrirModalReglas(idCatalogo) {
+    console.log('ID de catálogo recibido:', idCatalogo);
+
+    // Aquí pasa el idCatalogo numérico
+    fetch(`http://localhost:5500/reglas/${idCatalogo}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la red: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reglasTableBody = document.getElementById('reglasTableBody');
+            reglasTableBody.innerHTML = '';
+
+            if (Array.isArray(data)) {
+                data.forEach(regla => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${regla.nombreRegla}</td>
+                        <td>${regla.descripcionRE}</td>
+                    `;
+                    reglasTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Se recibió un formato inesperado:', data);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalReglasMostrar'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error al cargar las reglas:', error);
+        });
+}
+
+
+</script>
+
+
+</body>
+</html>
+
+
+
+<script>
+	document.addEventListener('DOMContentLoaded', async () => {
 		try {
-			const response = await fetch("http://localhost:5500/catalogo");
-			if (!response.ok)
-				throw new Error("Error al obtener los datos del catálogo");
+			const response = await fetch('http://localhost:5500/catalogo');
+			if (!response.ok) throw new Error('Error al obtener los datos del catálogo');
 
 			const catalogo = await response.json();
-			const tableBody = document.getElementById("catalogoTableBody");
+			const tableBody = document.getElementById('catalogoTableBody');
 
 			// Limpia el contenido de la tabla antes de agregar nuevos datos
-			tableBody.innerHTML = "";
+			tableBody.innerHTML = '';
 
 			catalogo.forEach((item, index) => {
-				const row = document.createElement("tr");
+				const row = document.createElement('tr');
 				row.innerHTML = `
+<td>${index + 1}</td>
 <td>${item.idCatalogo}</td>
 <td>${item.nombre}</td>
 <td>${item.marca}</td>
 <td>${item.modelo}</td>
 <td>${item.descripcion}</td>
 <td>${item.tipo}</td>
-<td><button class="btn btn-danger" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
-<td><button class="btn btn-primary" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
-<td><button class="btn btn-secondary" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
+<td><button class="btn btn-eliminar" onclick="eliminarDispositivo('${item._id}')">Eliminar</button></td>
+<td><button class="btn btn-modificar" onclick="abrirModalModificar('${item._id}', '${item.nombre}', '${item.descripcion}', '${item.marca}', '${item.modelo}', '${item.tipo}')">Modificar</button></td>
+<td><button class="btn btn-regla" onclick="abrirModalRegla('${item._id}', '${item.nombre}', '${item.descripcion}')">Regla</button></td>
 `;
 				tableBody.appendChild(row);
 			});
 		} catch (error) {
-			console.error("Error:", error);
+			console.error('Error:', error);
 		}
 	});
 
@@ -1196,125 +981,107 @@
 	// Función para abrir el modal y preparar la eliminación
 	function eliminarDispositivo(id) {
 		idDispositivoEliminar = id; // Guardar el ID del dispositivo a eliminar
-		const myModal = new bootstrap.Modal(
-			document.getElementById("confirmDeleteModal"),
-			{
-				keyboard: false,
-			}
-		);
+		const myModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'), {
+			keyboard: false
+		});
 		myModal.show(); // Mostrar el modal de confirmación
 	}
 
 	function abrirModalModificar(id, nombre, descripcion, marca, modelo, tipo) {
-		// Poner los valores en los campos del modal
-		document.getElementById("dispositivoId").value = id;
-		document.getElementById("nombreModificar").value = nombre || "";
-		document.getElementById("descripcionModificar").value = descripcion || "";
-		document.getElementById("marcaModificar").value = marca || "";
-		document.getElementById("modeloModificar").value = modelo || "";
-		document.getElementById("tipoModificar").value = tipo || "";
+    // Poner los valores en los campos del modal
+    document.getElementById('dispositivoId').value = id;
+    document.getElementById('nombreModificar').value = nombre || '';
+    document.getElementById('descripcionModificar').value = descripcion || '';
+    document.getElementById('marcaModificar').value = marca || '';
+    document.getElementById('modeloModificar').value = modelo || '';
+    document.getElementById('tipoModificar').value = tipo || '';
 
-		// Abrir el modal
-		const modal = new bootstrap.Modal(
-			document.getElementById("modalModificarDevice")
-		);
-		modal.show();
-	}
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarDevice'));
+    modal.show();
+  }
 
-	function abrirModalRegla(id, nombre, descripcion) {
-		// Poner los valores en los campos del modal
-		document.getElementById("dispositivoId").value = id;
-		document.getElementById("nombreModificar").value = nombre || "";
-		document.getElementById("descripcionModificar").value = descripcion || "";
-		// Abrir el modal
-		const modal = new bootstrap.Modal(
-			document.getElementById("modalReglasAgregar")
-		);
-		modal.show();
-	}
+  function abrirModalRegla(id, nombre, descripcion) {
+    // Poner los valores en los campos del modal
+    document.getElementById('dispositivoId').value = id;
+    document.getElementById('nombreModificar').value = nombre || '';
+    document.getElementById('descripcionModificar').value = descripcion || '';
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalReglasAgregar'));
+    modal.show();
+  }
 
-	// Enviar los cambios al backend cuando se presione "Guardar Cambios"
+  // Enviar los cambios al backend cuando se presione "Guardar Cambios"
 
-	document
-		.getElementById("modifyDeviceForm")
-		.addEventListener("submit", async function (event) {
-			event.preventDefault();
 
-			const id = document.getElementById("dispositivoId").value;
-			const formData = new FormData(this);
+  document.getElementById('modifyDeviceForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
 
-			// Solo envía los campos que fueron modificados
-			const updatedData = {};
-			for (const [key, value] of formData.entries()) {
-				if (value) {
-					updatedData[key] = value;
-				}
-			}
+    const id = document.getElementById('dispositivoId').value;
+    const formData = new FormData(this);
 
-			try {
-				const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(updatedData),
-				});
+    // Solo envía los campos que fueron modificados
+    const updatedData = {};
+    for (const [key, value] of formData.entries()) {
+      if (value) {
+        updatedData[key] = value;
+      }
+    }
 
-				if (response.ok) {
-					alert("Dispositivo actualizado exitosamente");
-					window.location.reload(); // Recargar la página
-				} else {
-					alert("Error al actualizar el dispositivo");
-				}
-			} catch (error) {
-				console.error("Error:", error);
-			}
-		});
+    try {
+      const response = await fetch(`http://localhost:5500/catalogo/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        alert('Dispositivo actualizado exitosamente');
+        window.location.reload(); // Recargar la página
+      } else {
+        alert('Error al actualizar el dispositivo');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  });
 
 	// Función para mostrar el modal de notificación
 	function mostrarNotificacion(mensaje) {
-		document.getElementById("notificationMessage").innerText = mensaje;
-		const notificationModal = new bootstrap.Modal(
-			document.getElementById("notificationModal"),
-			{
-				keyboard: false,
-			}
-		);
+		document.getElementById('notificationMessage').innerText = mensaje;
+		const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'), {
+			keyboard: false
+		});
 		notificationModal.show();
 	}
 
 	// Función para confirmar la eliminación del dispositivo
-	document
-		.getElementById("confirmDeleteBtn")
-		.addEventListener("click", async function () {
-			if (idDispositivoEliminar) {
-				try {
-					const response = await fetch(
-						`http://localhost:5500/catalogo/${idDispositivoEliminar}`,
-						{
-							method: "DELETE",
-						}
-					);
+	document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
+		if (idDispositivoEliminar) {
+			try {
+				const response = await fetch(`http://localhost:5500/catalogo/${idDispositivoEliminar}`, {
+					method: 'DELETE'
+				});
 
-					if (response.ok) {
-						// Mostrar el modal de notificación con el mensaje de éxito
-						mostrarNotificacion("Dispositivo eliminado con éxito");
+				if (response.ok) {
+					// Mostrar el modal de notificación con el mensaje de éxito
+					mostrarNotificacion('Dispositivo eliminado con éxito');
 
-						// Recargar la página después de un pequeño retraso para dar tiempo de ver la notificación
-						setTimeout(() => {
-							location.reload(); // Recargar la página para actualizar la tabla
-						}, 2000); // Espera 2 segundos antes de recargar
-					} else {
-						// Mostrar el modal de notificación con el mensaje de error
-						mostrarNotificacion("Error al eliminar el dispositivo");
-					}
-				} catch (error) {
-					console.error("Error:", error);
+					// Recargar la página después de un pequeño retraso para dar tiempo de ver la notificación
+					setTimeout(() => {
+						location.reload(); // Recargar la página para actualizar la tabla
+					}, 2000); // Espera 2 segundos antes de recargar
+				} else {
 					// Mostrar el modal de notificación con el mensaje de error
-					mostrarNotificacion(
-						"Ocurrió un error al intentar eliminar el dispositivo"
-					);
+					mostrarNotificacion('Error al eliminar el dispositivo');
 				}
+			} catch (error) {
+				console.error('Error:', error);
+				// Mostrar el modal de notificación con el mensaje de error
+				mostrarNotificacion('Ocurrió un error al intentar eliminar el dispositivo');
 			}
-		});
+		}
+	});
 </script>
