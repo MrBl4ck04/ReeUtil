@@ -371,6 +371,26 @@
 				</div>
 			</div>
 		</div>
+		
+				<script>
+					function openModalSol() {
+						document.getElementById("modalSol").style.display = "block";
+					}
+		
+					function closeModal() {
+						document.getElementById("modalSol").style.display = "none";
+					}
+		
+					window.onclick = function (event) {
+						var modal = document.getElementById("modalSol");
+						if (event.target == modal) {
+							modal.style.display = "none";
+						}
+					}
+				</script>
+
+
+
 		<section class="container blogs mt-5">
 			<div class="d-flex align-items-center">
 				<h1 class="heading-1 mb-0">Catalogo</h1>
@@ -1030,9 +1050,9 @@
 							}" placeholder="Ingrese cotización"></td> <!-- Nueva columna Cotización -->
             <td>
                 <button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button>
-                <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo
-							}')">Guardar</button> <!-- Botón Guardar -->
-            </td> <!-- Acciones -->
+                <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo}')">Guardar</button> <!-- Botón Guardar -->
+                <button class="btn btn-reglasMostrar" onclick="abrirModalReglas('${solicitud.idCatalogo}')">Mostrar Reglas</button> <!-- Aquí se pasa el ObjectId -->
+				</td> <!-- Acciones -->
         `;
 						tableBody.appendChild(row);
 					}
@@ -1075,8 +1095,9 @@
 		}
 	</script>
 </body>
-
 </html>
+
+
 
 <script>
 	document.addEventListener("DOMContentLoaded", async () => {
