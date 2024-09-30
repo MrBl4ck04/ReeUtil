@@ -11,4 +11,4 @@ const dispositivoSchema = new mongoose.Schema({
     imagen: String
   });
   
-  module.exports = mongoose.model('dispositivo', dispositivoSchema);
+module.exports = mongoose.models.Dispositivo || mongoose.model('Dispositivo', dispositivoSchema);
