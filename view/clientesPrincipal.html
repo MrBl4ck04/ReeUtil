@@ -409,43 +409,27 @@
 							// Función para generar las tarjetas de productos
 							function generarCards(productos) {
 								const track = document.getElementById('carousel-track');
-								if (track) {
-									track.innerHTML = ''; // Clear track before adding products
-								} else {
-									console.error("Element 'carousel-track' not found in the DOM.");
-								}
-
+								track.innerHTML = ''; // Limpia antes de agregar nuevos productos
+								
 								productos.forEach(producto => {
 									const card = document.createElement('div');
 									card.classList.add('card-product');
 
 									card.innerHTML = `
-												<div class="container-img">
-													<img src="prod1.png" alt="${producto.nombre}" />
-													<div class="button-group">
-														<span class="view-product"><i class="fa-regular fa-eye"></i></span>
-													</div>
-												</div>
-												<div class="content-card-product">
-													<h3>${producto.nombre}</h3>
-													<span class="add-cart"><i class="fa-solid fa-basket-shopping"></i></span>
-													<p class="tipo">${producto.tipo}</p>
-												</div>
-											`;
+										<div class="container-img">
+											<img src="data:image/png;base64,${producto.imagenProdu}" alt="${producto.nombre}" />
+											<div class="button-group">
+												<span class="view-product"><i class="fa-regular fa-eye"></i></span>
+											</div>
+										</div>
+										<div class="content-card-product">
+											<h3>${producto.nombre}</h3>
+											<p class="tipo">${producto.tipo}</p>
+										</div>
+									`;
 
 									track.appendChild(card);
-									const viewButton = card.querySelector('.view-product');
-									viewButton.addEventListener('click', () => {
-										mostrarModalProducto(producto);
-									});
-
-									track.appendChild(card);
-									const Button = card.querySelector('.add-cart');
-									Button.addEventListener('click', () => {
-										mostrarModal(producto.nombre, producto.idCatalogo);
-									});
 								});
-								iniciarCarrusel();
 							}
 
 							// Función para iniciar el carrusel

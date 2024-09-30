@@ -38,6 +38,17 @@ app.post('/login', usuarioNegocio.loginUsuario);
 const newDispos = require('./newDispos');
 app.post('/registerDevice', newDispos.registrarDispositivo);
 
+app.post('/registerDevice', async (req, res) => {
+  const { nombre, descripcion, marca, modelo, tipo, imagenProdu } = req.body;
+  try {
+      const nuevoDispositivo = new Catalogo({ nombre, descripcion, marca, modelo, tipo, imagenProdu });
+      await nuevoDispositivo.save();
+      res.status(201).json({ message: 'Dispositivo registrado con éxito' });
+  } catch (error) {
+      res.status(500).json({ error: 'Error al registrar el dispositivo' });
+  }
+});
+
 // Ruta para sacar catálogo
 const cata = require('./catalogoClientes'); 
 app.get('/obteCatalogo', cata.obtenerCatalogo);
