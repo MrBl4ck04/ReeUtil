@@ -1032,6 +1032,7 @@
                 <button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button>
                 <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo
 							}')">Guardar</button> <!-- Botón Guardar -->
+							<button class="btn btn-reglasMostrar" onclick="abrirModalReglas('${solicitud.idCatalogo}')">Mostrar Reglas</button> <!-- Aquí se pasa el ObjectId -->
             </td> <!-- Acciones -->
         `;
 						tableBody.appendChild(row);
@@ -1074,6 +1075,81 @@
 				.catch((error) => console.error("Error:", error));
 		}
 	</script>
+
+
+
+<div class="modal fade" id="modalReglasMostrar" tabindex="-1" role="dialog" aria-labelledby="modalReglasMostrarLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalReglasMostrarLabel">Reglas Asociadas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre de Regla</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reglasTableBody">
+                        <!-- Aquí se agregarán las reglas dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+ function abrirModalReglas(idCatalogo) {
+    console.log('ID de catálogo recibido:', idCatalogo);
+
+    // Aquí pasa el idCatalogo numérico
+    fetch(`http://localhost:5500/reglas/${idCatalogo}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la red: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reglasTableBody = document.getElementById('reglasTableBody');
+            reglasTableBody.innerHTML = '';
+
+            if (Array.isArray(data)) {
+                data.forEach(regla => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${regla.nombreRegla}</td>
+                        <td>${regla.descripcionRE}</td>
+                    `;
+                    reglasTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Se recibió un formato inesperado:', data);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalReglasMostrar'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error al cargar las reglas:', error);
+        });
+}
+
+
+</script>
+
+
+
+
 </body>
 
 </html>
