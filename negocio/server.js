@@ -4,6 +4,7 @@ const cors = require('cors');
 const formidable = require('formidable');
 const path = require('path'); // Importar el módulo path
 const app = express();
+const fs = require('fs');
 const port = 5500;
 
 // Middleware para manejar JSON y formularios
@@ -34,9 +35,68 @@ app.post('/register', usuarioNegocio.registrarUsuario);
 // Ruta para login de usuarios
 app.post('/login', usuarioNegocio.loginUsuario);
 
+// Hacer que la carpeta uploads sea accesible públicamente
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Ruta para registrar dispositivos
-const newDispos = require('./newDispos');
-app.post('/registerDevice', newDispos.registrarDispositivo);
+app.post('/registerDevice', (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.uploadDir = path.join(__dirname, 'uploads'); // Directorio donde se suben los archivos
+  form.keepExtensions = true; // Mantener la extensión del archivo
+
+  form.parse(req, async (err, fields, files) => {
+      if (err) {
+          console.error("Error al procesar el formulario:", err);
+          res.status(500).json({ error: 'Error al procesar el formulario de imagen' });
+          return;
+      }
+
+      // Depuración: mostrar los campos y archivos recibidos
+      console.log("Campos recibidos:", fields);
+      console.log("Archivos recibidos:", files);
+
+      const nombre = fields.nombre[0];
+      const descripcion = fields.descripcion[0];
+      const marca = fields.marca[0];
+      const modelo = fields.modelo[0];
+      const tipo = fields.tipo[0];
+
+      // Verificar si se recibió un archivo y acceder al primer archivo
+      let rutaImagen = null;
+      if (Array.isArray(files.imagenProdu) && files.imagenProdu.length > 0) {
+          const archivo = files.imagenProdu[0]; // Obtener el primer archivo
+
+          // Guardar la imagen con su nombre original en la carpeta uploads
+          rutaImagen = path.join(__dirname, 'uploads', archivo.originalFilename); // Ruta completa
+
+          // Renombrar el archivo subido a su nombre original
+          fs.renameSync(archivo.filepath, rutaImagen); // Mover el archivo a la carpeta uploads
+          console.log("Ruta de la imagen guardada:", rutaImagen); // Mostrar la ruta de la imagen
+      } else {
+          console.log("No se recibió ninguna imagen");
+      }
+
+      // Guardar el dispositivo en la base de datos
+      const nuevoDispositivo = new Catalogo({
+          nombre,
+          descripcion,
+          marca,
+          modelo,
+          tipo,
+          imagenProdu: rutaImagen // Guardar la ruta de la imagen
+      });
+
+      try {
+          await nuevoDispositivo.save();
+          console.log("Dispositivo guardado con éxito");
+          res.status(200).json({ message: 'Dispositivo registrado con éxito' });
+      } catch (error) {
+          console.error("Error al guardar el dispositivo:", error);
+          res.status(500).json({ error: 'Error al guardar el dispositivo' });
+      }
+  });
+});
+
 
 // Ruta para sacar catálogo
 const cata = require('./catalogoClientes'); 

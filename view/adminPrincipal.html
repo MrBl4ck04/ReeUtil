@@ -115,118 +115,43 @@
 			</div>
 		</div>
 		<script>
-			document
-				.getElementById("registerDeviceForm")
-				.addEventListener("submit", async function (event) {
-					event.preventDefault();
+			document.getElementById("registerDeviceForm").addEventListener("submit", async function (event) {
+				event.preventDefault();
 
-					const formData = new FormData(this);
-					const fileInput = document.getElementById("imagenProdu");
-					const file = fileInput.files[0];
+				const formData = new FormData(this);
+				const fileInput = document.getElementById("imagenProdu");
+				formData.append("imagenProdu", fileInput.files[0]);
 
-					// Verificar el idUsuario en localStorage
-					const idUsuario = localStorage.getItem("idUsuario");
-					console.log("idUsuario en localStorage:", idUsuario); // Aquí verificamos el valor de idUsuario
+				// Depuración: imprimir los datos enviados
+				for (let pair of formData.entries()) {
+					console.log(`${pair[0]}: ${pair[1]}`);
+				}
 
-					if (idUsuario) {
-						formData.append("idUsuario", idUsuario); // Añadir idUsuario a FormData
+				try {
+					const response = await fetch("http://localhost:5500/registerDevice", {
+						method: "POST",
+						body: formData
+					});
+
+					if (response.ok) {
+						console.log("Dispositivo registrado con éxito");
+						document.getElementById("deviceMessage").style.display = "block";
+						document.getElementById("deviceErrorMessage").style.display = "none";
+						document.getElementById("registerDeviceForm").reset();
 					} else {
-						console.error("idUsuario no encontrado en localStorage");
-						return; // Salir si no se encuentra el idUsuario
+						console.error("Error al registrar el dispositivo", await response.json());
+						document.getElementById("deviceErrorMessage").style.display = "block";
+						document.getElementById("deviceMessage").style.display = "none";
 					}
+				} catch (error) {
+					console.error("Error:", error);
+					document.getElementById("deviceErrorMessage").style.display = "block";
+					document.getElementById("deviceMessage").style.display = "none";
+				}
+			});
 
-					if (file) {
-						// Convertir archivo a Base64
-						const reader = new FileReader();
-						reader.readAsDataURL(file);
 
-						reader.onload = async function () {
-							const base64String = reader.result.replace(
-								/^data:.+;base64,/,
-								""
-							);
 
-							// Agregar la cadena Base64 al FormData
-							formData.set("imagenProdu", base64String);
-
-							try {
-								const response = await fetch(
-									"http://localhost:5500/registerDevice",
-									{
-										method: "POST",
-										headers: {
-											"Content-Type": "application/json",
-										},
-										body: JSON.stringify(
-											Object.fromEntries(formData.entries())
-										),
-									}
-								);
-
-								if (response.ok) {
-									document.getElementById("deviceMessage").style.display =
-										"block";
-									document.getElementById(
-										"deviceErrorMessage"
-									).style.display = "none";
-									document.getElementById("registerDeviceForm").reset();
-								} else {
-									document.getElementById(
-										"deviceErrorMessage"
-									).style.display = "block";
-									document.getElementById("deviceMessage").style.display =
-										"none";
-								}
-							} catch (error) {
-								document.getElementById("deviceErrorMessage").style.display =
-									"block";
-								document.getElementById("deviceMessage").style.display =
-									"none";
-								console.error("Error:", error);
-							}
-						};
-
-						reader.onerror = function (error) {
-							document.getElementById("deviceErrorMessage").style.display =
-								"block";
-							document.getElementById("deviceMessage").style.display = "none";
-							console.error("Error al leer el archivo:", error);
-						};
-					} else {
-						try {
-							const response = await fetch(
-								"http://localhost:5500/registerDevice",
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify(
-										Object.fromEntries(formData.entries())
-									),
-								}
-							);
-
-							if (response.ok) {
-								document.getElementById("deviceMessage").style.display =
-									"block";
-								document.getElementById("deviceErrorMessage").style.display =
-									"none";
-								document.getElementById("registerDeviceForm").reset();
-							} else {
-								document.getElementById("deviceErrorMessage").style.display =
-									"block";
-								document.getElementById("deviceMessage").style.display =
-									"none";
-							}
-						} catch (error) {
-							document.getElementById("deviceErrorMessage").style.display =
-								"block";
-							document.getElementById("deviceMessage").style.display = "none";
-							console.error("Error:", error);
-						}
-					}
-				});
 		</script>
 	</header>
 
@@ -752,85 +677,6 @@
 					</tr>
 				</thead>
 			</table>
-		</section>
-
-		<section class="container blogs">
-			<h1 class="heading-1">Últimas acciones</h1>
-
-			<div class="container-blogs">
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u1.png" alt="Imagen Blog 1" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Galaxy Buds</h3>
-						<span>01 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u2.png" alt="Imagen Blog 2" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Lavadora,WA456DRHDSU/ZS</h3>
-						<span>02 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-				<div class="card-blog">
-					<div class="container-img">
-						<img src="u.png" alt="Imagen Blog 3" />
-						<div class="button-group-blog">
-							<span>
-								<i class="fa-solid fa-magnifying-glass"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-link"></i>
-							</span>
-						</div>
-					</div>
-					<div class="content-blog">
-						<h3>Philips Serie 2200 Cafetera Superautomática</h3>
-						<span>03 Septiembre 2024</span>
-						<p>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
-							molestiae! Ratione et, dolore ipsum quaerat iure illum
-							reprehenderit non maxime amet dolor voluptas facilis corporis,
-							consequatur eius est sunt suscipit?
-						</p>
-						<div class="btn-read-more">Leer más</div>
-					</div>
-				</div>
-			</div>
 		</section>
 	</main>
 
