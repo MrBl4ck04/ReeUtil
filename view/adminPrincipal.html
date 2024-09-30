@@ -820,7 +820,7 @@
             <td>
                 <button class="btn btn-cotizar" onclick="openModalSol()">Cotizar</button>
                 <button class="btn btn-guardar" onclick="guardarCotizacion('${solicitud.idDispositivo}')">Guardar</button> <!-- Botón Guardar -->
-				<button class="btn btn-reglasMostrar" onclick="abrirModalReglas('${solicitud._id}')">Mostrar Reglas</button>
+                <button class="btn btn-reglasMostrar" onclick="abrirModalReglas('${solicitud.idCatalogo}')">Mostrar Reglas</button> <!-- Aquí se pasa el ObjectId -->
 				</td> <!-- Acciones -->
         `;
         tableBody.appendChild(row);
@@ -897,43 +897,40 @@
 </div>
 
 <script>
-   function abrirModalReglas(idCatalogo) {
-  console.log('ID de catálogo:', idCatalogo); // Verifica aquí
-  if (!idCatalogo) {
-    console.error('ID de catálogo es nulo o inválido.');
-    return;
-  }
-  
-  fetch(`http://localhost:5500/reglas/${idCatalogo}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error en la red: ' + response.statusText);
-      }
-      return response.json();
-    })
-    .then(data => {
-      const reglasTableBody = document.getElementById('reglasTableBody');
-      reglasTableBody.innerHTML = ''; // Limpia el contenido anterior
+ function abrirModalReglas(idCatalogo) {
+    console.log('ID de catálogo recibido:', idCatalogo);
 
-      if (Array.isArray(data)) {
-        data.forEach(regla => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${regla.nombreRegla}</td>
-            <td>${regla.descripcionRE}</td>
-          `;
-          reglasTableBody.appendChild(row);
+    // Aquí pasa el idCatalogo numérico
+    fetch(`http://localhost:5500/reglas/${idCatalogo}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la red: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reglasTableBody = document.getElementById('reglasTableBody');
+            reglasTableBody.innerHTML = '';
+
+            if (Array.isArray(data)) {
+                data.forEach(regla => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${regla.nombreRegla}</td>
+                        <td>${regla.descripcionRE}</td>
+                    `;
+                    reglasTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Se recibió un formato inesperado:', data);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalReglasMostrar'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error al cargar las reglas:', error);
         });
-      } else {
-        console.error('Se recibió un formato inesperado:', data);
-      }
-
-      const modal = new bootstrap.Modal(document.getElementById('modalReglasMostrar'));
-      modal.show();
-    })
-    .catch(error => {
-      console.error('Error al cargar las reglas:', error);
-    });
 }
 
 

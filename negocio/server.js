@@ -194,26 +194,23 @@ app.post('/actualizarCotizacion', async (req, res) => {
   }
 });
 app.get('/reglas/:idCatalogo', async (req, res) => {
-  const { idCatalogo } = req.params;
-  
-  console.log('Buscando reglas para idCatalogo:', idCatalogo); // Verifica el ID recibido
-
-  // Asegúrate de que el idCatalogo sea un ObjectId válido
-  if (!ObjectId.isValid(idCatalogo)) {
-    return res.status(400).json({ message: 'ID de catálogo no válido' });
-  }
+  const idCatalogo = req.params.idCatalogo; // Esto es un número
 
   try {
-    const reglas = await Regla.find({ idCatalogo: ObjectId(idCatalogo) });
+      // Primero, busca el catálogo por su id (numérico)
+      const catalogo = await Catalogo.findOne({ idCatalogo: idCatalogo }); // Asegúrate de que 'Catalogo' sea tu modelo correcto
 
-    if (!reglas || reglas.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron reglas para este catálogo.' });
-    }
+      if (!catalogo) {
+          return res.status(404).send('Catálogo no encontrado');
+      }
 
-    res.json(reglas);
+      // Ahora, busca las reglas usando el ObjectId del catálogo encontrado
+      const reglas = await Regla.find({ idCatalogo: catalogo._id }); // Aquí usamos el ObjectId
+
+      res.json(reglas);
   } catch (error) {
-    console.error('Error al obtener las reglas:', error);
-    res.status(500).json({ message: 'Error al obtener las reglas' });
+      console.error('Error al buscar reglas:', error);
+      res.status(500).send('Error al buscar reglas');
   }
 });
 
