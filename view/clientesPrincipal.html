@@ -243,18 +243,29 @@
 		document.getElementById('solicitudForm').addEventListener('submit', async function (event) {
 			event.preventDefault();
 
-			const formData = new FormData(this);
-			const data = Object.fromEntries(formData.entries());
 			const idUsuario = localStorage.getItem('idUsuario');
 			console.log('idUsuario en localStorage:', idUsuario);
-
-			if (idUsuario) {
-				data.idUsuario = idUsuario; // Agregar el idUsuario al objeto `data`
-			} else {
+	
+			if (idUsuario && idUsuario == 56) {
+				const contadorCotizaciones = localStorage.getItem('contadorCotizaciones');
+				if (contadorCotizaciones && parseInt(contadorCotizaciones) >= 1) {
+					mostrarMensaje('Ya has enviado una cotización. Necesitas un plan premium.', 'error');
+					return;
+				} else {
+					localStorage.setItem('contadorCotizaciones', 1);
+				}
+			} else if (!idUsuario) {
 				mostrarMensaje('idUsuario no encontrado en localStorage', 'error');
 				return;
 			}
-
+	
+			const formData = new FormData(this);
+			const data = Object.fromEntries(formData.entries());
+	
+			if (idUsuario) {
+				data.idUsuario = idUsuario;
+			}
+	
 			try {
 				const response = await fetch('http://localhost:5500/envcotizacion', {
 					method: 'POST',
@@ -263,26 +274,24 @@
 					},
 					body: JSON.stringify(data)
 				});
-
+	
 				const result = await response.json();
-
+	
 				if (response.ok) {
 					mostrarMensaje('Datos enviados correctamente', 'exito');
 				} else {
 					mostrarMensaje('Error al enviar los datos: ' + result.message, 'error');
 				}
-
+	
 			} catch (error) {
 				mostrarMensaje('Error en la solicitud: ' + error.message, 'error');
 			}
 		});
+	
+		// Función para mostrar mensajes
 		function mostrarMensaje(mensaje, tipo) {
 			const mensajeDiv = document.getElementById('mensaje');
-
-			// Cambiar el texto del mensaje
 			mensajeDiv.textContent = mensaje;
-
-			// Quitar las clases previas y asignar la clase según el tipo
 			if (tipo === 'exito') {
 				mensajeDiv.classList.remove('mensaje-error');
 				mensajeDiv.classList.add('mensaje-exito');
@@ -290,16 +299,15 @@
 				mensajeDiv.classList.remove('mensaje-exito');
 				mensajeDiv.classList.add('mensaje-error');
 			}
-
-			// Asegurarse de que el mensaje esté visible
+	
 			mensajeDiv.style.display = 'block';
-
-			// Ocultar el mensaje después de 5 segundos
+	
 			setTimeout(() => {
 				mensajeDiv.style.display = 'none';
 			}, 5000);
 		}
 	</script>
+	
 
 	<section class="banner">
 		<div class="content-banner">
@@ -423,13 +431,25 @@
 											</div>
 										</div>
 										<div class="content-card-product">
-											<h3>${producto.nombre}</h3>
-											<p class="tipo">${producto.tipo}</p>
-										</div>
+													<h3>${producto.nombre}</h3>
+													<span class="add-cart"><i class="fa-solid fa-basket-shopping"></i></span>
+													<p class="tipo">${producto.tipo}</p>
+												</div>
 									`;
 
 									track.appendChild(card);
+									const viewButton = card.querySelector('.view-product');
+									viewButton.addEventListener('click', () => {
+										mostrarModalProducto(producto);
+									});
+
+									track.appendChild(card);
+									const Button = card.querySelector('.add-cart');
+									Button.addEventListener('click', () => {
+										mostrarModal(producto.nombre, producto.idCatalogo);
+									});
 								});
+								iniciarCarrusel();
 							}
 
 							// Función para iniciar el carrusel
