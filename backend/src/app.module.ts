@@ -14,7 +14,7 @@ import { InventoryModule } from './inventory/inventory.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb+srv://mati:clapper123@reeutil.f0n5a.mongodb.net/reeutil'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb+srv://JesusIma:mongo@cluster0.purayjh.mongodb.net/ReeUtil?retryWrites=true&w=majority'),
     AuthModule,
     UsersModule,
     CatalogModule,
