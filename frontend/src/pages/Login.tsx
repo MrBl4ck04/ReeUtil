@@ -23,6 +23,7 @@ interface RegisterForm {
 export const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -86,6 +87,7 @@ export const Login: React.FC = () => {
 
         <div className="bg-white py-8 px-6 shadow-lg rounded-lg">
           {isLogin ? (
+            // ---------- FORMULARIO DE LOGIN ----------
             <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -155,6 +157,7 @@ export const Login: React.FC = () => {
               </button>
             </form>
           ) : (
+            // ---------- FORMULARIO DE REGISTRO ----------
             <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -219,18 +222,31 @@ export const Login: React.FC = () => {
                 <label htmlFor="contraseA" className="block text-sm font-medium text-gray-700">
                   Contraseña
                 </label>
-                <input
-                  {...registerForm.register('contraseA', { 
-                    required: 'La contraseña es requerida',
-                    minLength: {
-                      value: 6,
-                      message: 'La contraseña debe tener al menos 6 caracteres'
-                    }
-                  })}
-                  type="password"
-                  className="input mt-1"
-                  placeholder="Tu contraseña"
-                />
+                <div className="mt-1 relative">
+                  <input
+                    {...registerForm.register('contraseA', { 
+                      required: 'La contraseña es requerida',
+                      pattern: {
+                        value: /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-\\[\]\/+=;']).{8,}$/,
+                        message: 'Debe tener mínimo 8 caracteres, una mayúscula y un símbolo especial'
+                      }
+                    })}
+                    type={showRegisterPassword ? 'text' : 'password'}
+                    className="input pr-10"
+                    placeholder="Tu contraseña"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  >
+                    {showRegisterPassword ? (
+                      <EyeOff className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
                 {registerForm.formState.errors.contraseA && (
                   <p className="mt-1 text-sm text-danger-600">
                     {registerForm.formState.errors.contraseA.message}
