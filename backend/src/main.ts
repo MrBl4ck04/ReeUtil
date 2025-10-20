@@ -2,9 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import mongoose from 'mongoose';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Mongoose connection event listeners for clearer logging
+  mongoose.connection.on('connected', () => {
+    console.log('\u2705 Mongoose connected to', mongoose.connection.host + ':' + mongoose.connection.port);
+  });
+  mongoose.connection.on('error', (err) => {
+    console.error('\u26A0\ufe0f Mongoose connection error:', err.message || err);
+  });
+  mongoose.connection.on('disconnected', () => {
+    console.warn('\u26A0\ufe0f Mongoose disconnected');
+  });
 
   // Configurar CORS
   app.enableCors({

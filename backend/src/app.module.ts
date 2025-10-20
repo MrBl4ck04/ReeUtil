@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CatalogModule } from './catalog/catalog.module';
@@ -13,8 +14,23 @@ import { InventoryModule } from './inventory/inventory.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
+      validationSchema: Joi.object({
+        MONGODB_URI: Joi.string().required(),
+        JWT_SECRET: Joi.string().default('your-super-secret-jwt-key-here'),
+        JWT_EXPIRES_IN: Joi.string().default('24h'),
+        PORT: Joi.number().default(5500),
+        NODE_ENV: Joi.string().default('development'),
+        CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
+      }),
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb+srv://JesusIma:mongo@cluster0.purayjh.mongodb.net/ReeUtil?retryWrites=true&w=majority'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_URI'),
+      }),
+    }),
     AuthModule,
     UsersModule,
     CatalogModule,

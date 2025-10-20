@@ -18,7 +18,8 @@ export class InventoryService {
     let resultado = [];
     
     for (const item of catalogo) {
-      let dispositivoQuery = { idCatalogo: item.idCatalogo };
+  // Use a loose type for the dynamic query object to avoid strict TS property checks
+  let dispositivoQuery: any = { idCatalogo: item.idCatalogo };
       
       if (estado) {
         dispositivoQuery.estadoCotizaci = estado;
