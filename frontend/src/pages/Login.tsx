@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
+import { authApi } from '../services/api';
+import toast from 'react-hot-toast';
 import { Recycle, Eye, EyeOff } from 'lucide-react';
 
 interface LoginForm {
@@ -41,12 +43,25 @@ export const Login: React.FC = () => {
   const handleRegister = async (data: RegisterForm) => {
     setIsLoading(true);
     try {
-      // Aquí implementarías la lógica de registro
-      console.log('Register data:', data);
-      // Por ahora solo mostramos un mensaje
-      alert('Funcionalidad de registro en desarrollo');
-    } catch (error) {
-      console.error('Error registering:', error);
+      const response = await authApi.register(data);
+      if (response.data && response.data.user) {
+        toast.success('Registro exitoso. Iniciando sesión...');
+        const logged = await login(data.email, data.contraseA);
+        if (logged) {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          navigate(user.rol ? '/admin' : '/client');
+        } else {
+          toast.error('No se pudo iniciar sesión automáticamente. Intenta iniciar sesión manualmente.');
+          setIsLogin(true);
+        }
+      } else {
+        toast.success('Usuario registrado con éxito');
+        setIsLogin(true);
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al registrar usuario';
+      console.error('Error registering:', message);
+      toast.error(message);
     }
     setIsLoading(false);
   };

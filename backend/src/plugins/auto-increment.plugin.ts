@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 
 export function autoIncrementPlugin(schema: Schema, options: { field: string }) {
-  schema.pre('save', async function (next) {
+  schema.pre('validate', async function (next) {
     if (this.isNew) {
       // Use a loose any type for Model to avoid TS errors when calling static methods
       const Model: any = this.constructor;
