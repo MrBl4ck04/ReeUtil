@@ -2,12 +2,22 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authApi } from '../services/api';
 import toast from 'react-hot-toast';
 
+interface Permission {
+  moduleId: string;
+  moduleName: string;
+  hasAccess: boolean;
+}
+
 interface User {
   idUsuario: number;
   nombre: string;
   apellido: string;
   email: string;
-  rol: boolean;
+  rol: boolean; // true = admin, false = cliente
+  cargo?: string; // Puesto en la empresa (solo para admin)
+  permissions?: Permission[]; // Permisos específicos (solo para admin)
+  loginAttempts?: number; // Contador de intentos fallidos de login
+  isBlocked?: boolean; // Si el usuario está bloqueado
 }
 
 interface AuthContextType {
@@ -56,6 +66,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.data.access_token) {
         const { access_token, user: userData } = response.data;
         
+        // Verificar si el usuario está bloqueado
+        if (userData.isBlocked) {
+          toast.error('Su cuenta está bloqueada. Por favor contacte con soporte.');
+          return false;
+        }
+        
+        // Resetear contador de intentos fallidos si existía
+        if (userData.loginAttempts > 0) {
+          authApi.resetLoginAttempts(userData.idUsuario);
+        }
+        
         setToken(access_token);
         setUser(userData);
         
@@ -68,6 +89,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       return false;
     } catch (error: any) {
+      // Incrementar contador de intentos fallidos
+      if (error.response?.status === 401) {
+        const email = error.config?.data ? JSON.parse(error.config.data).email : '';
+        if (email) {
+          authApi.incrementLoginAttempts(email);
+        }
+      }
+      
       const message = error.response?.data?.message || 'Error al iniciar sesión';
       toast.error(message);
       return false;

@@ -37,12 +37,36 @@ export const authApi = {
     api.post('/auth/login', data),
   register: (data: any) =>
     api.post('/auth/register', data),
+  incrementLoginAttempts: (email: string) =>
+    api.post('/auth/login-attempts/increment', { email }),
+  resetLoginAttempts: (userId: number) =>
+    api.post('/auth/login-attempts/reset', { userId }),
+  checkUserBlocked: (email: string) =>
+    api.get(`/auth/check-blocked/${email}`),
 };
 
 // Users API
 export const usersApi = {
+  // Usuarios comunes (clientes)
   getAll: () => api.get('/users'),
   getById: (id: number) => api.get(`/users/${id}`),
+  update: (id: number, data: any) => api.patch(`/users/${id}`, data),
+  delete: (id: number) => api.delete(`/users/${id}`),
+  getBlocked: () => api.get('/users/blocked'),
+  unblockUser: (id: number) => api.post(`/users/${id}/unblock`),
+  
+  // Empleados (admin)
+  getAllEmployees: () => api.get('/users/employees'),
+  getEmployeeById: (id: number) => api.get(`/users/employees/${id}`),
+  createEmployee: (data: any) => api.post('/users/employees', data),
+  updateEmployee: (id: number, data: any) => api.patch(`/users/employees/${id}`, data),
+  deleteEmployee: (id: number) => api.delete(`/users/employees/${id}`),
+  resetEmployeePassword: (id: number) => api.post(`/users/employees/${id}/reset-password`),
+  
+  // Permisos
+  getEmployeePermissions: (id: number) => api.get(`/users/employees/${id}/permissions`),
+  updateEmployeePermissions: (id: number, permissions: any[]) => 
+    api.post(`/users/employees/${id}/permissions`, { permissions }),
 };
 
 // Catalog API

@@ -1,31 +1,20 @@
 {
-  "name": "reeutil-refactored",
+  "name": "reeutil-frontend-only",
   "version": "2.0.0",
-  "description": "ReeUtil - Sistema de reciclaje de dispositivos electrónicos (Refactorizado)",
+  "description": "ReeUtil - Frontend (Solo interfaz, sin backend)",
   "author": "ReeUtil Team",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run start:dev",
-    "dev:frontend": "cd frontend && npm start",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "start": "cd backend && npm run start:prod",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm run test",
-    "test:frontend": "cd frontend && npm run test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint"
+    "dev": "cd frontend && npm start",
+    "start": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "install:all": "npm install && cd frontend && npm install",
+    "test": "cd frontend && npm run test",
+    "lint": "cd frontend && npm run lint"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
+  "devDependencies": {},
   "workspaces": [
-    "backend",
     "frontend"
   ],
   "engines": {

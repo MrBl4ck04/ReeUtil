@@ -1,8 +1,10 @@
-# ReeUtil - Sistema de Reciclaje de Dispositivos Electrónicos
+# ReeUtil - Frontend Only
 
-## 🚀 Refactorización Completa
+## ⚠️ Nota Importante
 
-Este proyecto ha sido completamente refactorizado con una arquitectura moderna y escalable, migrando de un sistema monolítico a una aplicación full-stack con separación clara de responsabilidades.
+Este proyecto contiene **SOLO EL FRONTEND**. El backend ha sido eliminado para que puedas implementar tu propia solución de backend.
+
+El frontend está completamente funcional y listo para conectarse a cualquier API REST que implementes.
 
 ## 📋 Tabla de Contenidos
 
@@ -19,12 +21,18 @@ Este proyecto ha sido completamente refactorizado con una arquitectura moderna y
 ## ✨ Características
 
 ### Funcionalidades Principales
-- 🔐 **Sistema de Autenticación**: Login/Registro con JWT y roles (Admin/Cliente)
+- 🔐 **Sistema de Autenticación**: Login/Registro con JWT, roles múltiples y permisos granulares
+- 🛒 **Marketplace**: Compra y venta de dispositivos electrónicos entre usuarios
+- 🔧 **Reparaciones**: Solicitud y gestión de reparaciones de dispositivos
+- ♻️ **Reciclaje**: Sistema de reciclaje con compensación económica
+- ⭐ **Reseñas**: Sistema de reseñas y calificaciones para vendedores y servicios
 - 📱 **Gestión de Catálogo**: CRUD completo de dispositivos electrónicos
 - 📋 **Sistema de Cotizaciones**: Evaluación y cotización de dispositivos
 - 📊 **Inventario**: Gestión de dispositivos listos para reciclar/vender
 - 📜 **Reglas de Evaluación**: Configuración de criterios por tipo de dispositivo
-- 👥 **Gestión de Usuarios**: Administración de usuarios y permisos
+- 👥 **Gestión de Usuarios**: Administración de usuarios, empleados y permisos
+- 🔔 **Notificaciones**: Sistema de notificaciones en tiempo real
+- 💰 **Simulación de Pagos**: Simulación de transacciones económicas
 
 ### Mejoras Implementadas
 - 🏗️ **Arquitectura Modular**: Separación clara entre frontend y backend
@@ -34,6 +42,8 @@ Este proyecto ha sido completamente refactorizado con una arquitectura moderna y
 - 📚 **Documentación**: API documentada con Swagger
 - 🧪 **Testing**: Estructura preparada para testing
 - 🔧 **DevOps**: Scripts automatizados para desarrollo y producción
+- 🔐 **OSI**: Gestión de permisos por módulos para administradores
+- 🔒 **Bloqueo de Cuentas**: Sistema de bloqueo automático por intentos fallidos
 
 ## 🏗️ Arquitectura
 
@@ -45,6 +55,11 @@ backend/
 │   ├── users/          # Gestión de usuarios
 │   ├── catalog/        # Catálogo de dispositivos
 │   ├── devices/        # Gestión de dispositivos
+│   ├── marketplace/    # Sistema de marketplace
+│   ├── repairs/        # Sistema de reparaciones
+│   ├── recycle/        # Sistema de reciclaje
+│   ├── reviews/        # Sistema de reseñas
+│   ├── notifications/  # Sistema de notificaciones
 │   ├── quotations/     # Sistema de cotizaciones
 │   ├── rules/          # Reglas de evaluación
 │   ├── inventory/      # Gestión de inventario
@@ -58,7 +73,13 @@ backend/
 frontend/
 ├── src/
 │   ├── components/     # Componentes reutilizables
+│   │   ├── Layout.tsx  # Layout general
+│   │   ├── ClientLayout.tsx  # Layout para clientes
+│   │   ├── AdminLayout.tsx   # Layout para administradores
+│   │   └── ProtectedRoute.tsx # Rutas protegidas
 │   ├── pages/          # Páginas de la aplicación
+│   │   ├── client/     # Páginas de cliente
+│   │   └── admin/      # Páginas de administrador
 │   ├── contexts/       # Contextos de React
 │   ├── services/       # Servicios de API
 │   ├── hooks/          # Custom hooks
@@ -75,6 +96,7 @@ frontend/
 - **Swagger**: Documentación de API
 - **Class Validator**: Validación de datos
 - **Passport**: Estrategias de autenticación
+- **Bcrypt**: Encriptación de contraseñas
 
 ### Frontend
 - **React 18**: Biblioteca de UI
@@ -85,6 +107,7 @@ frontend/
 - **React Router**: Navegación
 - **Axios**: Cliente HTTP
 - **Lucide React**: Iconos
+- **React Hot Toast**: Notificaciones
 
 ### Herramientas de Desarrollo
 - **ESLint**: Linting de código
@@ -103,7 +126,7 @@ frontend/
 ```bash
 # Clonar el repositorio
 git clone <repository-url>
-cd reeutil-refactored
+cd reeutil
 
 # Instalar todas las dependencias
 npm run install:all
@@ -194,33 +217,69 @@ Una vez que el backend esté ejecutándose, la documentación de la API estará 
 #### Autenticación
 - `POST /auth/login` - Iniciar sesión
 - `POST /auth/register` - Registro de usuario
+- `POST /auth/login-attempts/increment` - Incrementar intentos fallidos
+- `POST /auth/login-attempts/reset` - Resetear intentos fallidos
+- `GET /auth/check-blocked/:email` - Verificar si un usuario está bloqueado
 
-#### Catálogo
-- `GET /catalog` - Obtener todos los dispositivos
-- `POST /catalog` - Crear nuevo dispositivo
-- `PUT /catalog/:id` - Actualizar dispositivo
-- `DELETE /catalog/:id` - Eliminar dispositivo
+#### Marketplace
+- `GET /marketplace/products` - Obtener productos disponibles
+- `POST /marketplace/products` - Crear nuevo producto
+- `PATCH /marketplace/products/:id` - Actualizar producto
+- `DELETE /marketplace/products/:id` - Eliminar producto
+- `POST /marketplace/purchase` - Comprar un producto
+- `POST /marketplace/simulate-payment` - Simular un pago
+- `GET /marketplace/my-purchases` - Obtener mis compras
+- `GET /marketplace/my-sales` - Obtener mis ventas
 
-#### Dispositivos
-- `GET /devices` - Obtener todas las solicitudes
-- `POST /devices` - Crear nueva solicitud
-- `POST /devices/update-quotation` - Actualizar cotización
+#### Reparaciones
+- `POST /repairs/request` - Solicitar reparación
+- `GET /repairs/my-requests` - Obtener mis solicitudes
+- `GET /repairs/all` - Obtener todas las solicitudes (admin)
+- `PATCH /repairs/:id/quote` - Actualizar cotización
+- `PATCH /repairs/:id/status` - Actualizar estado
+- `POST /repairs/:id/accept` - Aceptar cotización
+- `POST /repairs/:id/reject` - Rechazar cotización
 
-#### Inventario
-- `GET /inventory` - Obtener inventario completo
-- `GET /inventory?tipo=smartphone` - Filtrar por tipo
-- `GET /inventory?estado=Para reciclar` - Filtrar por estado
+#### Reciclaje
+- `POST /recycle/request` - Solicitar reciclaje
+- `GET /recycle/my-requests` - Obtener mis solicitudes
+- `GET /recycle/all` - Obtener todas las solicitudes (admin)
+- `PATCH /recycle/:id/quote` - Actualizar cotización
+- `PATCH /recycle/:id/status` - Actualizar estado
+- `POST /recycle/:id/accept` - Aceptar oferta
+- `POST /recycle/:id/reject` - Rechazar oferta
 
-## 📁 Estructura del Proyecto
+#### Reseñas
+- `POST /reviews` - Crear reseña
+- `GET /reviews/my-reviews` - Obtener mis reseñas
+- `GET /reviews/seller/:sellerId` - Obtener reseñas de un vendedor
+- `GET /reviews/all` - Obtener todas las reseñas (admin)
+- `GET /reviews/stats` - Obtener estadísticas (admin)
+- `PATCH /reviews/:id` - Actualizar reseña
+- `DELETE /reviews/:id` - Eliminar reseña
+- `POST /reviews/:id/flag` - Reportar reseña (admin)
+
+#### Notificaciones
+- `GET /notifications` - Obtener notificaciones
+- `PATCH /notifications/:id/read` - Marcar como leída
+- `PATCH /notifications/read-all` - Marcar todas como leídas
+- `DELETE /notifications/:id` - Eliminar notificación
+
+## 📁 Estructura del Proyecto Actualizada
 
 ```
-reeutil-refactored/
+reeutil/
 ├── backend/                 # Backend NestJS
 │   ├── src/
 │   │   ├── auth/           # Autenticación
 │   │   ├── users/          # Usuarios
 │   │   ├── catalog/        # Catálogo
 │   │   ├── devices/        # Dispositivos
+│   │   ├── marketplace/    # Marketplace
+│   │   ├── repairs/        # Reparaciones
+│   │   ├── recycle/        # Reciclaje
+│   │   ├── reviews/        # Reseñas
+│   │   ├── notifications/  # Notificaciones
 │   │   ├── quotations/     # Cotizaciones
 │   │   ├── rules/          # Reglas
 │   │   ├── inventory/      # Inventario
@@ -232,6 +291,8 @@ reeutil-refactored/
 │   ├── src/
 │   │   ├── components/     # Componentes
 │   │   ├── pages/          # Páginas
+│   │   │   ├── client/     # Páginas de cliente
+│   │   │   └── admin/      # Páginas de administrador
 │   │   ├── contexts/       # Contextos
 │   │   ├── services/       # Servicios API
 │   │   └── types/          # Tipos TypeScript
@@ -242,44 +303,45 @@ reeutil-refactored/
 └── README.md
 ```
 
-## 🔄 Migración desde la Versión Anterior
+## 🔄 Nuevas Funcionalidades
 
-### Cambios Principales
-1. **Separación Frontend/Backend**: El código monolítico se dividió en dos aplicaciones independientes
-2. **Nuevas Tecnologías**: Migración de Express a NestJS y HTML vanilla a React
-3. **Mejor Arquitectura**: Implementación de patrones de diseño y separación de responsabilidades
-4. **Seguridad Mejorada**: JWT, validación de datos y CORS configurado
-5. **UI/UX Moderna**: Interfaz completamente rediseñada con Tailwind CSS
+### 1. Marketplace
+- Compra y venta de dispositivos entre usuarios
+- Sistema de comisiones por ventas
+- Simulación de pagos
+- Gestión de transacciones
 
-### Datos Compatibles
-- ✅ Base de datos MongoDB compatible
-- ✅ Esquemas de datos mantenidos
-- ✅ Funcionalidades existentes preservadas
-- ✅ Usuarios y datos existentes funcionan sin cambios
+### 2. Reparaciones
+- Solicitud de reparación de dispositivos
+- Cotización por técnicos
+- Seguimiento de estado
+- Notificaciones de actualización
 
-## 🧪 Testing
+### 3. Reciclaje
+- Solicitud de reciclaje con compensación económica
+- Evaluación de dispositivos
+- Gestión de ofertas
+- Proceso de pago al usuario
 
-```bash
-# Testing del backend
-cd backend && npm run test
+### 4. Reseñas y Calificaciones
+- Sistema de reseñas para vendedores
+- Calificaciones de 1 a 5 estrellas
+- Moderación de reseñas por administradores
+- Estadísticas de satisfacción
 
-# Testing del frontend
-cd frontend && npm run test
+### 5. Notificaciones
+- Notificaciones en tiempo real
+- Alertas de actualizaciones
+- Gestión de lectura/no leída
+- Acciones rápidas desde notificaciones
 
-# Testing completo
-npm run test
-```
+### 6. Gestión de Permisos (OSI)
+- Control granular de permisos por módulo
+- Asignación de permisos por empleado
+- Roles personalizables
+- Seguridad por niveles
 
-## 📈 Performance
-
-### Optimizaciones Implementadas
-- **React Query**: Cache inteligente de datos
-- **Lazy Loading**: Carga diferida de componentes
-- **Code Splitting**: División de código para mejor performance
-- **MongoDB Indexing**: Índices optimizados para consultas frecuentes
-- **Compression**: Compresión gzip en el backend
-
-## 🔒 Seguridad
+## 🔒 Seguridad Mejorada
 
 ### Medidas Implementadas
 - **JWT Authentication**: Tokens seguros con expiración
@@ -287,6 +349,9 @@ npm run test
 - **CORS Configuration**: Configuración segura de CORS
 - **Password Hashing**: Contraseñas hasheadas con bcrypt
 - **Role-based Access**: Control de acceso basado en roles
+- **Permission-based Access**: Control de acceso basado en permisos
+- **Account Locking**: Bloqueo de cuentas tras intentos fallidos
+- **Admin Approval**: Desbloqueo de cuentas por administradores
 
 ## 🚀 Deployment
 
@@ -304,18 +369,6 @@ npm run build
 # Servir archivos estáticos con nginx, apache, etc.
 ```
 
-### Docker (Opcional)
-```dockerfile
-# Dockerfile para backend
-FROM node:18-alpine
-WORKDIR /app
-COPY backend/package*.json ./
-RUN npm ci --only=production
-COPY backend/dist ./dist
-EXPOSE 5500
-CMD ["node", "dist/main"]
-```
-
 ## 🤝 Contribución
 
 1. Fork el proyecto
@@ -331,16 +384,16 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 👥 Equipo
 
 - **Desarrollo**: Equipo ReeUtil
-- **Arquitectura**: Refactorización completa con NestJS + React
+- **Arquitectura**: Sistema completo con NestJS + React
 - **Diseño**: UI/UX moderna con Tailwind CSS
 
 ## 📞 Soporte
 
-Para soporte técnico o preguntas sobre la refactorización:
+Para soporte técnico o preguntas sobre el proyecto:
 - Crear un issue en el repositorio
 - Contactar al equipo de desarrollo
 - Revisar la documentación de la API en `/api`
 
 ---
 
-**ReeUtil v2.0** - Sistema de reciclaje moderno y escalable 🚀
+**ReeUtil v3.0** - Sistema de reciclaje, reparación y marketplace moderno y escalable 🚀
