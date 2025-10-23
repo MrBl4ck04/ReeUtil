@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../services/api';
-import { Mail, User, Lock, Phone, MapPin } from 'lucide-react';
+import { Mail, User, Lock, Phone, MapPin, Eye, EyeOff } from 'lucide-react';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +23,9 @@ export const Register: React.FC = () => {
     direccion: '',
     telefono: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrengthInfo, setPasswordStrengthInfo] = useState<{ label: string; level: number }>({ label: '', level: 0 });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,13 +33,41 @@ export const Register: React.FC = () => {
     
     // Validar fortaleza de contraseña en tiempo real
     if (name === 'contraseA') {
+      // Se mantiene la validación estricta por submit
       setPasswordStrength({
         length: value.length >= 12,
         uppercase: /[A-Z]/.test(value),
         special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
       });
+
+      // Regla: <12 siempre débil, ==12 mediana,
+      // >12 se mantiene mediana a menos que cumpla mayúscula, número y símbolo
+      const len = value.length;
+      const hasUppercase = /[A-Z]/.test(value);
+      const hasNumber = /[0-9]/.test(value);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+      let level = 1;
+      let label = 'Muy débil';
+      if (len === 12) {
+        level = 2;
+        label = 'Mediana';
+      } else if (len > 12) {
+        if (hasUppercase && hasNumber && hasSpecial) {
+          level = 3;
+          label = 'Alta';
+        } else {
+          level = 2;
+          label = 'Mediana';
+        }
+      }
+      setPasswordStrengthInfo({ label, level });
     }
   };
+
+  // Colores para el indicador de fuerza
+  const strengthColor = passwordStrengthInfo.level === 3 ? 'text-green-600' : passwordStrengthInfo.level === 2 ? 'text-amber-600' : 'text-red-600';
+  const barColor = passwordStrengthInfo.level === 3 ? 'bg-green-500' : passwordStrengthInfo.level === 2 ? 'bg-amber-500' : 'bg-red-500';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +84,7 @@ export const Register: React.FC = () => {
       return;
     }
 
-    // Validación de contraseña segura
+    // Validación de contraseña segura (se mantiene)
     if (!passwordStrength.length || !passwordStrength.uppercase || !passwordStrength.special) {
       setError('La contraseña debe tener al menos 12 caracteres, una letra mayúscula y un símbolo especial.');
       return;
@@ -177,15 +208,33 @@ export const Register: React.FC = () => {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="contraseA"
                   id="contraseA"
-                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md"
                   placeholder="••••••••"
                   value={formData.contraseA}
                   onChange={handleChange}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              <div className="mt-2">
+                <p className={`text-sm font-medium ${strengthColor}`}>Seguridad: {passwordStrengthInfo.label || '—'}</p>
+                <div className="mt-1 h-2 bg-gray-200 rounded">
+                  <div className={`h-2 rounded ${barColor}`} style={{ width: `${passwordStrengthInfo.level * 33.33}%` }} />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Requiere 12+ caracteres, una mayúscula y un símbolo.</p>
               </div>
             </div>
 
@@ -198,15 +247,26 @@ export const Register: React.FC = () => {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   id="confirmPassword"
-                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 

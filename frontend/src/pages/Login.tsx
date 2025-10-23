@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, RefreshCw } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +12,23 @@ export const Login: React.FC = () => {
     email: '',
     contraseA: '',
   });
+
+  // Estado y lógica del captcha
+  const [captchaQuestion, setCaptchaQuestion] = useState('');
+  const [captchaExpected, setCaptchaExpected] = useState<number | null>(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+
+  const generateCaptcha = () => {
+    const a = Math.floor(Math.random() * 9) + 1; // 1-9
+    const b = Math.floor(Math.random() * 9) + 1; // 1-9
+    setCaptchaQuestion(`¿Cuánto es ${a} + ${b}?`);
+    setCaptchaExpected(a + b);
+    setCaptchaInput('');
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,6 +41,13 @@ export const Login: React.FC = () => {
 
     if (!formData.email || !formData.contraseA) {
       setError('Por favor ingrese su email y contraseña.');
+      return;
+    }
+
+    // Validación del captcha
+    if (captchaExpected === null || parseInt(captchaInput, 10) !== captchaExpected) {
+      setError('Verificación captcha incorrecta. Por favor inténtalo de nuevo.');
+      generateCaptcha();
       return;
     }
 
@@ -111,6 +135,32 @@ export const Login: React.FC = () => {
                   required
                 />
               </div>
+            </div>
+
+            {/* Captcha */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Verificación</label>
+              <div className="mt-1 flex items-center justify-between">
+                <p className="text-sm text-gray-700">{captchaQuestion}</p>
+                <button
+                  type="button"
+                  onClick={generateCaptcha}
+                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="ml-1">Cambiar</span>
+                </button>
+              </div>
+              <input
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                className="mt-2 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                placeholder="Tu respuesta"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                required
+              />
             </div>
 
             <div className="flex items-center justify-between">
