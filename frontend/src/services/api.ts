@@ -33,7 +33,7 @@ api.interceptors.response.use(
 
 // Auth API
 export const authApi = {
-  login: (data: { email: string; contraseA: string }) =>
+  login: (data: { email: string; contraseA: string; captchaId?: string; captchaValue?: string }) =>
     api.post('/auth/login', data),
   register: (data: any) =>
     api.post('/auth/register', data),
@@ -45,6 +45,7 @@ export const authApi = {
     api.get(`/auth/check-blocked/${email}`),
   validateCredentials: (data: { email: string; contraseA: string }) =>
     api.post('/auth/validate', data),
+  getCaptcha: () => api.get('/auth/captcha'),
   // NUEVO: cambio de contraseña (sin token, valida con contraseña actual)
   changePassword: (data: { email: string; currentPassword: string; newPassword: string; newPasswordConfirm: string }) =>
     api.post('/auth/change-password', data),

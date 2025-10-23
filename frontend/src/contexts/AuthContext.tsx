@@ -29,7 +29,7 @@ interface LoginResult {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<LoginResult>;
+  login: (email: string, password: string, captcha?: { captchaId: string; captchaValue: string }) => Promise<LoginResult>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -65,11 +65,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<LoginResult> => {
-    try {
-      console.log('Intentando login con:', { email, contraseA: password });
-      const response = await authApi.login({ email, contraseA: password });
-      console.log('Respuesta del servidor:', response.data);
+  const login = async (email: string, password: string, captcha?: { captchaId: string; captchaValue: string }): Promise<LoginResult> => {
+  try {
+    console.log('Intentando login con:', { email, contraseA: password, captcha });
+    const response = await authApi.login({ email, contraseA: password, captchaId: captcha?.captchaId, captchaValue: captcha?.captchaValue });
+    console.log('Respuesta del servidor:', response.data);
       
       // Verificar que la respuesta tenga un token de acceso
       if (response.data && response.data.access_token) {

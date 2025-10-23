@@ -14,10 +14,10 @@ export const Login: React.FC = () => {
     contraseA: '',
   });
 
-  // Estado y lógica del captcha
-  const [captchaQuestion, setCaptchaQuestion] = useState('');
-  const [captchaExpected, setCaptchaExpected] = useState<number | null>(null);
-  const [captchaInput, setCaptchaInput] = useState('');
+  // Estado y lógica del captcha (imagen)
+  const [captchaImage, setCaptchaImage] = useState<string>('');
+  const [captchaId, setCaptchaId] = useState<string>('');
+  const [captchaValue, setCaptchaValue] = useState<string>('');
 
   // NUEVO: flujo de cambio de contraseña
   const [mustChangePassword, setMustChangePassword] = useState(false);
@@ -29,16 +29,19 @@ export const Login: React.FC = () => {
     newPasswordConfirm: '',
   });
 
-  const generateCaptcha = () => {
-    const a = Math.floor(Math.random() * 9) + 1; // 1-9
-    const b = Math.floor(Math.random() * 9) + 1; // 1-9
-    setCaptchaQuestion(`¿Cuánto es ${a} + ${b}?`);
-    setCaptchaExpected(a + b);
-    setCaptchaInput('');
+  const fetchCaptcha = async () => {
+    try {
+      const res = await authApi.getCaptcha();
+      setCaptchaImage(res.data.image);
+      setCaptchaId(res.data.id);
+      setCaptchaValue('');
+    } catch {
+      setError('No se pudo cargar el captcha. Intente nuevamente.');
+    }
   };
 
   useEffect(() => {
-    generateCaptcha();
+    fetchCaptcha();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,16 +58,16 @@ export const Login: React.FC = () => {
       return;
     }
 
-    // Validación del captcha
-    if (captchaExpected === null || parseInt(captchaInput, 10) !== captchaExpected) {
-      setError('Verificación captcha incorrecta. Por favor inténtalo de nuevo.');
-      generateCaptcha();
+    // Validación del captcha (presencia)
+    if (!captchaId || !captchaValue) {
+      setError('Por favor resuelva el captcha.');
+      await fetchCaptcha();
       return;
     }
 
     try {
       setIsLoading(true);
-      const result = await login(formData.email, formData.contraseA);
+      const result = await login(formData.email, formData.contraseA, { captchaId, captchaValue });
       
       if (result.success) {
         // Redirigir según el rol del usuario (admin/empleado => /admin, usuario => /client)
@@ -118,7 +121,7 @@ export const Login: React.FC = () => {
       });
 
       // Intentar login automático con la nueva contraseña
-      const result = await login(formData.email, changeForm.newPassword);
+      const result = await login(formData.email, changeForm.newPassword, { captchaId, captchaValue });
       if (result.success) {
         const stored = localStorage.getItem('user');
         const user = stored ? JSON.parse(stored) : null;
@@ -204,14 +207,18 @@ export const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Captcha */}
+            {/* Captcha imagen */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Verificación</label>
               <div className="mt-1 flex items-center justify-between">
-                <p className="text-sm text-gray-700">{captchaQuestion}</p>
+                {captchaImage ? (
+                  <img src={captchaImage} alt="captcha" className="h-14 rounded border" />
+                ) : (
+                  <p className="text-sm text-gray-700">Cargando captcha...</p>
+                )}
                 <button
                   type="button"
-                  onClick={generateCaptcha}
+                  onClick={fetchCaptcha}
                   className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800"
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -219,13 +226,11 @@ export const Login: React.FC = () => {
                 </button>
               </div>
               <input
-                type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
+                type="text"
                 className="mt-2 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                placeholder="Tu respuesta"
-                value={captchaInput}
-                onChange={(e) => setCaptchaInput(e.target.value)}
+                placeholder="Ingrese el texto de la imagen"
+                value={captchaValue}
+                onChange={(e) => setCaptchaValue(e.target.value)}
                 required
               />
             </div>
@@ -256,71 +261,60 @@ export const Login: React.FC = () => {
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 disabled={isLoading}
               >
-                {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                {isLoading ? 'Ingresando...' : 'Ingresar'}
               </button>
             </div>
           </form>
 
-          {/* NUEVO: Formulario de cambio de contraseña forzado */}
+          {/* Formulario de cambio de contraseña si es necesario */}
           {mustChangePassword && (
-            <div className="mt-8 border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900">Tu contraseña ha expirado</h3>
-              <p className="mt-1 text-sm text-gray-600">Para continuar, cambia tu contraseña. No puedes reutilizar contraseñas anteriores.</p>
-
-              {changeError && (
-                <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-3">
-                  <p className="text-sm text-red-700">{changeError}</p>
-                </div>
-              )}
-
-              <form className="mt-4 space-y-4" onSubmit={handleSubmitChangePassword}>
+            <div className="mt-6 border-t pt-6">
+              <h3 className="text-lg font-medium text-gray-900">Cambiar contraseña</h3>
+              <form className="space-y-4" onSubmit={handleSubmitChangePassword}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Contraseña actual</label>
                   <input
                     type="password"
                     name="currentPassword"
+                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
                     value={changeForm.currentPassword}
                     onChange={handleChangePwdInput}
-                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="••••••••"
                     required
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nueva contraseña</label>
                   <input
                     type="password"
                     name="newPassword"
+                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
                     value={changeForm.newPassword}
                     onChange={handleChangePwdInput}
-                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="Mínimo 12 caracteres, mayúscula y símbolo"
                     required
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
                   <input
                     type="password"
                     name="newPasswordConfirm"
+                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
                     value={changeForm.newPasswordConfirm}
                     onChange={handleChangePwdInput}
-                    className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="Repite la nueva contraseña"
                     required
                   />
                 </div>
-
                 <div>
                   <button
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                     disabled={changeLoading}
                   >
-                    {changeLoading ? 'Actualizando...' : 'Cambiar contraseña'}
+                    {changeLoading ? 'Guardando...' : 'Actualizar contraseña'}
                   </button>
+                  {changeError && (
+                    <p className="mt-2 text-sm text-red-600">{changeError}</p>
+                  )}
                 </div>
               </form>
             </div>
