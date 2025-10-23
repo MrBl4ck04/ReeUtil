@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Employee = require('../models/Employee');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const emailService = require('../services/emailService');
 
 // Función para generar token JWT
 const signToken = (id) => {
@@ -146,6 +147,81 @@ exports.getCaptcha = (req, res) => {
   res.status(200).json({ id, image });
 };
 
+// Almacenamiento en memoria para códigos de verificación: email -> { code, expires }
+const verificationCodes = new Map();
+const VERIFICATION_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+// Almacenamiento en memoria para sesiones de login pendientes: email -> { userId, code, expires, isEmployee }
+const pendingLogins = new Map();
+const PENDING_LOGIN_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+function generateVerificationCode() {
+  // Generar código de 6 dígitos
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function pruneExpiredCodes() {
+  const now = Date.now();
+  for (const [email, data] of verificationCodes.entries()) {
+    if (data.expires < now) verificationCodes.delete(email);
+  }
+}
+
+function pruneExpiredPendingLogins() {
+  const now = Date.now();
+  for (const [email, data] of pendingLogins.entries()) {
+    if (data.expires < now) pendingLogins.delete(email);
+  }
+}
+
+// NUEVO: Endpoint para enviar código de verificación por email
+exports.sendVerificationCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'El email es requerido.'
+      });
+    }
+
+    // Verificar que el usuario existe
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Usuario no encontrado.'
+      });
+    }
+
+    // Generar código de verificación
+    const code = generateVerificationCode();
+    
+    // Guardar código con tiempo de expiración
+    verificationCodes.set(email, {
+      code,
+      expires: Date.now() + VERIFICATION_CODE_TTL_MS
+    });
+
+    // Enviar código por email
+    await emailService.sendVerificationCode(email, code);
+
+    // Limpiar códigos expirados
+    pruneExpiredCodes();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Código de verificación enviado a tu email.'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message || 'No se pudo enviar el código de verificación.'
+    });
+  }
+};
+
 // Login de usuario o empleado
 exports.login = async (req, res) => {
   try {
@@ -285,7 +361,121 @@ exports.login = async (req, res) => {
       });
     }
 
-    createSendToken(user, 200, res);
+    // NUEVO: Enviar código de verificación por email antes de completar el login
+    const code = generateVerificationCode();
+    
+    // Guardar sesión de login pendiente
+    pendingLogins.set(email, {
+      userId: user._id,
+      code,
+      expires: Date.now() + PENDING_LOGIN_TTL_MS,
+      isEmployee: false
+    });
+
+    // Enviar código por email
+    try {
+      await emailService.sendVerificationCode(email, code);
+    } catch (emailError) {
+      console.error('Error al enviar código de login:', emailError);
+      // Si falla el envío del email, eliminar la sesión pendiente
+      pendingLogins.delete(email);
+      return res.status(500).json({
+        status: 'fail',
+        message: 'No se pudo enviar el código de verificación. Inténtalo de nuevo.'
+      });
+    }
+
+    // Limpiar sesiones expiradas
+    pruneExpiredPendingLogins();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Credenciales correctas. Se ha enviado un código de verificación a tu email.',
+      requiresVerification: true,
+      email: email
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// NUEVO: Verificar código de login y completar inicio de sesión
+exports.verifyLoginCode = async (req, res) => {
+  try {
+    const { email, verificationCode } = req.body;
+
+    if (!email || !verificationCode) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Email y código de verificación son requeridos.'
+      });
+    }
+
+    // Limpiar sesiones expiradas
+    pruneExpiredPendingLogins();
+
+    // Verificar que existe una sesión de login pendiente
+    const pendingLogin = pendingLogins.get(email);
+    
+    if (!pendingLogin) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Sesión de login no encontrada o expirada. Por favor inicia sesión nuevamente.'
+      });
+    }
+
+    // Verificar que el código coincida
+    if (pendingLogin.code !== verificationCode) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Código de verificación incorrecto.'
+      });
+    }
+
+    // Código válido, eliminar la sesión pendiente
+    pendingLogins.delete(email);
+
+    // Obtener el usuario o empleado
+    let userData;
+    if (pendingLogin.isEmployee) {
+      const employee = await Employee.findById(pendingLogin.userId);
+      if (!employee) {
+        return res.status(404).json({
+          status: 'fail',
+          message: 'Usuario no encontrado.'
+        });
+      }
+      
+      const token = signToken(employee._id);
+      return res.status(200).json({
+        status: 'success',
+        access_token: token,
+        user: {
+          idUsuario: employee._id,
+          nombre: employee.nombre,
+          apellido: employee.apellido || '',
+          email: employee.email,
+          rol: true, // empleado => admin
+          cargo: employee.cargo || '',
+          loginAttempts: employee.loginAttempts || 0,
+          isBlocked: employee.isBlocked || false
+        }
+      });
+    } else {
+      const user = await User.findById(pendingLogin.userId);
+      if (!user) {
+        return res.status(404).json({
+          status: 'fail',
+          message: 'Usuario no encontrado.'
+        });
+      }
+      
+      // Usar la función createSendToken existente
+      createSendToken(user, 200, res);
+    }
   } catch (err) {
     res.status(400).json({
       status: 'fail',
@@ -492,14 +682,35 @@ exports.checkBlockedStatus = async (req, res) => {
 // NUEVO: Endpoint de recuperación de contraseña (desbloqueo + cambio de contraseña)
 exports.resetPassword = async (req, res) => {
   try {
-    const { email, newPassword, newPasswordConfirm } = req.body;
+    const { email, verificationCode, newPassword, newPasswordConfirm } = req.body;
 
-    if (!email || !newPassword || !newPasswordConfirm) {
+    if (!email || !verificationCode || !newPassword || !newPasswordConfirm) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Email, nueva contraseña y confirmación son requeridos.'
+        message: 'Email, código de verificación, nueva contraseña y confirmación son requeridos.'
       });
     }
+
+    // Validar código de verificación
+    pruneExpiredCodes();
+    const storedCode = verificationCodes.get(email);
+    
+    if (!storedCode) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Código de verificación no encontrado o expirado. Solicita un nuevo código.'
+      });
+    }
+
+    if (storedCode.code !== verificationCode) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Código de verificación incorrecto.'
+      });
+    }
+
+    // Código válido, eliminar para evitar reutilización
+    verificationCodes.delete(email);
 
     if (newPassword !== newPasswordConfirm) {
       return res.status(400).json({

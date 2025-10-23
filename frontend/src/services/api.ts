@@ -33,8 +33,11 @@ api.interceptors.response.use(
 
 // Auth API
 export const authApi = {
-  login: (data: { email: string; contraseA: string; captchaId?: string; captchaValue?: string }) =>
-    api.post('/auth/login', data),
+  login: (credentials: { email: string; contraseA: string; captchaId: string; captchaValue: string }) =>
+    api.post('/auth/login', credentials),
+  // NUEVO: verificar código de login
+  verifyLoginCode: (data: { email: string; verificationCode: string }) =>
+    api.post('/auth/verify-login-code', data),
   register: (data: any) =>
     api.post('/auth/register', data),
   checkUserBlocked: (email: string) =>
@@ -45,8 +48,11 @@ export const authApi = {
   // NUEVO: cambio de contraseña (sin token, valida con contraseña actual)
   changePassword: (data: { email: string; currentPassword: string; newPassword: string; newPasswordConfirm: string }) =>
     api.post('/auth/change-password', data),
-  // NUEVO: recuperación de contraseña (desbloquea cuenta y resetea intentos)
-  resetPassword: (data: { email: string; newPassword: string; newPasswordConfirm: string }) =>
+  // NUEVO: enviar código de verificación por email
+  sendVerificationCode: (email: string) =>
+    api.post('/auth/send-verification-code', { email }),
+  // NUEVO: recuperación de contraseña (requiere código de verificación, desbloquea cuenta y resetea intentos)
+  resetPassword: (data: { email: string; verificationCode: string; newPassword: string; newPasswordConfirm: string }) =>
     api.post('/auth/reset-password', data),
 };
 

@@ -23,6 +23,7 @@ interface User {
 interface LoginResult {
   success: boolean;
   requirePasswordChange?: boolean;
+  requiresVerification?: boolean; // NUEVO: indica que se requiere verificación por código
   email?: string;
 }
 
@@ -68,8 +69,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string, captcha?: { captchaId: string; captchaValue: string }): Promise<LoginResult> => {
   try {
     console.log('Intentando login con:', { email, contraseA: password, captcha });
-    const response = await authApi.login({ email, contraseA: password, captchaId: captcha?.captchaId, captchaValue: captcha?.captchaValue });
+    const response = await authApi.login({ 
+      email, 
+      contraseA: password, 
+      captchaId: captcha?.captchaId || '', 
+      captchaValue: captcha?.captchaValue || '' 
+    });
     console.log('Respuesta del servidor:', response.data);
+      
+      // NUEVO: Verificar si se requiere verificación por código
+      if (response.data && response.data.requiresVerification) {
+        // No guardar token aún, esperar verificación por código
+        return { 
+          success: false, 
+          requiresVerification: true,
+          email 
+        };
+      }
       
       // Verificar que la respuesta tenga un token de acceso
       if (response.data && response.data.access_token) {
