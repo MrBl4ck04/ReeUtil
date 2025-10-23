@@ -3,6 +3,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const recycleRoutes = require('./routes/recycle');
+const repairsRoutes = require('./routes/repairs');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -12,13 +14,15 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
 
 // Rutas
 app.use('/auth', authRoutes);
+app.use('/recycle', recycleRoutes);
+app.use('/repairs', repairsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
