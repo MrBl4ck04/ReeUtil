@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
   Users,
@@ -14,7 +14,7 @@ import {
   Briefcase,
   Lock
 } from 'lucide-react';
-import { usersApi } from '../../services/api';
+import { usersApi, rolesApi } from '../../services/api';
 
 export const EmployeesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,8 +29,21 @@ export const EmployeesManagement: React.FC = () => {
     contraseA: '',
     cargo: ''
   });
+  const [formError, setFormError] = useState<string>('');
   
   const queryClient = useQueryClient();
+  
+  // Roles
+  const { data: roles } = useQuery('roles', rolesApi.getAll);
+  // roles puede ser una respuesta Axios con shape { data: { status, results, data: Role[] } }
+  const rolesList = Array.isArray(roles?.data) ? roles?.data : (roles?.data?.data || []);
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+
+  useEffect(() => {
+    if (!selectedEmployee && rolesList.length > 0 && !selectedRoleId) {
+      setSelectedRoleId(rolesList[0]._id);
+    }
+  }, [rolesList, selectedEmployee, selectedRoleId]);
   
   // Obtener todos los empleados
   const { data: employees, isLoading } = useQuery('employees', usersApi.getAllEmployees);
@@ -43,6 +56,12 @@ export const EmployeesManagement: React.FC = () => {
         queryClient.invalidateQueries('employees');
         setIsModalOpen(false);
         resetForm();
+        setFormError('');
+      },
+      onError: (err: any) => {
+        const message = err?.response?.data?.message || 'Error al crear empleado';
+        setFormError(message);
+        console.error('Create employee error:', err?.response?.data || err);
       }
     }
   );
@@ -54,6 +73,12 @@ export const EmployeesManagement: React.FC = () => {
         queryClient.invalidateQueries('employees');
         setIsModalOpen(false);
         resetForm();
+        setFormError('');
+      },
+      onError: (err: any) => {
+        const message = err?.response?.data?.message || 'Error al actualizar empleado';
+        setFormError(message);
+        console.error('Update employee error:', err?.response?.data || err);
       }
     }
   );
@@ -110,8 +135,10 @@ export const EmployeesManagement: React.FC = () => {
         contraseA: '',
         cargo: employee.cargo || ''
       });
+      setSelectedRoleId(employee?.roleId?._id || '');
     } else {
       resetForm();
+      setSelectedRoleId(rolesList[0]?._id || '');
     }
     setIsModalOpen(true);
   };
@@ -125,11 +152,21 @@ export const EmployeesManagement: React.FC = () => {
   // Guardar empleado
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+    
+    if (!selectedRoleId) {
+      setFormError('Selecciona un rol');
+      return;
+    }
+    if (!selectedEmployee && (!formData.contraseA || formData.contraseA.length < 8)) {
+      setFormError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
     
     if (selectedEmployee) {
       // Actualizar empleado existente
       // Si la contraseña está vacía, la eliminamos del objeto
-      const updateData = { ...formData };
+      const updateData = { ...formData, roleId: selectedRoleId } as any;
       
       // Crear un objeto para la mutación
       const dataToSend = updateData.contraseA 
@@ -138,7 +175,8 @@ export const EmployeesManagement: React.FC = () => {
             nombre: updateData.nombre,
             apellido: updateData.apellido,
             email: updateData.email,
-            cargo: updateData.cargo
+            cargo: updateData.cargo,
+            roleId: updateData.roleId
           };
       
       updateEmployeeMutation.mutate({
@@ -147,7 +185,7 @@ export const EmployeesManagement: React.FC = () => {
       });
     } else {
       // Crear nuevo empleado
-      createEmployeeMutation.mutate(formData);
+      createEmployeeMutation.mutate({ ...formData, roleId: selectedRoleId });
     }
   };
   
@@ -412,6 +450,28 @@ export const EmployeesManagement: React.FC = () => {
                             />
                           </div>
                         </div>
+                        <div>
+                          <label htmlFor="roleId" className="block text-sm font-medium text-gray-700">
+                            Rol
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <Briefcase className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <select
+                              id="roleId"
+                              name="roleId"
+                              className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                              value={selectedRoleId}
+                              onChange={(e) => setSelectedRoleId(e.target.value)}
+                              required
+                            >
+                              {Array.isArray(rolesList) && rolesList.map((role: any) => (
+                                <option key={role._id} value={role._id}>{role.nombre}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
                         {!selectedEmployee && (
                           <div>
                             <label htmlFor="contraseA" className="block text-sm font-medium text-gray-700">
@@ -430,6 +490,7 @@ export const EmployeesManagement: React.FC = () => {
                                 value={formData.contraseA}
                                 onChange={handleChange}
                                 required={!selectedEmployee}
+                                minLength={8}
                               />
                             </div>
                           </div>
@@ -444,7 +505,7 @@ export const EmployeesManagement: React.FC = () => {
                   type="button"
                   className="btn-primary w-full sm:ml-3 sm:w-auto"
                   onClick={handleSubmit}
-                  disabled={createEmployeeMutation.isLoading || updateEmployeeMutation.isLoading}
+                  disabled={createEmployeeMutation.isLoading || updateEmployeeMutation.isLoading || !selectedRoleId}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {selectedEmployee ? 'Actualizar' : 'Crear'}
@@ -458,6 +519,9 @@ export const EmployeesManagement: React.FC = () => {
                   Cancelar
                 </button>
               </div>
+              {formError && (
+                <div className="px-6 pb-4 text-sm text-red-600">{formError}</div>
+              )}
             </div>
           </div>
         </div>

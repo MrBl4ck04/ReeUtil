@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Employee = require('../models/Employee');
 
 // Función para generar token JWT
 const signToken = (id) => {
@@ -8,7 +9,7 @@ const signToken = (id) => {
   });
 };
 
-// Función para crear y enviar token
+// Función para crear y enviar token (usuarios cliente)
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   
@@ -21,7 +22,11 @@ const createSendToken = (user, statusCode, res) => {
       nombre: user.name,
       apellido: user.lastName || '',
       email: user.email,
+<<<<<<< HEAD
       rol: user.role,
+=======
+      rol: false, // usuarios normales no son admin
+>>>>>>> origin/dev_jesus
       loginAttempts: user.loginAttempts || 0,
       isBlocked: user.isBlocked || false
     }
@@ -47,13 +52,11 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Login de usuario
+// Login de usuario o empleado
 exports.login = async (req, res) => {
   try {
-    console.log('Datos recibidos:', req.body);
     const { email, contraseA } = req.body;
 
-    // 1) Verificar si se proporcionó email y password
     if (!email || !contraseA) {
       return res.status(400).json({
         status: 'fail',
@@ -61,9 +64,43 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 2) Verificar si el usuario existe y la contraseña es correcta
-    const user = await User.findOne({ email }).select('+password');
+    // 1) Intentar login como EMPLEADO
+    const employee = await Employee.findOne({ email }).select('+contraseA');
+    if (employee) {
+      const isCorrect = await employee.correctPassword(contraseA, employee.contraseA);
+      if (!isCorrect) {
+        return res.status(401).json({
+          status: 'fail',
+          message: 'Email o contraseña incorrectos'
+        });
+      }
 
+      if (employee.isBlocked) {
+        return res.status(403).json({
+          status: 'fail',
+          message: 'La cuenta de empleado está bloqueada'
+        });
+      }
+
+      const token = signToken(employee._id);
+      return res.status(200).json({
+        status: 'success',
+        access_token: token,
+        user: {
+          idUsuario: employee._id,
+          nombre: employee.nombre,
+          apellido: employee.apellido || '',
+          email: employee.email,
+          rol: true, // empleado => admin
+          cargo: employee.cargo || '',
+          loginAttempts: employee.loginAttempts || 0,
+          isBlocked: employee.isBlocked || false
+        }
+      });
+    }
+
+    // 2) Si no es empleado, intentar login como USUARIO (cliente)
+    const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.correctPassword(contraseA, user.password))) {
       return res.status(401).json({
         status: 'fail',
@@ -71,7 +108,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 3) Si todo está bien, enviar token al cliente
     createSendToken(user, 200, res);
   } catch (err) {
     res.status(400).json({
@@ -100,8 +136,12 @@ exports.protect = async (req, res, next) => {
     // 2) Verificar token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 3) Verificar si el usuario aún existe
-    const currentUser = await User.findById(decoded.id);
+    // 3) Verificar si el usuario aún existe (en cualquiera de las colecciones)
+    let currentUser = await Employee.findById(decoded.id);
+    if (!currentUser) {
+      currentUser = await User.findById(decoded.id);
+    }
+
     if (!currentUser) {
       return res.status(401).json({
         status: 'fail',

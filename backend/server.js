@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
 const ventasRoutes = require('./routes/ventas');
+const employeesRoutes = require('./routes/employees');
+const rolesRoutes = require('./routes/roles');
+const permissionsRoutes = require('./routes/permissions');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -21,6 +24,9 @@ app.use(express.json());
 // Rutas
 app.use('/auth', authRoutes);
 app.use('/api/ventas', ventasRoutes);
+app.use('/api/employees', employeesRoutes);
+app.use('/api/roles', rolesRoutes);
+app.use('/api/permissions', permissionsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

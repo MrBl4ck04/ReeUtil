@@ -56,8 +56,11 @@ export const Login: React.FC = () => {
       const success = await login(formData.email, formData.contraseA);
       
       if (success) {
-        // Redirigir según el rol del usuario
-        navigate('/client');
+        // Redirigir según el rol del usuario (admin/empleado => /admin, usuario => /client)
+        const stored = localStorage.getItem('user');
+        const user = stored ? JSON.parse(stored) : null;
+        const isAdmin = user?.rol === true;
+        navigate(isAdmin ? '/admin' : '/client');
       } else {
         // El mensaje de error ya se muestra en la función login
       }
