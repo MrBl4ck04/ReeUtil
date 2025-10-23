@@ -25,7 +25,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { RulesManagement } from './pages/admin/RulesManagement';
 import { RepairsManagement } from './pages/admin/RepairsManagement';
 import { RecycleManagement } from './pages/admin/RecycleManagement';
-import { DashboardsView } from './pages/admin/DashboardsView';
+import DashboardsView from './pages/admin/DashboardsView';
 import { SalesManagement } from './pages/admin/SalesManagement';
 import { CustomerSatisfaction } from './pages/admin/CustomerSatisfaction';
 import { EmployeesManagement } from './pages/admin/EmployeesManagement';

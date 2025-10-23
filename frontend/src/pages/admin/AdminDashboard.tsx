@@ -28,27 +28,31 @@ export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   
   // Consultas para obtener datos de diferentes servicios
-  const { data: pendingRepairs } = useQuery('pendingRepairs', () => 
-    repairApi.getAllRepairRequests('pendiente')
+  const { data: pendingRepairs, isLoading: repairsLoading, error: repairsError } = useQuery('pendingRepairs', () => 
+    repairApi.getAllRepairRequests('pendiente'), 
+    { retry: 1, staleTime: 30000 }
   );
   
-  const { data: pendingRecycle } = useQuery('pendingRecycle', () => 
-    recycleApi.getAllRecycleRequests('pendiente')
+  const { data: pendingRecycle, isLoading: recycleLoading, error: recycleError } = useQuery('pendingRecycle', () => 
+    recycleApi.getAllRecycleRequests('pendiente'),
+    { retry: 1, staleTime: 30000 }
   );
   
-  const { data: recentSales } = useQuery('recentSales', () => 
-    marketplaceApi.getAllProducts({ limit: 5, sort: 'recent' })
+  const { data: recentSales, isLoading: salesLoading, error: salesError } = useQuery('recentSales', () => 
+    marketplaceApi.getAllProducts({ limit: 5, sort: 'recent' }),
+    { retry: 1, staleTime: 30000 }
   );
   
-  const { data: recentReviews } = useQuery('recentReviews', () => 
-    reviewsApi.getAllReviews()
+  const { data: recentReviews, isLoading: reviewsLoading, error: reviewsError } = useQuery('recentReviews', () => 
+    reviewsApi.getAllReviews(),
+    { retry: 1, staleTime: 30000 }
   );
   
   // Estadísticas para mostrar en el dashboard
   const stats = [
     {
       name: 'Reparaciones Pendientes',
-      value: pendingRepairs?.data?.length || 0,
+      value: Array.isArray(pendingRepairs?.data) ? pendingRepairs.data.length : 0,
       icon: Wrench,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-100',
@@ -56,7 +60,7 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       name: 'Reciclaje Pendiente',
-      value: pendingRecycle?.data?.length || 0,
+      value: Array.isArray(pendingRecycle?.data) ? pendingRecycle.data.length : 0,
       icon: RecycleIcon,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
@@ -64,7 +68,7 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       name: 'Ventas Recientes',
-      value: recentSales?.data?.length || 0,
+      value: Array.isArray(recentSales?.data) ? recentSales.data.length : 0,
       icon: ShoppingBag,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
@@ -72,7 +76,7 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       name: 'Reseñas Nuevas',
-      value: recentReviews?.data?.filter((r: any) => !r.revisado).length || 0,
+      value: Array.isArray(recentReviews?.data) ? recentReviews.data.filter((r: any) => !r.revisado).length : 0,
       icon: Star,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
@@ -129,33 +133,35 @@ export const AdminDashboard: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            {pendingRepairs?.data?.slice(0, 5).map((repair: any) => (
-              <div 
-                key={repair._id} 
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-full bg-yellow-100 mr-3">
-                    <Wrench className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {repair.tipoDispositivo} - {repair.marca} {repair.modelo}
-                    </p>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {new Date(repair.fechaSolicitud).toLocaleDateString()}
+            {Array.isArray(pendingRepairs?.data) && pendingRepairs.data.length > 0 ? (
+              pendingRepairs.data.slice(0, 5).map((repair: any) => (
+                <div 
+                  key={repair._id} 
+                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-yellow-100 mr-3">
+                      <Wrench className="h-5 w-5 text-yellow-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {repair.tipoDispositivo} - {repair.marca} {repair.modelo}
+                      </p>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(repair.fechaSolicitud).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
+                  <Link
+                    to={`/admin/reparaciones/${repair._id}`}
+                    className="btn-sm btn-outline-primary"
+                  >
+                    Evaluar
+                  </Link>
                 </div>
-                <Link
-                  to={`/admin/reparaciones/${repair._id}`}
-                  className="btn-sm btn-outline-primary"
-                >
-                  Evaluar
-                </Link>
-              </div>
-            )) || (
+              ))
+            ) : (
               <div className="text-center py-6 text-gray-500">
                 No hay reparaciones pendientes
               </div>
@@ -177,33 +183,35 @@ export const AdminDashboard: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            {pendingRecycle?.data?.slice(0, 5).map((recycle: any) => (
-              <div 
-                key={recycle._id} 
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-full bg-green-100 mr-3">
-                    <RecycleIcon className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {recycle.tipoDispositivo} - {recycle.marca} {recycle.modelo}
-                    </p>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {new Date(recycle.fechaSolicitud).toLocaleDateString()}
+            {Array.isArray(pendingRecycle?.data) && pendingRecycle.data.length > 0 ? (
+              pendingRecycle.data.slice(0, 5).map((recycle: any) => (
+                <div 
+                  key={recycle._id} 
+                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-green-100 mr-3">
+                      <RecycleIcon className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {recycle.tipoDispositivo} - {recycle.marca} {recycle.modelo}
+                      </p>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(recycle.fechaSolicitud).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
+                  <Link
+                    to={`/admin/reciclaje/${recycle._id}`}
+                    className="btn-sm btn-outline-primary"
+                  >
+                    Evaluar
+                  </Link>
                 </div>
-                <Link
-                  to={`/admin/reciclaje/${recycle._id}`}
-                  className="btn-sm btn-outline-primary"
-                >
-                  Evaluar
-                </Link>
-              </div>
-            )) || (
+              ))
+            ) : (
               <div className="text-center py-6 text-gray-500">
                 No hay solicitudes de reciclaje pendientes
               </div>
