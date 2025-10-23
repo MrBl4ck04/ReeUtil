@@ -4,15 +4,22 @@ const dashboardController = require('../controllers/dashboardController');
 
 const router = express.Router();
 
-// Proteger todas las rutas - solo admin
+// Proteger todas las rutas
 router.use(authController.protect);
-router.use(authController.restrictTo('admin'));
 
-// Endpoints del dashboard
-router.get('/repairs-pending', dashboardController.getPendingRepairs);
-router.get('/recycle-pending', dashboardController.getPendingRecycle);
-router.get('/recent-sales', dashboardController.getRecentSales);
-router.get('/new-reviews', dashboardController.getNewReviews);
-router.get('/all', dashboardController.getAllDashboardData);
+// ============ RUTAS ADMIN ============
+router.get('/repairs-pending', authController.restrictTo('admin'), dashboardController.getPendingRepairs);
+router.get('/recycle-pending', authController.restrictTo('admin'), dashboardController.getPendingRecycle);
+router.get('/recent-sales', authController.restrictTo('admin'), dashboardController.getRecentSales);
+router.get('/new-reviews', authController.restrictTo('admin'), dashboardController.getNewReviews);
+router.get('/all', authController.restrictTo('admin'), dashboardController.getAllDashboardData);
+
+// ============ RUTAS CLIENTE ============
+router.get('/client/my-sales', dashboardController.getClientMySales);
+router.get('/client/my-purchases', dashboardController.getClientMyPurchases);
+router.get('/client/my-repairs', dashboardController.getClientMyRepairs);
+router.get('/client/my-recycle', dashboardController.getClientMyRecycle);
+router.get('/client/my-notifications', dashboardController.getClientMyNotifications);
+router.get('/client/all', dashboardController.getClientDashboardData);
 
 module.exports = router;
