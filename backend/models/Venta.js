@@ -37,7 +37,7 @@ const ventaSchema = new mongoose.Schema({
   },
   estado: {
     type: String,
-    enum: ['venta', 'disponible', 'vendido', 'pausado'],
+    enum: ['venta', 'comprado', 'disponible', 'vendido', 'pausado'],
     default: 'venta'
   },
   categoria: {
