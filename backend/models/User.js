@@ -53,6 +53,17 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  // NUEVO: Fecha de último cambio de contraseña
+  passwordChangedAt: {
+    type: Date,
+    default: Date.now
+  },
+  // NUEVO: Historial de contraseñas (hashes)
+  passwordHistory: {
+    type: [String],
+    select: false,
+    default: []
   }
 });
 
@@ -73,22 +84,39 @@ userSchema.pre('save', function(next) {
   next();
 });
 
-// Middleware para encriptar la contraseña antes de guardarla
+// Middleware para encriptar la contraseña antes de guardarla y actualizar historial/fecha
 userSchema.pre('save', async function(next) {
   // Solo encriptar si la contraseña ha sido modificada
   if (!this.isModified('password')) return next();
   
-  // Encriptar la contraseña con un costo de 12
-  this.password = await bcrypt.hash(this.password, 12);
+  const hashed = await bcrypt.hash(this.password, 12);
+  this.password = hashed;
   
   // Eliminar passwordConfirm
   this.passwordConfirm = undefined;
+  
+  // Actualizar fecha de cambio de contraseña
+  this.passwordChangedAt = Date.now();
+  
+  // Inicializar historial si no existe y agregar el hash actual si no está
+  if (!Array.isArray(this.passwordHistory)) this.passwordHistory = [];
+  if (!this.passwordHistory.includes(hashed)) {
+    this.passwordHistory.push(hashed);
+  }
+
   next();
 });
 
 // Método para comparar contraseñas
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+// NUEVO: Método para verificar si la contraseña está expirada (60 días)
+userSchema.methods.isPasswordExpired = function() {
+  const lastChange = this.passwordChangedAt || this.createdAt;
+  const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
+  return Date.now() - new Date(lastChange).getTime() > SIXTY_DAYS_MS;
 };
 
 const User = mongoose.model('User', userSchema);

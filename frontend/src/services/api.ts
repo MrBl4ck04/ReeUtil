@@ -45,6 +45,9 @@ export const authApi = {
     api.get(`/auth/check-blocked/${email}`),
   validateCredentials: (data: { email: string; contraseA: string }) =>
     api.post('/auth/validate', data),
+  // NUEVO: cambio de contraseña (sin token, valida con contraseña actual)
+  changePassword: (data: { email: string; currentPassword: string; newPassword: string; newPasswordConfirm: string }) =>
+    api.post('/auth/change-password', data),
 };
 
 // Users API

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Employee = require('../models/Employee');
+const bcrypt = require('bcryptjs');
 
 // Función para generar token JWT
 const signToken = (id) => {
@@ -22,11 +23,7 @@ const createSendToken = (user, statusCode, res) => {
       nombre: user.name,
       apellido: user.lastName || '',
       email: user.email,
-<<<<<<< HEAD
       rol: user.role,
-=======
-      rol: false, // usuarios normales no son admin
->>>>>>> origin/dev_jesus
       loginAttempts: user.loginAttempts || 0,
       isBlocked: user.isBlocked || false
     }
@@ -108,6 +105,15 @@ exports.login = async (req, res) => {
       });
     }
 
+    // NUEVO: Forzar cambio de contraseña si expiró (60 días)
+    if (typeof user.isPasswordExpired === 'function' && user.isPasswordExpired()) {
+      return res.status(403).json({
+        status: 'fail',
+        code: 'PASSWORD_EXPIRED',
+        message: 'Tu contraseña ha expirado. Debes cambiarla.'
+      });
+    }
+
     createSendToken(user, 200, res);
   } catch (err) {
     res.status(400).json({
@@ -171,4 +177,62 @@ exports.restrictTo = (...roles) => {
     }
     next();
   };
+};
+
+// NUEVO: Endpoint para cambiar contraseña con validación de historial
+exports.changePassword = async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword, newPasswordConfirm } = req.body;
+
+    if (!email || !currentPassword || !newPassword || !newPasswordConfirm) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Datos incompletos para cambiar la contraseña.'
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+password +passwordHistory');
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Usuario no encontrado.'
+      });
+    }
+
+    const isCorrect = await user.correctPassword(currentPassword, user.password);
+    if (!isCorrect) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'La contraseña actual es incorrecta.'
+      });
+    }
+
+    // Validar que la nueva contraseña no esté en el historial
+    const history = user.passwordHistory || [];
+    for (const prevHash of history) {
+      const reused = await bcrypt.compare(newPassword, prevHash);
+      if (reused) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'No puedes reutilizar una contraseña anterior.'
+        });
+      }
+    }
+
+    // Asignar nueva contraseña y confirmar para activar validaciones del modelo
+    user.password = newPassword;
+    user.passwordConfirm = newPasswordConfirm;
+
+    await user.save();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Contraseña actualizada correctamente.'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
 };

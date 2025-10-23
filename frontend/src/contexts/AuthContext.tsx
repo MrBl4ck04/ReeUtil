@@ -20,10 +20,16 @@ interface User {
   isBlocked?: boolean; // Si el usuario está bloqueado
 }
 
+interface LoginResult {
+  success: boolean;
+  requirePasswordChange?: boolean;
+  email?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -59,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       console.log('Intentando login con:', { email, contraseA: password });
       const response = await authApi.login({ email, contraseA: password });
@@ -72,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Verificar si el usuario está bloqueado
         if (userData && userData.isBlocked) {
           toast.error('Su cuenta está bloqueada. Por favor contacte con soporte.');
-          return false;
+          return { success: false };
         }
         
         // Resetear contador de intentos fallidos si existía
@@ -87,24 +93,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         
         toast.success('¡Bienvenido a ReeUtil!');
-        return true;
+        return { success: true };
       }
       
       // Si no hay token, el login no fue exitoso
       toast.error('Credenciales inválidas. Por favor intente nuevamente.');
-      return false;
+      return { success: false };
     } catch (error: any) {
       // Incrementar contador de intentos fallidos
       if (error.response?.status === 401) {
-        const email = error.config?.data ? JSON.parse(error.config.data).email : '';
-        if (email) {
-          authApi.incrementLoginAttempts(email);
+        const emailPayload = error.config?.data ? JSON.parse(error.config.data).email : '';
+        if (emailPayload) {
+          authApi.incrementLoginAttempts(emailPayload);
         }
+      }
+
+      // Manejo específico: contraseña expirada
+      if (error.response?.status === 403 && error.response?.data?.code === 'PASSWORD_EXPIRED') {
+        toast.error(error.response?.data?.message || 'Tu contraseña ha expirado. Debes cambiarla.');
+        return { success: false, requirePasswordChange: true, email };
       }
       
       const message = error.response?.data?.message || 'Error al iniciar sesión';
       toast.error(message);
-      return false;
+      return { success: false };
     }
   };
 
