@@ -22,6 +22,23 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/api/ventas', ventasRoutes);
 
+// Rutas de mock para evitar errores 404
+app.get('/repairs/all', (req, res) => {
+  res.json({ status: 'success', data: [] });
+});
+
+app.get('/recycle/all', (req, res) => {
+  res.json({ status: 'success', data: [] });
+});
+
+app.get('/marketplace/products', (req, res) => {
+  res.json({ status: 'success', data: [] });
+});
+
+app.get('/reviews/all', (req, res) => {
+  res.json({ status: 'success', data: [] });
+});
+
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('API de ReeUtil funcionando correctamente');

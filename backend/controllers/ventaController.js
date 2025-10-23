@@ -261,3 +261,5 @@ exports.buscarVentas = async (req, res) => {
     });
   }
 };
+
+// La función obtenerEstadisticasDashboard se ha movido a controllers/dashboard/dashController.js

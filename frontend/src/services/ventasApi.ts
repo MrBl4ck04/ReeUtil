@@ -9,4 +9,5 @@ export const ventasApi = {
   obtenerVenta: (id: string) => api.get(`/api/ventas/${id}`),
   obtenerVentas: (params?: any) => api.get('/api/ventas', { params }),
   buscarVentas: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
+  obtenerEstadisticasDashboard: () => api.get('/api/ventas/dashboard'),
 };
