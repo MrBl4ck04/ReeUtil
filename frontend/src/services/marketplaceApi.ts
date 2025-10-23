@@ -72,18 +72,18 @@ export const recycleApi = {
 // API para reseñas
 export const reviewsApi = {
   // Cliente
-  getMyReviews: () => api.get('/reviews/my-reviews'),
-  createReview: (data: any) => api.post('/reviews', data),
-  updateReview: (id: string, data: any) => api.patch(`/reviews/${id}`, data),
-  deleteReview: (id: string) => api.delete(`/reviews/${id}`),
+  getMyReviews: () => api.get('/api/reviews/my-reviews'),
+  createReview: (data: any) => api.post('/api/reviews', data),
+  updateReview: (id: string, data: any) => api.patch(`/api/reviews/${id}`, data),
+  deleteReview: (id: string) => api.delete(`/api/reviews/${id}`),
   
   // Ambos
-  getSellerReviews: (sellerId: number) => api.get(`/reviews/seller/${sellerId}`),
+  getSellerReviews: (sellerId: string) => api.get(`/api/reviews/seller/${sellerId}`),
   
   // Admin
-  getAllReviews: () => api.get('/reviews/all'),
-  getReviewsStats: () => api.get('/reviews/stats'),
-  flagReview: (id: string, reason: string) => api.post(`/reviews/${id}/flag`, { reason }),
+  getAllReviews: () => api.get('/api/reviews/all'),
+  getReviewsStats: () => api.get('/api/reviews/stats'),
+  flagReview: (id: string, reason: string) => api.post(`/api/reviews/${id}/flag`, { reason }),
 };
 
 // API para notificaciones

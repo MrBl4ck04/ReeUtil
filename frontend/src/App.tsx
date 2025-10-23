@@ -18,6 +18,8 @@ import { Purchases } from './pages/client/Purchases';
 import { Repairs } from './pages/client/Repairs';
 import { Recycle } from './pages/client/Recycle';
 import { Reviews } from './pages/client/Reviews';
+import { CreateReview } from './pages/client/CreateReview';
+import { EditReview } from './pages/client/EditReview';
 import { Notifications } from './pages/client/Notifications';
 
 // Páginas de administrador
@@ -87,6 +89,24 @@ function App() {
             <Route path="/client/resenas" element={
               <ClientLayout>
                 <Reviews />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/resenas/nuevo" element={
+              <ClientLayout>
+                <CreateReview />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/resenas/nuevo/:vendedorId" element={
+              <ClientLayout>
+                <CreateReview />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/resenas/editar/:id" element={
+              <ClientLayout>
+                <EditReview />
               </ClientLayout>
             } />
             

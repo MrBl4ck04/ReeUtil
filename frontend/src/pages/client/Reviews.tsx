@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation } from 'react-query';
 import { Link } from 'react-router-dom';
 import { 
   Plus, 
@@ -12,23 +12,28 @@ import {
   User,
   Calendar
 } from 'lucide-react';
-import { reviewsApi } from '../../services/marketplaceApi';
+import { clientReviewsApi } from '../../services/clientReviewsApi';
 
 export const Reviews: React.FC = () => {
   const [activeTab, setActiveTab] = useState('my-reviews');
   
   // Obtener mis reseñas
-  const { data: myReviews, isLoading: loadingMyReviews, refetch } = useQuery('myReviews', reviewsApi.getMyReviews);
+  const { data: myReviews, isLoading: loadingMyReviews, refetch } = useQuery('myReviews', () => clientReviewsApi.getMyReviews());
+
+  // Mutation para eliminar
+  const deleteMutation = useMutation(
+    (id: string) => clientReviewsApi.deleteReview(id),
+    {
+      onSuccess: () => {
+        refetch();
+      }
+    }
+  );
   
   // Eliminar una reseña
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta reseña?')) {
-      try {
-        await reviewsApi.deleteReview(id);
-        refetch();
-      } catch (error) {
-        console.error('Error al eliminar la reseña:', error);
-      }
+      deleteMutation.mutate(id);
     }
   };
   
