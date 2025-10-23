@@ -2,6 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const compression = require('compression');
 const authRoutes = require('./routes/auth');
 const ventasRoutes = require('./routes/ventas');
 const employeesRoutes = require('./routes/employees');
@@ -17,11 +23,45 @@ dotenv.config();
 const app = express();
 
 // Middleware
+app.enable('trust proxy');
+
+// CORS restrictivo por defecto (seguridad por defecto)
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    const allowed = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (!origin || allowed.length === 0 || allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('Origen no permitido por CORS'));
+  },
   credentials: true
 }));
+
+// HTTP headers endurecidos
+app.use(helmet());
+// Política de COEP/CORP/CSP básica; puede ajustarse por frontend
+app.use(helmet.crossOriginResourcePolicy({ policy: 'same-site' }));
+
+// Rate limit para todas las rutas de API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+app.use('/api', apiLimiter);
+
+// Body parser
 app.use(express.json());
+
+// Sanitización contra NoSQL injection y XSS
+app.use(mongoSanitize());
+app.use(xss());
+
+// Prevención de HPP con lista blanca de parámetros repetidos
+app.use(hpp({ whitelist: ['precioMin', 'precioMax', 'categoria', 'estado', 'condicion', 'search'] }));
+
+// Compresión de respuestas
+app.use(compression());
 
 // Rutas
 app.use('/auth', authRoutes);
@@ -51,12 +91,19 @@ app.get('/', (req, res) => {
 });
 
 // Conexión a MongoDB
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  tls: true,
-  tlsAllowInvalidCertificates: true, // ignora certificados (solo para desarrollo)
-  serverSelectionTimeoutMS: 10000,   // 10 segundos de espera
-})
+mongoose.set('strictQuery', true);
+
+const mongoOptions = {
+  serverSelectionTimeoutMS: 10000,
+};
+
+// Solo permitir certificados inválidos en desarrollo explícitamente
+if (process.env.NODE_ENV === 'development') {
+  mongoOptions.tls = true;
+  mongoOptions.tlsAllowInvalidCertificates = true;
+}
+
+mongoose.connect(process.env.MONGODB_URI, mongoOptions)
   .then(() => {
     console.log('✅ Conexión a MongoDB establecida correctamente');
     
