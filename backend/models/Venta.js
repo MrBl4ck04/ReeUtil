@@ -40,6 +40,11 @@ const ventaSchema = new mongoose.Schema({
     enum: ['venta', 'comprado', 'disponible', 'vendido', 'pausado'],
     default: 'venta'
   },
+  estadoAdmin: {
+    type: String,
+    enum: ['habilitado', 'deshabilitado'],
+    default: 'habilitado'
+  },
   categoria: {
     type: String,
     enum: ['smartphone', 'tablet', 'laptop', 'desktop', 'accesorio', 'otro'],
@@ -55,6 +60,7 @@ const ventaSchema = new mongoose.Schema({
 // Índices para mejorar el rendimiento
 ventaSchema.index({ usuario: 1 });
 ventaSchema.index({ estado: 1 });
+ventaSchema.index({ estadoAdmin: 1 });
 ventaSchema.index({ categoria: 1 });
 ventaSchema.index({ precio: 1 });
 

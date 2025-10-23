@@ -27,10 +27,11 @@ export const Purchases: React.FC = () => {
   const queryClient = useQueryClient();
   // Lista de ventas disponibles se obtiene más abajo usando ventasApi
   
-  // Obtener ventas disponibles (estado "venta")
+  // Obtener ventas disponibles (estado "venta" y estadoAdmin "habilitado")
   const { data: availableProducts, isLoading, isError, error, refetch } = useQuery(['availableVentas', filters], () => 
     ventasApi.obtenerVentas({
       estado: 'venta',
+      estadoAdmin: 'habilitado', // Solo mostrar productos habilitados por el admin
       categoria: filters.categoria || undefined,
       precioMin: filters.precioMin || undefined,
       precioMax: filters.precioMax || undefined,

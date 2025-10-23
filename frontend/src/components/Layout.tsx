@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import DisabledProductsNotification from './DisabledProductsNotification';
 import { 
   Home, 
   Package, 
@@ -149,6 +150,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
+
+      {/* Notificación de productos deshabilitados - solo para usuarios normales */}
+      {user && !user.rol && <DisabledProductsNotification />}
     </div>
   );
 };

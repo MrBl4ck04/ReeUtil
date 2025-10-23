@@ -35,6 +35,17 @@ exports.obtenerVentas = async (req, res) => {
     if (req.query.estado) filtros.estado = req.query.estado;
     if (req.query.condicion) filtros.condicion = req.query.condicion;
     
+    // Filtro de estado de administración - por defecto solo mostrar habilitados
+    if (req.query.estadoAdmin) {
+      filtros.estadoAdmin = req.query.estadoAdmin;
+    } else {
+      // Por defecto, solo mostrar ventas habilitadas (o sin estadoAdmin definido)
+      filtros.$or = [
+        { estadoAdmin: 'habilitado' },
+        { estadoAdmin: { $exists: false } }
+      ];
+    }
+    
     // Filtro de precio
     if (req.query.precioMin || req.query.precioMax) {
       filtros.precio = {};
@@ -88,7 +99,16 @@ exports.obtenerVenta = async (req, res) => {
 // Obtener ventas del usuario autenticado
 exports.obtenerMisVentas = async (req, res) => {
   try {
-    const ventas = await Venta.find({ usuario: req.user.id }).sort({ fechaCreacion: -1 });
+    // Solo mostrar ventas habilitadas por defecto
+    const filtros = {
+      usuario: req.user.id,
+      $or: [
+        { estadoAdmin: 'habilitado' },
+        { estadoAdmin: { $exists: false } }
+      ]
+    };
+
+    const ventas = await Venta.find(filtros).sort({ fechaCreacion: -1 });
 
     res.status(200).json({
       status: 'success',
@@ -262,4 +282,153 @@ exports.buscarVentas = async (req, res) => {
   }
 };
 
-// La función obtenerEstadisticasDashboard se ha movido a controllers/dashboard/dashController.js
+// ========== FUNCIONES ESPECÍFICAS DEL ADMIN ==========
+
+// Obtener todas las ventas para administración (incluye deshabilitadas)
+exports.obtenerVentasAdmin = async (req, res) => {
+  try {
+    // Filtros opcionales
+    const filtros = {};
+    
+    if (req.query.categoria) filtros.categoria = req.query.categoria;
+    if (req.query.estado) filtros.estado = req.query.estado;
+    if (req.query.estadoAdmin) filtros.estadoAdmin = req.query.estadoAdmin;
+    if (req.query.condicion) filtros.condicion = req.query.condicion;
+    
+    // Filtro de precio
+    if (req.query.precioMin || req.query.precioMax) {
+      filtros.precio = {};
+      if (req.query.precioMin) filtros.precio.$gte = Number(req.query.precioMin);
+      if (req.query.precioMax) filtros.precio.$lte = Number(req.query.precioMax);
+    }
+
+    // Búsqueda por texto
+    if (req.query.search) {
+      filtros.$or = [
+        { nombre: { $regex: req.query.search, $options: 'i' } },
+        { descripcion: { $regex: req.query.search, $options: 'i' } }
+      ];
+    }
+
+    const ventas = await Venta.find(filtros).sort({ fechaCreacion: -1 });
+
+    // Calcular estadísticas
+    const totalVentas = await Venta.countDocuments({ estadoAdmin: 'habilitado' });
+    const ventasDeshabilitadas = await Venta.countDocuments({ estadoAdmin: 'deshabilitado' });
+    const ventasCompletadas = await Venta.countDocuments({ 
+      estado: 'comprado', 
+      estadoAdmin: 'habilitado' 
+    });
+    
+    // Calcular ingresos por comisiones (asumiendo 5% de comisión)
+    const ventasConComision = await Venta.find({ 
+      estado: 'comprado', 
+      estadoAdmin: 'habilitado' 
+    });
+    const ingresosComisiones = ventasConComision.reduce((total, venta) => {
+      return total + (venta.precio * 0.05);
+    }, 0);
+
+    res.status(200).json({
+      status: 'success',
+      results: ventas.length,
+      data: {
+        ventas,
+        estadisticas: {
+          totalVentas,
+          ventasDeshabilitadas,
+          ventasCompletadas,
+          ingresosComisiones: Math.round(ingresosComisiones * 100) / 100
+        }
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Deshabilitar una venta (solo admin)
+exports.deshabilitarVenta = async (req, res) => {
+  try {
+    const venta = await Venta.findById(req.params.id);
+    
+    if (!venta) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No se encontró la venta con ese ID'
+      });
+    }
+
+    venta.estadoAdmin = 'deshabilitado';
+    await venta.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Venta deshabilitada correctamente',
+      data: {
+        venta
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Habilitar una venta (solo admin)
+exports.habilitarVenta = async (req, res) => {
+  try {
+    const venta = await Venta.findById(req.params.id);
+    
+    if (!venta) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No se encontró la venta con ese ID'
+      });
+    }
+
+    venta.estadoAdmin = 'habilitado';
+    await venta.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Venta habilitada correctamente',
+      data: {
+        venta
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Obtener productos deshabilitados del usuario autenticado
+exports.obtenerProductosDeshabilitados = async (req, res) => {
+  try {
+    const ventasDeshabilitadas = await Venta.find({ 
+      usuario: req.user.id,
+      estadoAdmin: 'deshabilitado'
+    }).sort({ fechaCreacion: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      results: ventasDeshabilitadas.length,
+      data: {
+        ventas: ventasDeshabilitadas
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};

@@ -16,8 +16,26 @@ export const Sales: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   
-  // Obtener productos del usuario
-  const { data: myProducts, isLoading, refetch } = useQuery('myProducts', ventasApi.obtenerMisVentas);
+  // Obtener productos del usuario (solo los habilitados por el admin)
+  const { data: myProducts, isLoading, refetch } = useQuery('myProducts', () => 
+    ventasApi.obtenerMisVentas().then(response => {
+      // Filtrar solo productos habilitados por el admin
+      const ventas = response.data?.data?.ventas || [];
+      const ventasHabilitadas = ventas.filter((venta: any) => 
+        venta.estadoAdmin === 'habilitado' || !venta.estadoAdmin
+      );
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          data: {
+            ...response.data.data,
+            ventas: ventasHabilitadas
+          }
+        }
+      };
+    })
+  );
   
   // Normalizar datos
   const productsList = myProducts?.data?.data?.ventas || [];
