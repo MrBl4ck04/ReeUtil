@@ -12,13 +12,25 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState<number | ''>('');
+  const [categoria, setCategoria] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Lista de categorías sugeridas para dispositivos electrónicos
+  const categorias = [
+    { value: 'smartphone', label: 'Smartphone / Celular' },
+    { value: 'tablet', label: 'Tablet' },
+    { value: 'laptop', label: 'Laptop / Portátil' },
+    { value: 'desktop', label: 'PC de escritorio' },
+    { value: 'accesorio', label: 'Accesorio' },
+    { value: 'otro', label: 'Otros' },
+  ];
 
   const reset = () => {
     setNombre('');
     setDescripcion('');
     setPrecio('');
+    setCategoria('');
     setError(null);
   };
 
@@ -26,8 +38,8 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
     e.preventDefault();
     setError(null);
 
-    if (!nombre || !descripcion || precio === '' || Number(precio) <= 0) {
-      setError('Completa todos los campos y asegura un precio válido');
+    if (!nombre || !descripcion || precio === '' || Number(precio) <= 0 || !categoria) {
+      setError('Completa todos los campos, selecciona una categoría y asegura un precio válido');
       return;
     }
 
@@ -37,6 +49,7 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
         nombre,
         descripcion,
         precio: Number(precio),
+        categoria,
         estado: 'venta',
       });
       reset();
@@ -91,6 +104,20 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
               rows={3}
               required
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Categoría</label>
+            <select
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            >
+              <option value="" disabled>Selecciona una categoría</option>
+              {categorias.map((cat) => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Precio</label>
