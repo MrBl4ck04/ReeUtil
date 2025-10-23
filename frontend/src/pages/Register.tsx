@@ -17,6 +17,8 @@ export const Register: React.FC = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
+    apellidoMaterno: '',
+    genero: '',
     email: '',
     contraseA: '',
     confirmPassword: '',
@@ -27,7 +29,7 @@ export const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrengthInfo, setPasswordStrengthInfo] = useState<{ label: string; level: number }>({ label: '', level: 0 });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
@@ -74,7 +76,7 @@ export const Register: React.FC = () => {
     setError('');
 
     // Validaciones básicas
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.contraseA) {
+    if (!formData.nombre || !formData.apellido || !formData.apellidoMaterno || !formData.genero || !formData.email || !formData.contraseA) {
       setError('Por favor complete todos los campos requeridos.');
       return;
     }
@@ -94,7 +96,10 @@ export const Register: React.FC = () => {
       setIsLoading(true);
       // Llamada a la API para registrar al usuario
       await authApi.register({
-        name: formData.nombre + ' ' + formData.apellido,
+        name: formData.nombre,
+        lastName: formData.apellido,
+        motherLastName: formData.apellidoMaterno,
+        gender: formData.genero, // M, F, N, O
         email: formData.email,
         password: formData.contraseA,
         passwordConfirm: formData.confirmPassword
@@ -158,7 +163,7 @@ export const Register: React.FC = () => {
 
               <div>
                 <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
-                  Apellido
+                  Apellido paterno
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -175,6 +180,49 @@ export const Register: React.FC = () => {
                     required
                   />
                 </div>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="apellidoMaterno" className="block text-sm font-medium text-gray-700">
+                Apellido materno
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  name="apellidoMaterno"
+                  id="apellidoMaterno"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  placeholder="García"
+                  value={formData.apellidoMaterno}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="genero" className="block text-sm font-medium text-gray-700">
+                Género
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <select
+                  name="genero"
+                  id="genero"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  value={formData.genero}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Selecciona tu género</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                  <option value="N">No binario</option>
+                  <option value="O">Otro</option>
+                </select>
               </div>
             </div>
 
@@ -200,7 +248,7 @@ export const Register: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="contraseA" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="contraseA" className="block text_sm font-medium text-gray-700">
                 Contraseña
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -242,8 +290,8 @@ export const Register: React.FC = () => {
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirmar Contraseña
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="mt-1 relative rounded-md shadow_sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items_center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input

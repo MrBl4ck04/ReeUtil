@@ -34,17 +34,21 @@ app.get('/', (req, res) => {
 });
 
 // Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  tls: true,
+  tlsAllowInvalidCertificates: true, // ignora certificados (solo para desarrollo)
+  serverSelectionTimeoutMS: 10000,   // 10 segundos de espera
+})
   .then(() => {
-    console.log('Conexión a MongoDB establecida correctamente');
+    console.log('✅ Conexión a MongoDB establecida correctamente');
     
-    // Iniciar servidor
     const PORT = process.env.PORT || 5500;
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en el puerto ${PORT}`);
+      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
     });
   })
   .catch(err => {
-    console.error('Error al conectar a MongoDB:', err.message);
+    console.error('❌ Error al conectar a MongoDB:', err);
     process.exit(1);
   });

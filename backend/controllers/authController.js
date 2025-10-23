@@ -22,6 +22,9 @@ const createSendToken = (user, statusCode, res) => {
       idUsuario: user._id,
       nombre: user.name,
       apellido: user.lastName || '',
+      apellidoMaterno: user.motherLastName || '',
+      genero: user.gender || '',
+      userId: user.userId,
       email: user.email,
       rol: user.role,
       loginAttempts: user.loginAttempts || 0,
@@ -33,11 +36,49 @@ const createSendToken = (user, statusCode, res) => {
 // Registro de usuario
 exports.signup = async (req, res) => {
   try {
+    const { name, lastName, motherLastName, email, password, passwordConfirm, gender } = req.body;
+
+    if (!name || !lastName || !motherLastName || !email || !password || !passwordConfirm || !gender) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Por favor completa todos los campos: nombre, apellido paterno, apellido materno, género, email y contraseñas.'
+      });
+    }
+
+    // Validar género permitido (M, F, N, O)
+    const genderCode = (gender || '').trim().charAt(0).toUpperCase();
+    const allowed = ['M', 'F', 'N', 'O'];
+    if (!allowed.includes(genderCode)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Género inválido. Valores permitidos: M, F, N, O.'
+      });
+    }
+
+    // Generar userId por iniciales: USR-NPMG
+    const initial = (s) => (s || '').trim().charAt(0).toUpperCase();
+    const initials = `${initial(name)}${initial(lastName)}${initial(motherLastName)}${genderCode}`;
+    const userId = `USR-${initials}`;
+
+    // Verificar duplicados de userId
+    const existingUserId = await User.findOne({ userId });
+    if (existingUserId) {
+      return res.status(400).json({
+        status: 'fail',
+        code: 'USERID_DUPLICATE',
+        message: `El código de usuario generado (${userId}) ya existe. Intenta variar el nombre o verifica tus datos.`
+      });
+    }
+
     const newUser = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm
+      userId,
+      name,
+      lastName,
+      motherLastName,
+      gender: genderCode,
+      email,
+      password,
+      passwordConfirm
     });
 
     createSendToken(newUser, 201, res);

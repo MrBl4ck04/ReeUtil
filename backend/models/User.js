@@ -15,11 +15,27 @@ const userSchema = new mongoose.Schema({
   userId: {
     type: String,
     unique: true,
-    default: generateUserId
+    required: [true, 'El código de usuario es requerido']
   },
   name: {
     type: String,
     required: [true, 'Por favor ingresa tu nombre']
+  },
+  // Nuevo: Apellido paterno
+  lastName: {
+    type: String,
+    required: [true, 'Por favor ingresa tu apellido paterno']
+  },
+  // Nuevo: Apellido materno
+  motherLastName: {
+    type: String,
+    required: [true, 'Por favor ingresa tu apellido materno']
+  },
+  // Nuevo: Género (M, F, N, O)
+  gender: {
+    type: String,
+    enum: ['M', 'F', 'N', 'O'],
+    required: [true, 'Por favor selecciona tu género']
   },
   email: {
     type: String,
