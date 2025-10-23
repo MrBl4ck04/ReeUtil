@@ -6,7 +6,7 @@ exports.getMyReviews = async (req, res) => {
   try {
     const userId = req.user.id || req.user._id;
     const reviews = await Review.find({ autor: userId })
-      .populate('destinatario', 'nombre apellido foto')
+      .populate('destinatario', 'name email')  // Usar 'name' en lugar de 'nombre'
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -33,7 +33,7 @@ exports.getSellerReviews = async (req, res) => {
       destinatario: sellerId,
       visible: true
     })
-      .populate('autor', 'nombre apellido foto')
+      .populate('autor', 'name')
       .sort({ createdAt: -1 });
 
     const totalReviews = reviews.length;
@@ -275,8 +275,8 @@ exports.flagReview = async (req, res) => {
 exports.getAllReviews = async (req, res) => {
   try {
     const reviews = await Review.find()
-      .populate('autor', 'nombre apellido email')
-      .populate('destinatario', 'nombre apellido email')
+      .populate('autor', 'name email')  // User usa 'name', no 'nombre'
+      .populate('destinatario', 'name email')  // User usa 'name', no 'nombre'
       .sort({ createdAt: -1 });
 
     res.status(200).json({

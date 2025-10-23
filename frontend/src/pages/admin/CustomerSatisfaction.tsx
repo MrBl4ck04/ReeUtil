@@ -9,13 +9,27 @@ export const CustomerSatisfaction: React.FC = () => {
   const [showReported, setShowReported] = useState(false);
   
   // Obtener todas las reseñas de la BD
-  const { data: reviewsResponse, isLoading, refetch } = useQuery(
+  const { data: reviewsResponse, isLoading, refetch, error } = useQuery(
     'adminReviews',
     () => adminSatisfactionApi.getAllReviews(),
-    { retry: 1, staleTime: 30000 }
+    { 
+      retry: 2,
+      staleTime: 0,  // Siempre considerar como stale
+      cacheTime: 0,  // No cachear
+      refetchOnWindowFocus: true  // Refetch cuando la ventana recupera el foco
+    }
   );
 
-  const reviewsData = reviewsResponse?.data?.reviews || [];
+  // Debug log
+  React.useEffect(() => {
+    console.log('📊 Admin Reviews Response:', reviewsResponse);
+    console.log('📊 Reseñas cargadas:', reviewsResponse?.data?.reviews?.length || 0);
+    if (error) {
+      console.error('❌ Error al cargar reseñas:', error);
+    }
+  }, [reviewsResponse, error]);
+
+  const reviewsData = reviewsResponse?.data?.data?.reviews || [];
 
   // Mutation para eliminar reseña
   const deleteMutation = useMutation(
@@ -36,8 +50,8 @@ export const CustomerSatisfaction: React.FC = () => {
   // Filtrar reseñas
   const filteredReviews = reviewsData.filter((review: any) => {
     const matchesSearch = 
-      review.autor?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.destinatario?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.autor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.destinatario?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.comentario?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -199,18 +213,35 @@ export const CustomerSatisfaction: React.FC = () => {
 
       {/* Lista de reseñas */}
       <div className="space-y-4">
-        {isLoading ? (
+        {isLoading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
             <p className="mt-2 text-gray-500">Cargando reseñas...</p>
           </div>
-        ) : filteredReviews.length === 0 ? (
+        )}
+        
+        {error && (
+          <div className="text-center py-8 card bg-red-50">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto" />
+            <h3 className="mt-2 text-lg font-medium text-red-900">Error al cargar</h3>
+            <p className="mt-1 text-red-700">{(error as any)?.message || 'No se pudieron cargar las reseñas'}</p>
+            <button 
+              onClick={() => refetch()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+        
+        {!isLoading && !error && filteredReviews.length === 0 ? (
           <div className="text-center py-12 card">
             <MessageCircle className="h-12 w-12 text-gray-400 mx-auto" />
             <h3 className="mt-2 text-lg font-medium text-gray-900">No hay reseñas</h3>
-            <p className="mt-1 text-gray-500">No se encontraron reseñas que coincidan con los filtros</p>
+            <p className="mt-1 text-gray-500">Total en BD: {reviewsData.length}</p>
+            <p className="text-gray-500">No se encontraron reseñas que coincidan con los filtros</p>
           </div>
-        ) : (
+        ) : !isLoading && filteredReviews.length > 0 && (
           filteredReviews.map((review: any) => {
             const hasReports = review.reportes && review.reportes.length > 0;
             return (
@@ -225,7 +256,7 @@ export const CustomerSatisfaction: React.FC = () => {
                       
                       <div className="mt-1 flex items-center text-sm text-gray-500">
                         <User className="h-4 w-4 mr-1" />
-                        <span>De: {review.autor?.nombre || 'Usuario'} • Para: {review.destinatario?.nombre || 'Usuario'}</span>
+                        <span>De: {review.autor?.name || 'Usuario'} • Para: {review.destinatario?.name || 'Usuario'}</span>
                       </div>
                       
                       <div className="mt-1 flex items-center text-xs text-gray-400">
