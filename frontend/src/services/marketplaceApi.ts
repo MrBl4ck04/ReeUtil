@@ -47,7 +47,7 @@ export const repairApi = {
   },
   getRepairById: (id: string) => api.get(`/repairs/${id}`),
   updateRepairQuote: (id: string, data: any) => api.patch(`/repairs/${id}/quote`, data),
-  updateRepairStatus: (id: string, status: string) => api.patch(`/repairs/${id}/status`, { status }),
+  updateRepairStatus: (id: string, data: any) => api.patch(`/repairs/${id}/status`, data),
 };
 
 // API para reciclaje
@@ -66,7 +66,8 @@ export const recycleApi = {
   },
   getRecycleById: (id: string) => api.get(`/recycle/${id}`),
   updateRecycleQuote: (id: string, data: any) => api.patch(`/recycle/${id}/quote`, data),
-  updateRecycleStatus: (id: string, status: string) => api.patch(`/recycle/${id}/status`, { status }),
+  updateRecycleStatus: (id: string, data: any) => api.patch(`/recycle/${id}/status`, data),
+  updateEntregaInfo: (id: string, data: any) => api.patch(`/recycle/${id}/entrega`, data),
 };
 
 // API para reseñas

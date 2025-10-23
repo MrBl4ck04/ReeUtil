@@ -16,7 +16,11 @@ import { ClientDashboard } from './pages/client/ClientDashboard';
 import { Sales } from './pages/client/Sales';
 import { Purchases } from './pages/client/Purchases';
 import { Repairs } from './pages/client/Repairs';
+import { RepairNew } from './pages/client/RepairNew';
+import { RepairDetail } from './pages/client/RepairDetail';
 import { Recycle } from './pages/client/Recycle';
+import { RecycleNew } from './pages/client/RecycleNew';
+import { RecycleDetail } from './pages/client/RecycleDetail';
 import { Reviews } from './pages/client/Reviews';
 import { Notifications } from './pages/client/Notifications';
 
@@ -78,9 +82,33 @@ function App() {
               </ClientLayout>
             } />
             
+            <Route path="/client/reparaciones/nuevo" element={
+              <ClientLayout>
+                <RepairNew />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/reparaciones/:id" element={
+              <ClientLayout>
+                <RepairDetail />
+              </ClientLayout>
+            } />
+            
             <Route path="/client/reciclar" element={
               <ClientLayout>
                 <Recycle />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/reciclar/nuevo" element={
+              <ClientLayout>
+                <RecycleNew />
+              </ClientLayout>
+            } />
+            
+            <Route path="/client/reciclar/:id" element={
+              <ClientLayout>
+                <RecycleDetail />
               </ClientLayout>
             } />
             
