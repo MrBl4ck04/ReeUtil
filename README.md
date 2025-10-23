@@ -101,6 +101,7 @@ frontend/
 ### Frontend
 - **React 18**: Biblioteca de UI
 - **TypeScript**: Tipado estático
+- **Vite**: Build tool y dev server ultrarrápido
 - **Tailwind CSS**: Framework de CSS
 - **React Query**: Gestión de estado del servidor
 - **React Hook Form**: Manejo de formularios
@@ -114,6 +115,7 @@ frontend/
 - **Prettier**: Formateo de código
 - **Concurrently**: Ejecución paralela de scripts
 - **Jest**: Framework de testing
+- **Vite**: Servidor de desarrollo y bundler
 
 ## 📦 Instalación
 
@@ -170,10 +172,10 @@ cp backend/env.example backend/.env
 ### Variables de Entorno (Frontend)
 ```bash
 # Copiar archivo de ejemplo
-cp frontend/env.example frontend/.env
+cp frontend/env.example frontend/.env.local
 
 # Editar con tus configuraciones
-# REACT_APP_API_URL=http://localhost:5500
+# VITE_API_URL=http://localhost:5500
 ```
 
 ## 🚀 Uso
@@ -184,8 +186,8 @@ cp frontend/env.example frontend/.env
 npm run dev
 
 # O ejecutar por separado:
-npm run dev:backend  # Backend en puerto 5500
-npm run dev:frontend # Frontend en puerto 3000
+npm run dev:backend    # Backend en puerto 5500
+cd frontend && npm run dev  # Frontend con Vite (puerto automático)
 ```
 
 ### Producción
@@ -204,6 +206,11 @@ npm run build            # Construcción completa
 npm run test             # Testing completo
 npm run lint             # Linting completo
 npm run install:all      # Instalar todas las dependencias
+
+# Scripts específicos del frontend (desde frontend/)
+npm run dev              # Servidor de desarrollo Vite
+npm run build            # Build de producción con Vite
+npm run preview          # Vista previa del build de producción
 ```
 
 ## 📚 API Documentation

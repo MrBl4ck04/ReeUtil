@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { 
   Search, 
   Filter,
@@ -11,6 +11,8 @@ import {
   Tag
 } from 'lucide-react';
 import { marketplaceApi } from '../../services/marketplaceApi';
+import { ventasApi } from '../../services/ventasApi';
+import ConfirmPurchaseModal from '../../components/ventas/ConfirmPurchaseModal';
 
 export const Purchases: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,10 +22,15 @@ export const Purchases: React.FC = () => {
     precioMax: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedVenta, setSelectedVenta] = useState<any | null>(null);
+  const queryClient = useQueryClient();
+  // Lista de ventas disponibles se obtiene más abajo usando ventasApi
   
-  // Obtener productos disponibles (excluyendo los propios)
-  const { data: availableProducts, isLoading } = useQuery(['availableProducts', filters], () => 
-    marketplaceApi.getAllProducts({
+  // Obtener ventas disponibles (estado "venta")
+  const { data: availableProducts, isLoading, isError, error, refetch } = useQuery(['availableVentas', filters], () => 
+    ventasApi.obtenerVentas({
+      estado: 'venta',
       categoria: filters.categoria || undefined,
       precioMin: filters.precioMin || undefined,
       precioMax: filters.precioMax || undefined,
@@ -33,29 +40,29 @@ export const Purchases: React.FC = () => {
   // Obtener historial de compras
   const { data: myPurchases } = useQuery('myPurchases', marketplaceApi.getMyPurchases);
   
-  // Filtrar productos por búsqueda
-  const filteredProducts = availableProducts?.data?.filter((product: any) => 
-    product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtrar productos por búsqueda usando la forma correcta: data.ventas
+  const ventas = availableProducts?.data?.data?.ventas ?? [];
+  const filteredProducts = ventas.filter((product: any) => 
+    product?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product?.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   // Manejar compra de producto
-  const handlePurchase = async (productId: string) => {
-    if (window.confirm('¿Estás seguro de que deseas comprar este producto?')) {
-      try {
-        await marketplaceApi.purchaseProduct(productId);
-        // Simular el pago
-        await marketplaceApi.simulatePayment({
-          productId,
-          paymentMethod: 'credit_card',
-          amount: filteredProducts.find((p: any) => p._id === productId).precio
-        });
-        
-        // Recargar los datos
-        window.location.reload();
-      } catch (error) {
-        console.error('Error al comprar el producto:', error);
-      }
+  const openConfirm = (venta: any) => {
+    setSelectedVenta(venta);
+    setConfirmOpen(true);
+  };
+
+  const confirmPurchase = async () => {
+    if (!selectedVenta) return;
+    try {
+      await ventasApi.comprarVenta(selectedVenta._id);
+      setConfirmOpen(false);
+      setSelectedVenta(null);
+      await queryClient.invalidateQueries('availableVentas');
+      await refetch();
+    } catch (error) {
+      console.error('Error al realizar la compra:', error);
     }
   };
   
@@ -165,6 +172,12 @@ export const Purchases: React.FC = () => {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
           <p className="mt-2 text-gray-500">Cargando productos...</p>
         </div>
+      ) : isError ? (
+        <div className="text-center py-12 card">
+          <ShoppingCart className="h-12 w-12 text-red-400 mx-auto" />
+          <h3 className="mt-2 text-lg font-medium text-gray-900">Error al cargar productos</h3>
+          <p className="mt-1 text-gray-500">{(error as any)?.message || 'Verifica que el backend esté activo en http://localhost:5500'}</p>
+        </div>
       ) : filteredProducts?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product: any) => (
@@ -183,52 +196,33 @@ export const Purchases: React.FC = () => {
                   </div>
                 )}
               </div>
-              
               {/* Información del producto */}
               <div className="p-4">
                 <div className="flex justify-between items-start">
                   <h3 className="font-medium text-gray-900">{product.nombre}</h3>
                   <div className="flex items-center text-green-600 font-semibold">
                     <DollarSign className="h-4 w-4 mr-1" />
-                    {product.precio.toFixed(2)}
+                    {Number(product.precio).toFixed(2)}
                   </div>
                 </div>
-                
                 <p className="mt-1 text-sm text-gray-500 line-clamp-2">{product.descripcion}</p>
-                
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center">
                     <Tag className="h-4 w-4 text-gray-400 mr-1" />
                     <span className="text-xs text-gray-500">{product.categoria}</span>
                   </div>
-                  
                   <div className="flex items-center">
                     <User className="h-4 w-4 text-gray-400 mr-1" />
-                    <span className="text-xs text-gray-500">{product.vendedor.nombre}</span>
+                    <span className="text-xs text-gray-500">{product.usuario?.name || 'Vendedor'}</span>
                   </div>
                 </div>
-                
-                <div className="mt-2 flex items-center">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i}
-                        className={`h-4 w-4 ${i < (product.vendedor.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-500 ml-1">
-                    ({product.vendedor.totalReviews || 0} reseñas)
-                  </span>
-                </div>
-                
                 {/* Botón de compra */}
                 <button
-                  onClick={() => handlePurchase(product._id)}
+                  onClick={() => openConfirm(product)}
                   className="mt-4 w-full btn-primary flex items-center justify-center"
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Comprar ahora
+                  Comprar
                 </button>
               </div>
             </div>
@@ -241,6 +235,13 @@ export const Purchases: React.FC = () => {
           <p className="mt-1 text-gray-500">No se encontraron productos que coincidan con tu búsqueda</p>
         </div>
       )}
+      {/* Modal de confirmación */}
+      <ConfirmPurchaseModal 
+        open={confirmOpen}
+        venta={selectedVenta}
+        onCancel={() => { setConfirmOpen(false); setSelectedVenta(null); }}
+        onConfirm={confirmPurchase}
+      />
       
       {/* Historial de compras */}
       <div className="mt-10">
