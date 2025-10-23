@@ -58,17 +58,36 @@ export const usersApi = {
   unblockUser: (id: number) => api.post(`/users/${id}/unblock`),
   
   // Empleados (admin)
-  getAllEmployees: () => api.get('/users/employees'),
-  getEmployeeById: (id: number) => api.get(`/users/employees/${id}`),
-  createEmployee: (data: any) => api.post('/users/employees', data),
-  updateEmployee: (id: number, data: any) => api.patch(`/users/employees/${id}`, data),
-  deleteEmployee: (id: number) => api.delete(`/users/employees/${id}`),
-  resetEmployeePassword: (id: number) => api.post(`/users/employees/${id}/reset-password`),
+  getAllEmployees: () => api.get('/api/employees'),
+  getEmployeeById: (id: string) => api.get(`/api/employees/${id}`),
+  createEmployee: (data: any) => api.post('/api/employees', data),
+  updateEmployee: (id: string, data: any) => api.patch(`/api/employees/${id}`, data),
+  deleteEmployee: (id: string) => api.delete(`/api/employees/${id}`),
+  resetEmployeePassword: (id: string) => api.post(`/api/employees/${id}/reset-password`),
+  toggleBlockEmployee: (id: string) => api.post(`/api/employees/${id}/toggle-block`),
   
-  // Permisos
-  getEmployeePermissions: (id: number) => api.get(`/users/employees/${id}/permissions`),
-  updateEmployeePermissions: (id: number, permissions: any[]) => 
-    api.post(`/users/employees/${id}/permissions`, { permissions }),
+  // Permisos de empleados
+  getEmployeePermissions: (id: string) => api.get(`/api/employees/${id}/permissions`),
+  updateEmployeePermissions: (id: string, permissions: any[]) => 
+    api.post(`/api/employees/${id}/permissions`, { customPermissions: permissions }),
+};
+
+// Roles API
+export const rolesApi = {
+  getAll: () => api.get('/api/roles'),
+  getById: (id: string) => api.get(`/api/roles/${id}`),
+  create: (data: any) => api.post('/api/roles', data),
+  update: (id: string, data: any) => api.patch(`/api/roles/${id}`, data),
+  delete: (id: string) => api.delete(`/api/roles/${id}`),
+};
+
+// Permissions Modules API
+export const permissionsApi = {
+  getAll: () => api.get('/api/permissions'),
+  getById: (id: string) => api.get(`/api/permissions/${id}`),
+  create: (data: any) => api.post('/api/permissions', data),
+  update: (id: string, data: any) => api.patch(`/api/permissions/${id}`, data),
+  delete: (id: string) => api.delete(`/api/permissions/${id}`),
 };
 
 // Catalog API
