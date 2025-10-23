@@ -221,11 +221,59 @@ exports.login = async (req, res) => {
 
     // 2) Si no es empleado, intentar login como USUARIO (cliente)
     const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await user.correctPassword(contraseA, user.password))) {
+    if (!user) {
       return res.status(401).json({
         status: 'fail',
         message: 'Email o contraseña incorrectos'
       });
+    }
+
+    // NUEVO: Verificar si la cuenta está bloqueada
+    if (user.isBlocked) {
+      return res.status(403).json({
+        status: 'fail',
+        code: 'ACCOUNT_BLOCKED',
+        message: 'Tu cuenta ha sido bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor contacta con soporte.',
+        blockedAt: user.blockedAt
+      });
+    }
+
+    // Verificar la contraseña
+    const isPasswordCorrect = await user.correctPassword(contraseA, user.password);
+    if (!isPasswordCorrect) {
+      // Incrementar contador de intentos fallidos
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+      
+      // Si alcanza 3 intentos, bloquear la cuenta
+      if (user.loginAttempts >= 3) {
+        user.isBlocked = true;
+        user.blockedAt = new Date();
+        await user.save({ validateBeforeSave: false });
+        
+        return res.status(403).json({
+          status: 'fail',
+          code: 'ACCOUNT_BLOCKED',
+          message: 'Tu cuenta ha sido bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor contacta con soporte.',
+          blockedAt: user.blockedAt
+        });
+      }
+      
+      // Guardar el incremento de intentos
+      await user.save({ validateBeforeSave: false });
+      
+      const attemptsLeft = 3 - user.loginAttempts;
+      return res.status(401).json({
+        status: 'fail',
+        message: `Email o contraseña incorrectos. Te quedan ${attemptsLeft} intento(s) antes de que tu cuenta sea bloqueada.`,
+        loginAttempts: user.loginAttempts,
+        attemptsLeft
+      });
+    }
+
+    // Si la contraseña es correcta, resetear intentos fallidos
+    if (user.loginAttempts > 0) {
+      user.loginAttempts = 0;
+      await user.save({ validateBeforeSave: false });
     }
 
     // NUEVO: Forzar cambio de contraseña si expiró (60 días)
@@ -351,6 +399,149 @@ exports.changePassword = async (req, res) => {
     return res.status(200).json({
       status: 'success',
       message: 'Contraseña actualizada correctamente.'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Endpoint para desbloquear una cuenta (uso administrativo)
+exports.unblockAccount = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Se requiere el ID del usuario.'
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Usuario no encontrado.'
+      });
+    }
+
+    // Desbloquear cuenta y resetear intentos
+    user.isBlocked = false;
+    user.loginAttempts = 0;
+    user.blockedAt = null;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Cuenta desbloqueada exitosamente.',
+      user: {
+        idUsuario: user._id,
+        email: user.email,
+        isBlocked: user.isBlocked,
+        loginAttempts: user.loginAttempts
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Endpoint para verificar estado de bloqueo de una cuenta
+exports.checkBlockedStatus = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Se requiere el email del usuario.'
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Usuario no encontrado.'
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        email: user.email,
+        isBlocked: user.isBlocked,
+        loginAttempts: user.loginAttempts,
+        blockedAt: user.blockedAt
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// NUEVO: Endpoint de recuperación de contraseña (desbloqueo + cambio de contraseña)
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword, newPasswordConfirm } = req.body;
+
+    if (!email || !newPassword || !newPasswordConfirm) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Email, nueva contraseña y confirmación son requeridos.'
+      });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Las contraseñas no coinciden.'
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+password +passwordHistory');
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Usuario no encontrado.'
+      });
+    }
+
+    // Validar que la nueva contraseña no esté en el historial
+    const history = user.passwordHistory || [];
+    for (const prevHash of history) {
+      const reused = await bcrypt.compare(newPassword, prevHash);
+      if (reused) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'No puedes reutilizar una contraseña anterior.'
+        });
+      }
+    }
+
+    // Asignar nueva contraseña
+    user.password = newPassword;
+    user.passwordConfirm = newPasswordConfirm;
+
+    // Desbloquear cuenta y resetear intentos de login
+    user.isBlocked = false;
+    user.loginAttempts = 0;
+    user.blockedAt = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Contraseña actualizada correctamente. Tu cuenta ha sido desbloqueada y puedes iniciar sesión.'
     });
   } catch (err) {
     res.status(400).json({

@@ -81,11 +81,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return { success: false };
         }
         
-        // Resetear contador de intentos fallidos si existía
-        if (userData && userData.loginAttempts > 0) {
-          authApi.resetLoginAttempts(userData.idUsuario);
-        }
-        
         setToken(access_token);
         setUser(userData);
         
@@ -100,18 +95,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       toast.error('Credenciales inválidas. Por favor intente nuevamente.');
       return { success: false };
     } catch (error: any) {
-      // Incrementar contador de intentos fallidos
-      if (error.response?.status === 401) {
-        const emailPayload = error.config?.data ? JSON.parse(error.config.data).email : '';
-        if (emailPayload) {
-          authApi.incrementLoginAttempts(emailPayload);
-        }
+      // Manejo específico: cuenta bloqueada
+      if (error.response?.status === 403 && error.response?.data?.code === 'ACCOUNT_BLOCKED') {
+        toast.error(error.response?.data?.message || 'Tu cuenta ha sido bloqueada. Por favor contacta con soporte.');
+        return { success: false };
       }
 
       // Manejo específico: contraseña expirada
       if (error.response?.status === 403 && error.response?.data?.code === 'PASSWORD_EXPIRED') {
         toast.error(error.response?.data?.message || 'Tu contraseña ha expirado. Debes cambiarla.');
         return { success: false, requirePasswordChange: true, email };
+      }
+
+      // Manejo de intentos fallidos con advertencia
+      if (error.response?.status === 401) {
+        const message = error.response?.data?.message || 'Email o contraseña incorrectos';
+        const attemptsLeft = error.response?.data?.attemptsLeft;
+        
+        if (attemptsLeft !== undefined) {
+          // Mostrar advertencia con intentos restantes
+          if (attemptsLeft === 0) {
+            toast.error('¡Tu cuenta ha sido bloqueada por múltiples intentos fallidos!');
+          } else if (attemptsLeft === 1) {
+            toast.error(`${message}\n¡ADVERTENCIA: Solo te queda 1 intento más!`);
+          } else {
+            toast.error(`${message}\nTe quedan ${attemptsLeft} intentos.`);
+          }
+        } else {
+          toast.error(message);
+        }
+        
+        return { success: false };
       }
       
       const message = error.response?.data?.message || 'Error al iniciar sesión';

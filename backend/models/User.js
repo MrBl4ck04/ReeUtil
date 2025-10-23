@@ -80,6 +80,21 @@ const userSchema = new mongoose.Schema({
     type: [String],
     select: false,
     default: []
+  },
+  // NUEVO: Contador de intentos fallidos de login
+  loginAttempts: {
+    type: Number,
+    default: 0
+  },
+  // NUEVO: Estado de bloqueo de cuenta
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+  // NUEVO: Fecha de bloqueo de cuenta
+  blockedAt: {
+    type: Date,
+    default: null
   }
 });
 

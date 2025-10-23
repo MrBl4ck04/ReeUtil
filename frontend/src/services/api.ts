@@ -37,18 +37,17 @@ export const authApi = {
     api.post('/auth/login', data),
   register: (data: any) =>
     api.post('/auth/register', data),
-  incrementLoginAttempts: (email: string) =>
-    api.post('/auth/login-attempts/increment', { email }),
-  resetLoginAttempts: (userId: number) =>
-    api.post('/auth/login-attempts/reset', { userId }),
   checkUserBlocked: (email: string) =>
     api.get(`/auth/check-blocked/${email}`),
-  validateCredentials: (data: { email: string; contraseA: string }) =>
-    api.post('/auth/validate', data),
+  unblockAccount: (userId: string) =>
+    api.post('/auth/unblock-account', { userId }),
   getCaptcha: () => api.get('/auth/captcha'),
   // NUEVO: cambio de contraseña (sin token, valida con contraseña actual)
   changePassword: (data: { email: string; currentPassword: string; newPassword: string; newPasswordConfirm: string }) =>
     api.post('/auth/change-password', data),
+  // NUEVO: recuperación de contraseña (desbloquea cuenta y resetea intentos)
+  resetPassword: (data: { email: string; newPassword: string; newPasswordConfirm: string }) =>
+    api.post('/auth/reset-password', data),
 };
 
 // Users API
