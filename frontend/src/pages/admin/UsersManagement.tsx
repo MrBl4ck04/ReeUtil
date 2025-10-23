@@ -33,7 +33,7 @@ export const UsersManagement: React.FC = () => {
   
   // Mutación para desbloquear usuario
   const unblockUserMutation = useMutation(
-    (id: number) => usersApi.unblockUser(id),
+    (id: string) => usersApi.unblockUser(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('users');
@@ -42,24 +42,33 @@ export const UsersManagement: React.FC = () => {
     }
   );
   
-  // Filtrar usuarios por búsqueda
+  // Filtrar usuarios por búsqueda (robusto ante undefined)
   const getFilteredUsers = () => {
-    const dataSource = showOnlyBlocked ? blockedUsers?.data : users?.data;
-    
-    if (!dataSource) return [];
-    
-    return dataSource.filter((user: any) => 
-      user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.telefono && user.telefono.includes(searchTerm))
-    );
+    const dataSourceRaw = showOnlyBlocked ? blockedUsers?.data : users?.data;
+    if (!Array.isArray(dataSourceRaw)) return [] as any[];
+    const term = (searchTerm || '').toLowerCase();
+    return dataSourceRaw.filter((u: any) => {
+      const nombre = (u?.nombre || '').toLowerCase();
+      const apellido = (u?.apellido || '').toLowerCase();
+      const email = (u?.email || '').toLowerCase();
+      const telefono = u?.telefono ? String(u.telefono) : '';
+      return (
+        nombre.includes(term) ||
+        apellido.includes(term) ||
+        email.includes(term) ||
+        telefono.includes(searchTerm || '')
+      );
+    });
   };
   
   // Desbloquear usuario
-  const handleUnblockUser = (id: number) => {
+  const handleUnblockUser = (id: string) => {
     if (window.confirm('¿Está seguro de que desea desbloquear a este usuario?')) {
-      unblockUserMutation.mutate(id);
+      unblockUserMutation.mutate(id, {
+        onError: (err: any) => {
+          console.error('Respuesta del servidor:', err.response?.data);   //  ←  mostrará { status, message }
+        }
+      });
     }
   };
 
@@ -152,7 +161,7 @@ export const UsersManagement: React.FC = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.nombre} {user.apellido}
+                          {(user.nombre || '')} {(user.apellido || '')}
                         </div>
                       </div>
                     </div>
@@ -200,8 +209,8 @@ export const UsersManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user.loginAttempts > 0
-                        ? user.loginAttempts >= 3
+                      (user.loginAttempts || 0) > 0
+                        ? (user.loginAttempts || 0) >= 3
                           ? 'bg-red-100 text-red-800'
                           : 'bg-yellow-100 text-yellow-800'
                         : 'bg-gray-100 text-gray-800'
@@ -213,7 +222,7 @@ export const UsersManagement: React.FC = () => {
                     <div className="flex justify-end">
                       {user.isBlocked && (
                         <button
-                          onClick={() => handleUnblockUser(user._id)}
+                          onClick={() => handleUnblockUser(String(user._id))}
                           className="text-primary-600 hover:text-primary-900 flex items-center"
                           title="Desbloquear usuario"
                         >

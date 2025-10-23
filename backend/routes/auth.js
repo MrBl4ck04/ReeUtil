@@ -17,4 +17,9 @@ router.post('/unblock-account', authController.unblockAccount);
 // NUEVO: verificar estado de bloqueo
 router.get('/check-blocked/:email', authController.checkBlockedStatus);
 
+// NUEVO: ABM Usuarios (clientes)
+router.get('/users', authController.getAllUsers);
+router.get('/users/blocked', authController.getBlockedUsers);
+router.post('/users/:id/unblock', authController.unblockUserById);
+
 module.exports = router;

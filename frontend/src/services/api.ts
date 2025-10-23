@@ -53,12 +53,12 @@ export const authApi = {
 // Users API
 export const usersApi = {
   // Usuarios comunes (clientes)
-  getAll: () => api.get('/users'),
-  getById: (id: number) => api.get(`/users/${id}`),
-  update: (id: number, data: any) => api.patch(`/users/${id}`, data),
-  delete: (id: number) => api.delete(`/users/${id}`),
-  getBlocked: () => api.get('/users/blocked'),
-  unblockUser: (id: number) => api.post(`/users/${id}/unblock`),
+  getAll: () => api.get('/auth/users'),
+  getById: (id: number) => api.get(`/auth/users/${id}`),
+  update: (id: number, data: any) => api.patch(`/auth/users/${id}`, data),
+  delete: (id: number) => api.delete(`/auth/users/${id}`),
+  getBlocked: () => api.get('/auth/users/blocked'),
+  unblockUser: (id: string) => api.post('/auth/unblock-account', { userId: id }),
   
   // Empleados (admin)
   getAllEmployees: () => api.get('/api/employees'),

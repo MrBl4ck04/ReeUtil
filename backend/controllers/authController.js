@@ -420,19 +420,19 @@ exports.unblockAccount = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId);
+    // Actualizar sin disparar middleware de validación
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isBlocked: false, loginAttempts: 0, blockedAt: null },
+      { new: true, runValidators: false }
+    );
+
     if (!user) {
       return res.status(404).json({
         status: 'fail',
         message: 'Usuario no encontrado.'
       });
     }
-
-    // Desbloquear cuenta y resetear intentos
-    user.isBlocked = false;
-    user.loginAttempts = 0;
-    user.blockedAt = null;
-    await user.save({ validateBeforeSave: false });
 
     return res.status(200).json({
       status: 'success',
@@ -548,5 +548,68 @@ exports.resetPassword = async (req, res) => {
       status: 'fail',
       message: err.message
     });
+  }
+};
+
+// Listar todos los usuarios (clientes)
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('name lastName motherLastName email loginAttempts isBlocked telefono direccion');
+    // Adaptar al shape esperado por el frontend (nombre/apellido)
+    const adapted = users.map(u => ({
+      _id: u._id,
+      nombre: u.name,
+      apellido: u.lastName,
+      apellidoMaterno: u.motherLastName,
+      email: u.email,
+      telefono: u.telefono || null,
+      direccion: u.direccion || null,
+      loginAttempts: u.loginAttempts || 0,
+      isBlocked: !!u.isBlocked,
+    }));
+    return res.status(200).json(adapted);
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
+// Listar usuarios bloqueados
+exports.getBlockedUsers = async (req, res) => {
+  try {
+    const users = await User.find({ isBlocked: true }).select('name lastName motherLastName email loginAttempts isBlocked telefono direccion');
+    const adapted = users.map(u => ({
+      _id: u._id,
+      nombre: u.name,
+      apellido: u.lastName,
+      apellidoMaterno: u.motherLastName,
+      email: u.email,
+      telefono: u.telefono || null,
+      direccion: u.direccion || null,
+      loginAttempts: u.loginAttempts || 0,
+      isBlocked: !!u.isBlocked,
+    }));
+    return res.status(200).json(adapted);
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
+// Desbloquear usuario por ID (y resetear intentos)
+exports.unblockUserById = async (req, res) => {
+  try {
+    console.log('BODY recibido en /auth/unblock-account:', req.body);   //  ←  temporal
+    const { userId } = req.body;
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ status: 'fail', message: 'Usuario no encontrado' });
+    }
+    user.isBlocked = false;
+    user.loginAttempts = 0;
+    user.blockedAt = null;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({ status: 'success' });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
   }
 };
