@@ -15,6 +15,7 @@ router.use(authController.protect);
 // Rutas protegidas (requieren autenticación)
 router.post('/', ventaController.crearVenta);
 router.get('/usuario/mis-ventas', ventaController.obtenerMisVentas);
+router.get('/usuario/productos-deshabilitados', ventaController.obtenerProductosDeshabilitados);
 router.patch('/:id', ventaController.actualizarVenta);
 router.post('/:id/comprar', ventaController.comprarVenta);
 router.delete('/:id', ventaController.eliminarVenta);

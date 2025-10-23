@@ -35,6 +35,17 @@ exports.obtenerVentas = async (req, res) => {
     if (req.query.estado) filtros.estado = req.query.estado;
     if (req.query.condicion) filtros.condicion = req.query.condicion;
     
+    // Filtro de estado de administración - por defecto solo mostrar habilitados
+    if (req.query.estadoAdmin) {
+      filtros.estadoAdmin = req.query.estadoAdmin;
+    } else {
+      // Por defecto, solo mostrar ventas habilitadas (o sin estadoAdmin definido)
+      filtros.$or = [
+        { estadoAdmin: 'habilitado' },
+        { estadoAdmin: { $exists: false } }
+      ];
+    }
+    
     // Filtro de precio
     if (req.query.precioMin || req.query.precioMax) {
       filtros.precio = {};
@@ -88,7 +99,16 @@ exports.obtenerVenta = async (req, res) => {
 // Obtener ventas del usuario autenticado
 exports.obtenerMisVentas = async (req, res) => {
   try {
-    const ventas = await Venta.find({ usuario: req.user.id }).sort({ fechaCreacion: -1 });
+    // Solo mostrar ventas habilitadas por defecto
+    const filtros = {
+      usuario: req.user.id,
+      $or: [
+        { estadoAdmin: 'habilitado' },
+        { estadoAdmin: { $exists: false } }
+      ]
+    };
+
+    const ventas = await Venta.find(filtros).sort({ fechaCreacion: -1 });
 
     res.status(200).json({
       status: 'success',
@@ -380,6 +400,29 @@ exports.habilitarVenta = async (req, res) => {
       message: 'Venta habilitada correctamente',
       data: {
         venta
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Obtener productos deshabilitados del usuario autenticado
+exports.obtenerProductosDeshabilitados = async (req, res) => {
+  try {
+    const ventasDeshabilitadas = await Venta.find({ 
+      usuario: req.user.id,
+      estadoAdmin: 'deshabilitado'
+    }).sort({ fechaCreacion: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      results: ventasDeshabilitadas.length,
+      data: {
+        ventas: ventasDeshabilitadas
       }
     });
   } catch (err) {
