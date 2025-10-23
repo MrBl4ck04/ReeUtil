@@ -1,12 +1,14 @@
 const express = require('express');
 const ventaController = require('../controllers/ventaController');
 const authController = require('../controllers/authController');
+const dashController = require('../controllers/dashboard/dashController');
 
 const router = express.Router();
 
 // Rutas públicas (no requieren autenticación)
 router.get('/', ventaController.obtenerVentas);
 router.get('/buscar', ventaController.buscarVentas);
+router.get('/dashboard', dashController.obtenerEstadisticasDashboard);
 router.get('/:id', ventaController.obtenerVenta);
 
 // Middleware de protección - todas las rutas siguientes requieren autenticación

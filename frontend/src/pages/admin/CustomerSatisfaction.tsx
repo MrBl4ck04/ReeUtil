@@ -1,82 +1,62 @@
 import React, { useState } from 'react';
+import { useQuery, useMutation } from 'react-query';
 import { Search, Star, Flag, User, Calendar, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
+import { adminSatisfactionApi } from '../../services/adminApi';
 
 export const CustomerSatisfaction: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [showReported, setShowReported] = useState(false);
   
-  // Datos de ejemplo para las reseñas
-  const reviewsData = [
+  // Obtener todas las reseñas de la BD
+  const { data: reviewsResponse, isLoading, refetch, error } = useQuery(
+    'adminReviews',
+    () => adminSatisfactionApi.getAllReviews(),
     { 
-      id: 1, 
-      author: 'Juan Pérez',
-      recipient: 'María López',
-      type: 'compra',
-      rating: 5,
-      title: 'Excelente vendedor',
-      comment: 'Muy buen trato, el producto llegó en perfectas condiciones y antes de lo esperado.',
-      date: '2023-10-15',
-      reported: false
-    },
-    { 
-      id: 2, 
-      author: 'Carlos Rodríguez',
-      recipient: 'Ana Martínez',
-      type: 'reparacion',
-      rating: 4,
-      title: 'Buen servicio de reparación',
-      comment: 'Repararon mi teléfono rápidamente y a buen precio. Le quito una estrella porque tardaron un poco en responder al principio.',
-      date: '2023-10-14',
-      reported: false
-    },
-    { 
-      id: 3, 
-      author: 'Pedro Sánchez',
-      recipient: 'Laura Gómez',
-      type: 'compra',
-      rating: 2,
-      title: 'Producto en mal estado',
-      comment: 'El producto no estaba en las condiciones descritas. Tenía varios arañazos que no se mencionaban en la descripción.',
-      date: '2023-10-12',
-      reported: true,
-      reportReason: 'Información falsa'
-    },
-    { 
-      id: 4, 
-      author: 'Elena Fernández',
-      recipient: 'Roberto Jiménez',
-      type: 'reciclaje',
-      rating: 5,
-      title: 'Muy buena compensación',
-      comment: 'Me ofrecieron un precio justo por mi dispositivo antiguo. El proceso fue muy sencillo y rápido.',
-      date: '2023-10-10',
-      reported: false
-    },
-    { 
-      id: 5, 
-      author: 'Miguel Torres',
-      recipient: 'Carmen Vázquez',
-      type: 'compra',
-      rating: 1,
-      title: 'Pésima experiencia',
-      comment: 'Nunca recibí el producto y el vendedor no responde a mis mensajes. Muy mala experiencia.',
-      date: '2023-10-08',
-      reported: true,
-      reportReason: 'Contenido ofensivo'
-    },
-  ];
+      retry: 2,
+      staleTime: 0,  // Siempre considerar como stale
+      cacheTime: 0,  // No cachear
+      refetchOnWindowFocus: true  // Refetch cuando la ventana recupera el foco
+    }
+  );
+
+  // Debug log
+  React.useEffect(() => {
+    console.log('📊 Admin Reviews Response:', reviewsResponse);
+    console.log('📊 Reseñas cargadas:', reviewsResponse?.data?.reviews?.length || 0);
+    if (error) {
+      console.error('❌ Error al cargar reseñas:', error);
+    }
+  }, [reviewsResponse, error]);
+
+  const reviewsData = reviewsResponse?.data?.data?.reviews || [];
+
+  // Mutation para eliminar reseña
+  const deleteMutation = useMutation(
+    (id: string) => adminSatisfactionApi.deleteReview(id),
+    {
+      onSuccess: () => {
+        refetch();
+      }
+    }
+  );
+
+  const handleDeleteReview = (id: string) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta reseña reportada?')) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   // Filtrar reseñas
-  const filteredReviews = reviewsData.filter(review => {
+  const filteredReviews = reviewsData.filter((review: any) => {
     const matchesSearch = 
-      review.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.comment.toLowerCase().includes(searchTerm.toLowerCase());
+      review.autor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.destinatario?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.comentario?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = filterType === 'all' || review.type === filterType;
-    const matchesReported = !showReported || review.reported;
+    const matchesType = filterType === 'all' || review.tipo === filterType;
+    const matchesReported = !showReported || (review.reportes && review.reportes.length > 0);
     
     return matchesSearch && matchesType && matchesReported;
   });
@@ -97,14 +77,18 @@ export const CustomerSatisfaction: React.FC = () => {
 
   // Estadísticas generales
   const totalReviews = reviewsData.length;
-  const avgRating = reviewsData.reduce((acc, review) => acc + review.rating, 0) / totalReviews;
-  const reportedReviews = reviewsData.filter(review => review.reported).length;
+  const avgRating = totalReviews > 0
+    ? reviewsData.reduce((acc: number, review: any) => acc + review.calificacion, 0) / totalReviews
+    : 0;
+  const reportedReviews = reviewsData.filter((review: any) => review.reportes && review.reportes.length > 0).length;
   
   // Distribución de calificaciones
   const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
     rating,
-    count: reviewsData.filter(review => review.rating === rating).length,
-    percentage: (reviewsData.filter(review => review.rating === rating).length / totalReviews) * 100
+    count: reviewsData.filter((review: any) => review.calificacion === rating).length,
+    percentage: totalReviews > 0 
+      ? (reviewsData.filter((review: any) => review.calificacion === rating).length / totalReviews) * 100
+      : 0
   }));
 
   return (
@@ -229,77 +213,106 @@ export const CustomerSatisfaction: React.FC = () => {
 
       {/* Lista de reseñas */}
       <div className="space-y-4">
-        {filteredReviews.map((review) => (
-          <div key={review.id} className={`card hover:shadow-md transition-shadow ${review.reported ? 'border-l-4 border-red-500' : ''}`}>
-            <div className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center">
-                    <h3 className="font-medium text-gray-900 mr-2">{review.title}</h3>
-                    {renderStars(review.rating)}
-                  </div>
-                  
-                  <div className="mt-1 flex items-center text-sm text-gray-500">
-                    <User className="h-4 w-4 mr-1" />
-                    <span>De: {review.author} • Para: {review.recipient}</span>
-                  </div>
-                  
-                  <div className="mt-1 flex items-center text-xs text-gray-400">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    <span>{review.date}</span>
-                  </div>
-                </div>
-                
-                {review.reported && (
-                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full flex items-center">
-                    <Flag className="h-3 w-3 mr-1" />
-                    Reportada
-                  </span>
-                )}
-              </div>
-              
-              <div className="mt-4">
-                <p className="text-gray-600">{review.comment}</p>
-              </div>
-              
-              {review.reported && (
-                <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded-md">
-                  <span className="font-medium">Motivo del reporte:</span> {review.reportReason}
-                </div>
-              )}
-              
-              {/* Acciones */}
-              <div className="mt-4 flex justify-end space-x-2">
-                {review.reported && (
-                  <>
-                    <button className="btn-outline-danger flex items-center text-xs px-3 py-1">
-                      <XCircle className="h-3 w-3 mr-1" />
-                      Eliminar
-                    </button>
-                    <button className="btn-outline-primary flex items-center text-xs px-3 py-1">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Aprobar
-                    </button>
-                  </>
-                )}
-                
-                {!review.reported && (
-                  <button className="btn-outline flex items-center text-xs px-3 py-1">
-                    <Flag className="h-3 w-3 mr-1" />
-                    Reportar
-                  </button>
-                )}
-              </div>
-            </div>
+        {isLoading && (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
+            <p className="mt-2 text-gray-500">Cargando reseñas...</p>
           </div>
-        ))}
+        )}
         
-        {filteredReviews.length === 0 && (
+        {error && (
+          <div className="text-center py-8 card bg-red-50">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto" />
+            <h3 className="mt-2 text-lg font-medium text-red-900">Error al cargar</h3>
+            <p className="mt-1 text-red-700">{(error as any)?.message || 'No se pudieron cargar las reseñas'}</p>
+            <button 
+              onClick={() => refetch()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+        
+        {!isLoading && !error && filteredReviews.length === 0 ? (
           <div className="text-center py-12 card">
             <MessageCircle className="h-12 w-12 text-gray-400 mx-auto" />
             <h3 className="mt-2 text-lg font-medium text-gray-900">No hay reseñas</h3>
-            <p className="mt-1 text-gray-500">No se encontraron reseñas que coincidan con los filtros</p>
+            <p className="mt-1 text-gray-500">Total en BD: {reviewsData.length}</p>
+            <p className="text-gray-500">No se encontraron reseñas que coincidan con los filtros</p>
           </div>
+        ) : !isLoading && filteredReviews.length > 0 && (
+          filteredReviews.map((review: any) => {
+            const hasReports = review.reportes && review.reportes.length > 0;
+            return (
+              <div key={review._id} className={`card hover:shadow-md transition-shadow ${hasReports ? 'border-l-4 border-red-500' : ''}`}>
+                <div className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <h3 className="font-medium text-gray-900 mr-2">{review.titulo}</h3>
+                        {renderStars(review.calificacion)}
+                      </div>
+                      
+                      <div className="mt-1 flex items-center text-sm text-gray-500">
+                        <User className="h-4 w-4 mr-1" />
+                        <span>De: {review.autor?.name || 'Usuario'} • Para: {review.destinatario?.name || 'Usuario'}</span>
+                      </div>
+                      
+                      <div className="mt-1 flex items-center text-xs text-gray-400">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    
+                    {hasReports && (
+                      <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full flex items-center">
+                        <Flag className="h-3 w-3 mr-1" />
+                        Reportada
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4">
+                    <p className="text-gray-600">{review.comentario}</p>
+                  </div>
+                  
+                  {hasReports && (
+                    <div className="mt-3 p-2 bg-red-50 text-red-700 text-sm rounded-md">
+                      <span className="font-medium">Reportes:</span> {review.reportes.map((r: any) => r.razon).join(', ')}
+                    </div>
+                  )}
+                  
+                  {/* Acciones */}
+                  <div className="mt-4 flex justify-end space-x-2">
+                    {hasReports && (
+                      <>
+                        <button 
+                          onClick={() => handleDeleteReview(review._id)}
+                          disabled={deleteMutation.isLoading}
+                          className="btn-outline-danger flex items-center text-xs px-3 py-1 disabled:opacity-50"
+                        >
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Eliminar
+                        </button>
+                        <button className="btn-outline-primary flex items-center text-xs px-3 py-1">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Aprobar
+                        </button>
+                      </>
+                    )}
+                    
+                    {!hasReports && (
+                      <button className="btn-outline flex items-center text-xs px-3 py-1">
+                        <Flag className="h-3 w-3 mr-1" />
+                        Reportar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

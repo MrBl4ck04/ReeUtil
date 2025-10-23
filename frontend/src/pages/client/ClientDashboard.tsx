@@ -6,69 +6,43 @@ import {
   ShoppingCart,
   Wrench,
   Recycle as RecycleIcon,
-  Star,
   Bell,
-  ArrowRight
+  ArrowRight,
+  Loader,
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { marketplaceApi, notificationsApi, repairApi, recycleApi } from '../../services/marketplaceApi';
+import { clientDashboardApi } from '../../services/clientDashboardApi';
 
 export const ClientDashboard: React.FC = () => {
   const { user } = useAuth();
   
-  // Consultas para obtener datos de diferentes servicios
-  const { data: myProducts } = useQuery('myProducts', marketplaceApi.getMyProducts);
-  const { data: myPurchases } = useQuery('myPurchases', marketplaceApi.getMyPurchases);
-  const { data: repairRequests } = useQuery('repairRequests', repairApi.getMyRepairRequests);
-  const { data: recycleRequests } = useQuery('recycleRequests', recycleApi.getMyRecycleRequests);
-  const { data: notifications } = useQuery('notifications', notificationsApi.getMyNotifications);
+  // Obtener todos los datos del dashboard del cliente
+  const { data: dashboardData, isLoading: isLoadingData, error: queryError } = useQuery(
+    'clientDashboard',
+    () => clientDashboardApi.getClientDashboardData(),
+    { retry: 2, staleTime: 0, cacheTime: 0, refetchOnWindowFocus: true }
+  );
+  
+  const isLoading = !!isLoadingData;
 
-  // Estadísticas para mostrar en el dashboard
-  const stats = [
-    {
-      name: 'Mis Ventas',
-      value: myProducts?.data?.length || 0,
-      icon: ShoppingBag,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-      href: '/client/ventas'
-    },
-    {
-      name: 'Mis Compras',
-      value: myPurchases?.data?.length || 0,
-      icon: ShoppingCart,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-      href: '/client/compras'
-    },
-    {
-      name: 'Reparaciones',
-      value: repairRequests?.data?.length || 0,
-      icon: Wrench,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-100',
-      href: '/client/reparaciones'
-    },
-    {
-      name: 'Reciclaje',
-      value: recycleRequests?.data?.length || 0,
-      icon: RecycleIcon,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-      href: '/client/reciclar'
-    },
-    {
-      name: 'Notificaciones',
-      value: notifications?.data?.filter((n: any) => !n.read).length || 0,
-      icon: Bell,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100',
-      href: '/client/notificaciones'
-    },
-  ];
+  const dashInfo = dashboardData?.data?.data || {};
+  
+  const mySalesCount = dashInfo.mySales?.count || 0;
+  const myPurchasesCount = dashInfo.myPurchases?.count || 0;
+  const myRepairsCount = dashInfo.myRepairs?.count || 0;
+  const myRecycleCount = dashInfo.myRecycle?.count || 0;
+  const notificationsCount = dashInfo.myNotifications?.count || 0;
+
+  const mySales = dashInfo.mySales?.sales || [];
+  const myPurchases = dashInfo.myPurchases?.purchases || [];
+  const myRepairs = dashInfo.myRepairs?.repairs || [];
+  const myRecycle = dashInfo.myRecycle?.recycleRequests || [];
+  const notifications = dashInfo.myNotifications?.notifications || [];
 
   return (
     <div className="space-y-6">
+      {/* Encabezado */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Mi Panel de Cliente</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -76,131 +50,256 @@ export const ClientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Link 
-              to={stat.href}
-              key={stat.name} 
-              className="card hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className={`flex-shrink-0 p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`h-6 w-6 ${stat.color}`} />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+        {/* Mis Ventas */}
+        <Link to="/client/ventas" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100">
+              <ShoppingBag className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Mis Ventas</p>
+              <p className="text-2xl font-bold text-gray-900">{mySalesCount}</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Mis Compras */}
+        <Link to="/client/compras" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100">
+              <ShoppingCart className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Mis Compras</p>
+              <p className="text-2xl font-bold text-gray-900">{myPurchasesCount}</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Reparaciones */}
+        <Link to="/client/reparaciones" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-yellow-100">
+              <Wrench className="h-6 w-6 text-yellow-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Reparaciones</p>
+              <p className="text-2xl font-bold text-gray-900">{myRepairsCount}</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Reciclaje */}
+        <Link to="/client/reciclaje" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-600/20">
+              <RecycleIcon className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Reciclaje</p>
+              <p className="text-2xl font-bold text-gray-900">{myRecycleCount}</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Notificaciones */}
+        <Link to="/client/notificaciones" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-red-100">
+              <Bell className="h-6 w-6 text-red-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Notificaciones</p>
+              <p className="text-2xl font-bold text-gray-900">{notificationsCount}</p>
+            </div>
+          </div>
+        </Link>
       </div>
 
-      {/* Acciones rápidas */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h3>
-          <div className="space-y-3">
-            <Link
-              to="/client/ventas/nuevo"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center">
-                <ShoppingBag className="h-5 w-5 text-blue-600 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900">Vender un Producto</p>
-                  <p className="text-sm text-gray-500">Publica un producto para vender</p>
-                </div>
-              </div>
-              <ArrowRight className="h-5 w-5 text-gray-400" />
-            </Link>
-            
-            <Link
-              to="/client/compras"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center">
-                <ShoppingCart className="h-5 w-5 text-green-600 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900">Comprar Productos</p>
-                  <p className="text-sm text-gray-500">Explora productos disponibles</p>
-                </div>
-              </div>
-              <ArrowRight className="h-5 w-5 text-gray-400" />
-            </Link>
-            
-            <Link
-              to="/client/reparaciones/nuevo"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center">
-                <Wrench className="h-5 w-5 text-yellow-600 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900">Solicitar Reparación</p>
-                  <p className="text-sm text-gray-500">Envía tu dispositivo para reparación</p>
-                </div>
-              </div>
-              <ArrowRight className="h-5 w-5 text-gray-400" />
-            </Link>
-            
-            <Link
-              to="/client/reciclar/nuevo"
-              className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center">
-                <RecycleIcon className="h-5 w-5 text-purple-600 mr-3" />
-                <div>
-                  <p className="font-medium text-gray-900">Reciclar Dispositivo</p>
-                  <p className="text-sm text-gray-500">Recicla dispositivos y obtén compensación</p>
-                </div>
-              </div>
-              <ArrowRight className="h-5 w-5 text-gray-400" />
-            </Link>
+      {/* Loading State */}
+      {(isLoading || false) && (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+          <p className="mt-2 text-gray-500">Cargando tu panel...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {(queryError || false) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <AlertCircle className="h-5 w-5 text-red-600 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-red-900">Error al cargar datos</h3>
+              <p className="text-sm text-red-700 mt-1">No se pudieron obtener los datos de tu panel</p>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Notificaciones Recientes</h3>
-          <div className="space-y-3">
-            {notifications?.data?.slice(0, 5).map((notification: any) => (
-              <div 
-                key={notification._id} 
-                className={`flex items-center p-3 rounded-lg border ${notification.read ? 'border-gray-200' : 'border-blue-300 bg-blue-50'}`}
-              >
-                <div className="flex-shrink-0 mr-3">
-                  {notification.type === 'repair' && <Wrench className="h-5 w-5 text-yellow-500" />}
-                  {notification.type === 'recycle' && <RecycleIcon className="h-5 w-5 text-purple-500" />}
-                  {notification.type === 'sale' && <ShoppingBag className="h-5 w-5 text-blue-500" />}
-                  {notification.type === 'purchase' && <ShoppingCart className="h-5 w-5 text-green-500" />}
-                  {notification.type === 'review' && <Star className="h-5 w-5 text-orange-500" />}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{notification.title}</p>
-                  <p className="text-sm text-gray-500">{notification.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString()}
-                  </p>
-                </div>
+      {!(isLoading || false) && !(queryError || false) && (
+        <>
+          {/* Acciones Rápidas */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Acciones Rápidas</h2>
+            </div>
+            <div className="px-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Vender un Producto */}
+                <Link
+                  to="/catalog"
+                  className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-blue-100 mr-3">
+                      <ShoppingBag className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Vender un Producto</p>
+                      <p className="text-xs text-gray-500">Publica un producto para vender</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </Link>
+
+                {/* Comprar Productos */}
+                <Link
+                  to="/catalog"
+                  className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-green-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-green-100 mr-3">
+                      <ShoppingCart className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Comprar Productos</p>
+                      <p className="text-xs text-gray-500">Explora productos disponibles</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </Link>
+
+                {/* Solicitar Reparación */}
+                <Link
+                  to="/client/reparaciones"
+                  className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-yellow-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-yellow-100 mr-3">
+                      <Wrench className="h-5 w-5 text-yellow-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Solicitar Reparación</p>
+                      <p className="text-xs text-gray-500">Envía tu dispositivo para reparación</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </Link>
+
+                {/* Reciclar Dispositivo */}
+                <Link
+                  to="/client/reciclaje"
+                  className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-green-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-full bg-green-600/20 mr-3">
+                      <RecycleIcon className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Reciclar Dispositivo</p>
+                      <p className="text-xs text-gray-500">Recicla dispositivos y obtén compensación</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </Link>
               </div>
-            )) || (
-              <p className="text-gray-500 text-center py-4">No tienes notificaciones recientes</p>
-            )}
-            
-            {notifications?.data?.length > 0 && (
-              <Link 
-                to="/client/notificaciones"
-                className="block text-center text-sm font-medium text-primary-600 hover:text-primary-700 mt-2"
-              >
-                Ver todas las notificaciones
+            </div>
+          </div>
+
+          {/* Mis Ventas Recientes */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Mis Ventas Recientes</h2>
+              <Link to="/client/ventas" className="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+                Ver todas <ArrowRight className="h-4 w-4 ml-1" />
               </Link>
-            )}
+            </div>
+            <div className="px-6 py-4">
+              {mySalesCount === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">No tienes ventas aún</p>
+              ) : (
+                <div className="space-y-3">
+                  {mySales.slice(0, 5).map((sale: any) => (
+                    <div
+                      key={sale._id}
+                      className="flex items-start p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="p-2 rounded-full bg-blue-100 mr-3 mt-0.5">
+                        <ShoppingBag className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-gray-900">{sale.nombre}</p>
+                          <p className="font-semibold text-blue-600">${sale.precio}</p>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{sale.descripcion}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            sale.estado === 'venta' ? 'bg-blue-100 text-blue-800' :
+                            sale.estado === 'vendido' ? 'bg-green-100 text-green-800' :
+                            sale.estado === 'pausado' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {sale.estado}
+                          </span>
+                          <p className="text-xs text-gray-400">
+                            {new Date(sale.fechaCreacion).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* Notificaciones Recientes */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Notificaciones Recientes</h2>
+              <Link to="/client/notificaciones" className="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+                Ver todas <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </div>
+            <div className="px-6 py-4">
+              {notificationsCount === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">No tienes notificaciones recientes</p>
+              ) : (
+                <div className="space-y-3">
+                  {notifications.slice(0, 5).map((notification: any) => (
+                    <div
+                      key={notification._id}
+                      className="flex items-start p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="p-2 rounded-full bg-blue-100 mr-3 mt-0.5">
+                        <Bell className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{notification.titulo || 'Notificación'}</p>
+                        <p className="text-sm text-gray-500 mt-1">{notification.mensaje}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
