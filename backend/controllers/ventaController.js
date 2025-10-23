@@ -182,6 +182,51 @@ exports.eliminarVenta = async (req, res) => {
   }
 };
 
+// Comprar una venta
+exports.comprarVenta = async (req, res) => {
+  try {
+    const venta = await Venta.findById(req.params.id);
+
+    if (!venta) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No se encontró la venta con ese ID'
+      });
+    }
+
+    // No permitir comprar la propia venta
+    if (venta.usuario._id.toString() === req.user.id) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'No puedes comprar tu propio producto'
+      });
+    }
+
+    // Solo permitir compra si está en estado "venta" o "disponible"
+    if (!['venta', 'disponible'].includes(venta.estado)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'El producto no está disponible para comprar'
+      });
+    }
+
+    venta.estado = 'comprado';
+    await venta.save();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        venta
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
 // Buscar ventas por texto
 exports.buscarVentas = async (req, res) => {
   try {

@@ -16,6 +16,7 @@ router.use(authController.protect);
 router.post('/', ventaController.crearVenta);
 router.get('/usuario/mis-ventas', ventaController.obtenerMisVentas);
 router.patch('/:id', ventaController.actualizarVenta);
+router.post('/:id/comprar', ventaController.comprarVenta);
 router.delete('/:id', ventaController.eliminarVenta);
 
 module.exports = router;
