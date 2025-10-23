@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const ventasRoutes = require('./routes/ventas');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/auth', authRoutes);
+app.use('/api/ventas', ventasRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

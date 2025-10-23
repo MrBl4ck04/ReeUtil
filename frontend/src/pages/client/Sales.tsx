@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -10,25 +9,30 @@ import {
   DollarSign,
   ShoppingBag
 } from 'lucide-react';
-import { marketplaceApi } from '../../services/marketplaceApi';
+import { ventasApi } from '../../services/ventasApi';
+import NuevoProductoModal from '../../components/ventas/NuevoProductoModal';
 
 export const Sales: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Obtener productos del usuario
-  const { data: myProducts, isLoading, refetch } = useQuery('myProducts', marketplaceApi.getMyProducts);
+  const { data: myProducts, isLoading, refetch } = useQuery('myProducts', ventasApi.obtenerMisVentas);
   
+  // Normalizar datos
+  const productsList = myProducts?.data?.data?.ventas || [];
+
   // Filtrar productos por búsqueda
-  const filteredProducts = myProducts?.data?.filter((product: any) => 
-    product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = productsList.filter((product: any) => 
+    (product.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (product.descripcion || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   // Eliminar un producto
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
       try {
-        await marketplaceApi.deleteProduct(id);
+        await ventasApi.eliminarVenta(id);
         refetch();
       } catch (error) {
         console.error('Error al eliminar el producto:', error);
@@ -45,13 +49,13 @@ export const Sales: React.FC = () => {
             Gestiona tus productos a la venta en el marketplace
           </p>
         </div>
-        <Link
-          to="/client/ventas/nuevo"
+        <button
+          onClick={() => setShowCreateModal(true)}
           className="btn-primary flex items-center"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Producto
-        </Link>
+        </button>
       </div>
 
       {/* Buscador */}
@@ -90,7 +94,7 @@ export const Sales: React.FC = () => {
                   </div>
                 )}
                 <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-1 text-xs font-medium text-gray-700 shadow">
-                  {product.estado || 'En venta'}
+                  {product.estado || 'venta'}
                 </div>
               </div>
               
@@ -100,7 +104,7 @@ export const Sales: React.FC = () => {
                   <h3 className="font-medium text-gray-900">{product.nombre}</h3>
                   <div className="flex items-center text-green-600 font-semibold">
                     <DollarSign className="h-4 w-4 mr-1" />
-                    {product.precio.toFixed(2)}
+                    {Number(product.precio).toFixed(2)}
                   </div>
                 </div>
                 
@@ -108,18 +112,12 @@ export const Sales: React.FC = () => {
                 
                 <div className="mt-3 flex items-center">
                   <Tag className="h-4 w-4 text-gray-400 mr-1" />
-                  <span className="text-xs text-gray-500">{product.categoria}</span>
+                  <span className="text-xs text-gray-500">{product.categoria || 'Sin categoría'}</span>
                 </div>
                 
                 {/* Acciones */}
                 <div className="mt-4 flex justify-between">
-                  <Link
-                    to={`/client/ventas/editar/${product._id}`}
-                    className="btn-outline-primary flex items-center text-xs px-3 py-1"
-                  >
-                    <Edit2 className="h-3 w-3 mr-1" />
-                    Editar
-                  </Link>
+                  {/* TODO: implementar edición en otra tarea */}
                   <button
                     onClick={() => handleDelete(product._id)}
                     className="btn-outline-danger flex items-center text-xs px-3 py-1"
@@ -137,15 +135,22 @@ export const Sales: React.FC = () => {
           <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">No tienes productos en venta</h3>
           <p className="mt-1 text-gray-500">Comienza a vender tus productos usados en nuestro marketplace</p>
-          <Link
-            to="/client/ventas/nuevo"
+          <button
+            onClick={() => setShowCreateModal(true)}
             className="btn-primary mt-4 inline-flex items-center"
           >
             <Plus className="h-4 w-4 mr-2" />
             Publicar mi primer producto
-          </Link>
+          </button>
         </div>
       )}
+
+      {/* Modal de nuevo producto */}
+      <NuevoProductoModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={() => refetch()}
+      />
     </div>
   );
 };

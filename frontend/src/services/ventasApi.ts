@@ -1,0 +1,10 @@
+import api from './api';
+
+export const ventasApi = {
+  crearVenta: (data: any) => api.post('/api/ventas', data),
+  obtenerMisVentas: () => api.get('/api/ventas/usuario/mis-ventas'),
+  actualizarVenta: (id: string, data: any) => api.patch(`/api/ventas/${id}`, data),
+  eliminarVenta: (id: string) => api.delete(`/api/ventas/${id}`),
+  obtenerVenta: (id: string) => api.get(`/api/ventas/${id}`),
+  buscarVentas: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
+};
