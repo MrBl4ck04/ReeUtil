@@ -43,6 +43,8 @@ export const authApi = {
     api.post('/auth/login-attempts/reset', { userId }),
   checkUserBlocked: (email: string) =>
     api.get(`/auth/check-blocked/${email}`),
+  validateCredentials: (data: { email: string; contraseA: string }) =>
+    api.post('/auth/validate', data),
 };
 
 // Users API

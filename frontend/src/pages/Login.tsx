@@ -29,11 +29,16 @@ export const Login: React.FC = () => {
 
     try {
       setIsLoading(true);
-      await login(formData.email, formData.contraseA);
-      // Redirigir al dashboard del cliente
-      navigate('/client');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Credenciales inválidas. Por favor intente nuevamente.');
+      const success = await login(formData.email, formData.contraseA);
+      
+      if (success) {
+        // Redirigir según el rol del usuario
+        navigate('/client');
+      } else {
+        // El mensaje de error ya se muestra en la función login
+      }
+    } catch (err) {
+      setError('Error al iniciar sesión. Por favor intente nuevamente.');
     } finally {
       setIsLoading(false);
     }

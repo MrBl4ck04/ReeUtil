@@ -15,13 +15,15 @@ const createSendToken = (user, statusCode, res) => {
   // Enviar respuesta
   res.status(statusCode).json({
     status: 'success',
-    token,
-    data: {
-      user: {
-        userId: user.userId,
-        name: user.name,
-        email: user.email
-      }
+    access_token: token,
+    user: {
+      idUsuario: user._id,
+      nombre: user.name,
+      apellido: user.lastName || '',
+      email: user.email,
+      rol: user.role === 'admin',
+      loginAttempts: user.loginAttempts || 0,
+      isBlocked: user.isBlocked || false
     }
   });
 };
@@ -48,10 +50,11 @@ exports.signup = async (req, res) => {
 // Login de usuario
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    console.log('Datos recibidos:', req.body);
+    const { email, contraseA } = req.body;
 
     // 1) Verificar si se proporcionó email y password
-    if (!email || !password) {
+    if (!email || !contraseA) {
       return res.status(400).json({
         status: 'fail',
         message: 'Por favor proporciona email y contraseña'
@@ -61,7 +64,7 @@ exports.login = async (req, res) => {
     // 2) Verificar si el usuario existe y la contraseña es correcta
     const user = await User.findOne({ email }).select('+password');
 
-    if (!user || !(await user.correctPassword(password, user.password))) {
+    if (!user || !(await user.correctPassword(contraseA, user.password))) {
       return res.status(401).json({
         status: 'fail',
         message: 'Email o contraseña incorrectos'

@@ -61,19 +61,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('Intentando login con:', { email, contraseA: password });
       const response = await authApi.login({ email, contraseA: password });
+      console.log('Respuesta del servidor:', response.data);
       
-      if (response.data.access_token) {
+      // Verificar que la respuesta tenga un token de acceso
+      if (response.data && response.data.access_token) {
         const { access_token, user: userData } = response.data;
         
         // Verificar si el usuario está bloqueado
-        if (userData.isBlocked) {
+        if (userData && userData.isBlocked) {
           toast.error('Su cuenta está bloqueada. Por favor contacte con soporte.');
           return false;
         }
         
         // Resetear contador de intentos fallidos si existía
-        if (userData.loginAttempts > 0) {
+        if (userData && userData.loginAttempts > 0) {
           authApi.resetLoginAttempts(userData.idUsuario);
         }
         
@@ -87,6 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
       
+      // Si no hay token, el login no fue exitoso
+      toast.error('Credenciales inválidas. Por favor intente nuevamente.');
       return false;
     } catch (error: any) {
       // Incrementar contador de intentos fallidos
