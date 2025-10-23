@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
       message: 'Las contraseñas no coinciden'
     }
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   createdAt: {
     type: Date,
     default: Date.now

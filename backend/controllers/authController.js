@@ -21,7 +21,7 @@ const createSendToken = (user, statusCode, res) => {
       nombre: user.name,
       apellido: user.lastName || '',
       email: user.email,
-      rol: user.role === 'admin',
+      rol: user.role,
       loginAttempts: user.loginAttempts || 0,
       isBlocked: user.isBlocked || false
     }
@@ -118,4 +118,17 @@ exports.protect = async (req, res, next) => {
       message: 'No autorizado: ' + err.message
     });
   }
+};
+
+// Middleware para restringir acceso solo a administradores
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'No tienes permisos para realizar esta acción'
+      });
+    }
+    next();
+  };
 };

@@ -122,4 +122,50 @@ export const inventoryApi = {
   },
 };
 
+// Sales API
+export const salesApi = {
+  // Rutas públicas
+  getAll: (params?: { categoria?: string; estado?: string; condicion?: string; precioMin?: number; precioMax?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.categoria) searchParams.append('categoria', params.categoria);
+    if (params?.estado) searchParams.append('estado', params.estado);
+    if (params?.condicion) searchParams.append('condicion', params.condicion);
+    if (params?.precioMin) searchParams.append('precioMin', params.precioMin.toString());
+    if (params?.precioMax) searchParams.append('precioMax', params.precioMax.toString());
+    return api.get(`/api/ventas?${searchParams.toString()}`);
+  },
+  getById: (id: string) => api.get(`/api/ventas/${id}`),
+  search: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
+  
+  // Rutas protegidas (requieren autenticación)
+  create: (data: any) => api.post('/api/ventas', data),
+  getMySales: () => api.get('/api/ventas/usuario/mis-ventas'),
+  update: (id: string, data: any) => api.patch(`/api/ventas/${id}`, data),
+  buy: (id: string) => api.post(`/api/ventas/${id}/comprar`),
+  delete: (id: string) => api.delete(`/api/ventas/${id}`),
+  
+  // Rutas de administración (requieren rol admin)
+  getAllForAdmin: (params?: { 
+    categoria?: string; 
+    estado?: string; 
+    estadoAdmin?: string; 
+    condicion?: string; 
+    precioMin?: number; 
+    precioMax?: number;
+    search?: string;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.categoria) searchParams.append('categoria', params.categoria);
+    if (params?.estado) searchParams.append('estado', params.estado);
+    if (params?.estadoAdmin) searchParams.append('estadoAdmin', params.estadoAdmin);
+    if (params?.condicion) searchParams.append('condicion', params.condicion);
+    if (params?.precioMin) searchParams.append('precioMin', params.precioMin.toString());
+    if (params?.precioMax) searchParams.append('precioMax', params.precioMax.toString());
+    if (params?.search) searchParams.append('search', params.search);
+    return api.get(`/api/ventas/admin/todas?${searchParams.toString()}`);
+  },
+  disable: (id: string) => api.patch(`/api/ventas/admin/${id}/deshabilitar`),
+  enable: (id: string) => api.patch(`/api/ventas/admin/${id}/habilitar`),
+};
+
 export default api;

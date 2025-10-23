@@ -19,4 +19,13 @@ router.patch('/:id', ventaController.actualizarVenta);
 router.post('/:id/comprar', ventaController.comprarVenta);
 router.delete('/:id', ventaController.eliminarVenta);
 
+// ========== RUTAS ESPECÍFICAS DEL ADMIN ==========
+// Todas las rutas siguientes requieren autenticación Y rol de admin
+router.use(authController.restrictTo('admin'));
+
+// Rutas de administración
+router.get('/admin/todas', ventaController.obtenerVentasAdmin);
+router.patch('/admin/:id/deshabilitar', ventaController.deshabilitarVenta);
+router.patch('/admin/:id/habilitar', ventaController.habilitarVenta);
+
 module.exports = router;
