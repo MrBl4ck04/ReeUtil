@@ -8,6 +8,7 @@ const employeesRoutes = require('./routes/employees');
 const rolesRoutes = require('./routes/roles');
 const permissionsRoutes = require('./routes/permissions');
 const reviewsRoutes = require('./routes/reviews');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/api/employees', employeesRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/permissions', permissionsRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Rutas de mock para evitar errores 404
 app.get('/repairs/all', (req, res) => {
