@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { authApi } from '../services/api';
 import { Mail, User, Lock, Phone, MapPin } from 'lucide-react';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  // const auth = useAuth(); // No se requiere para registro
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    uppercase: false,
+    special: false
+  });
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -21,6 +27,15 @@ export const Register: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Validar fortaleza de contraseña en tiempo real
+    if (name === 'contraseA') {
+      setPasswordStrength({
+        length: value.length >= 12,
+        uppercase: /[A-Z]/.test(value),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,18 +53,26 @@ export const Register: React.FC = () => {
       return;
     }
 
+    // Validación de contraseña segura
+    if (!passwordStrength.length || !passwordStrength.uppercase || !passwordStrength.special) {
+      setError('La contraseña debe tener al menos 12 caracteres, una letra mayúscula y un símbolo especial.');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      // Aquí iría la llamada a la API para registrar al usuario
-      // Por ahora simulamos un registro exitoso
-      setTimeout(() => {
-        setIsLoading(false);
-        // Redirigir al login
-        navigate('/login', { state: { message: 'Registro exitoso. Por favor inicie sesión.' } });
-      }, 1000);
-    } catch (err) {
+      // Llamada a la API para registrar al usuario
+      await authApi.register({
+        name: formData.nombre + ' ' + formData.apellido,
+        email: formData.email,
+        password: formData.contraseA,
+        passwordConfirm: formData.confirmPassword
+      });
       setIsLoading(false);
-      setError('Error al registrar. Por favor intente nuevamente.');
+      navigate('/login', { state: { message: 'Registro exitoso. Por favor inicie sesión.' } });
+    } catch (err: any) {
+      setIsLoading(false);
+      setError(err.response?.data?.message || 'Error al registrar. Por favor intente nuevamente.');
     }
   };
 
