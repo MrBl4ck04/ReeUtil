@@ -189,8 +189,8 @@ export const CreateReview: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Calificación *
             </label>
-            <div className="flex items-center space-x-2">
-              <div className="flex space-x-2">
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
@@ -217,7 +217,7 @@ export const CreateReview: React.FC = () => {
             {errors.calificacion && <p className="mt-2 text-sm text-red-500">{errors.calificacion}</p>}
             
             {/* Etiquetas descriptivas */}
-            <div className="mt-3 grid grid-cols-5 gap-2">
+            <div className="mt-4 flex justify-between px-1" style={{ width: '180px' }}>
               <div className="text-center">
                 <p className="text-xs text-gray-600">Muy Malo</p>
               </div>

@@ -12,13 +12,15 @@ import {
   User,
   Calendar
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { clientReviewsApi } from '../../services/clientReviewsApi';
 
 export const Reviews: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('my-reviews');
   
   // Obtener mis reseñas
-  const { data: myReviews, isLoading: loadingMyReviews, refetch } = useQuery('myReviews', () => clientReviewsApi.getMyReviews());
+  const { data: myReviews, isLoading: loadingMyReviews, error: reviewError, refetch } = useQuery('myReviews', () => clientReviewsApi.getMyReviews());
 
   // Mutation para eliminar
   const deleteMutation = useMutation(
@@ -105,9 +107,9 @@ export const Reviews: React.FC = () => {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
           <p className="mt-2 text-gray-500">Cargando tus reseñas...</p>
         </div>
-      ) : myReviews?.data?.length > 0 ? (
+      ) : (myReviews?.data?.data && Array.isArray(myReviews.data.data) && myReviews.data.data.length > 0) ? (
         <div className="space-y-4">
-          {myReviews?.data?.map((review: any) => (
+          {myReviews.data.data.map((review: any) => (
             <div key={review._id} className="card hover:shadow-md transition-shadow">
               <div className="p-5">
                 <div className="flex items-start justify-between">
@@ -127,12 +129,12 @@ export const Reviews: React.FC = () => {
                       
                       <div className="mt-1 flex items-center text-sm text-gray-500">
                         <User className="h-4 w-4 mr-1" />
-                        <span>Para: {review.destinatario.nombre}</span>
+                        <span>Para: {review.destinatario?.name || 'Usuario'}</span>
                       </div>
                       
                       <div className="mt-1 flex items-center text-xs text-gray-400">
                         <Calendar className="h-3 w-3 mr-1" />
-                        <span>{new Date(review.fecha).toLocaleDateString()}</span>
+                        <span>{new Date(review.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>

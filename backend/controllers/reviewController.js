@@ -5,18 +5,21 @@ const User = require('../models/User');
 exports.getMyReviews = async (req, res) => {
   try {
     const userId = req.user.id || req.user._id;
+    console.log('🔍 getMyReviews - userId:', userId);
+    
     const reviews = await Review.find({ autor: userId })
       .populate('destinatario', 'name email')  // Usar 'name' en lugar de 'nombre'
       .sort({ createdAt: -1 });
+    
+    console.log(`✅ Reseñas encontradas: ${reviews.length}`);
 
     res.status(200).json({
       status: 'success',
       results: reviews.length,
-      data: {
-        reviews
-      }
+      data: reviews
     });
   } catch (err) {
+    console.error('❌ Error en getMyReviews:', err);
     res.status(400).json({
       status: 'fail',
       message: err.message
