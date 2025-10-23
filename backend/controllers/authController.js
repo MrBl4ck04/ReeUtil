@@ -261,7 +261,10 @@ exports.login = async (req, res) => {
     captchas.delete(captchaId);
 
     // 1) Intentar login como EMPLEADO
-    const employee = await Employee.findOne({ email }).select('+contraseA');
+    const employee = await Employee.findOne({ email })
+      .select('+contraseA')
+      .populate('customPermissions');
+      
     if (employee) {
       const isCorrect = await employee.correctPassword(contraseA, employee.contraseA);
       if (!isCorrect) {
@@ -278,6 +281,9 @@ exports.login = async (req, res) => {
         });
       }
 
+      // Obtener permisos personalizados (moduleId)
+      const permissions = employee.customPermissions.map(p => p.moduleId);
+
       const token = signToken(employee._id);
       return res.status(200).json({
         status: 'success',
@@ -289,6 +295,7 @@ exports.login = async (req, res) => {
           email: employee.email,
           rol: true, // empleado => admin
           cargo: employee.cargo || '',
+          permissions: permissions, // NUEVO: permisos para filtrar módulos
           loginAttempts: employee.loginAttempts || 0,
           isBlocked: employee.isBlocked || false
         }

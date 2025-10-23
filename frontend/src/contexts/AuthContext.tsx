@@ -15,7 +15,7 @@ interface User {
   email: string;
   rol: boolean; // true = admin, false = cliente
   cargo?: string; // Puesto en la empresa (solo para admin)
-  permissions?: Permission[]; // Permisos específicos (solo para admin)
+  permissions?: string[]; // Permisos específicos como array de moduleId (solo para admin)
   loginAttempts?: number; // Contador de intentos fallidos de login
   isBlocked?: boolean; // Si el usuario está bloqueado
 }
@@ -33,6 +33,7 @@ interface AuthContextType {
   login: (email: string, password: string, captcha?: { captchaId: string; captchaValue: string }) => Promise<LoginResult>;
   logout: () => void;
   isLoading: boolean;
+  hasPermission: (moduleId: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -158,12 +159,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     toast.success('Sesión cerrada exitosamente');
   };
 
+  const hasPermission = (moduleId: string): boolean => {
+    // Si no hay usuario, no tiene permisos
+    if (!user) return false;
+    
+    // Si es un cliente (rol = false), no usar sistema de permisos
+    if (!user.rol) return true;
+    
+    // Si es admin pero no tiene permisos definidos, permitir todo (admin legacy)
+    if (!user.permissions || user.permissions.length === 0) return true;
+    
+    // Verificar si el moduleId está en la lista de permisos
+    return user.permissions.includes(moduleId);
+  };
+
   const value: AuthContextType = {
     user,
     token,
     login,
     logout,
     isLoading,
+    hasPermission,
   };
 
   return (

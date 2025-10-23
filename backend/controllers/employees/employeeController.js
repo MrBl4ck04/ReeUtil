@@ -189,15 +189,16 @@ exports.getEmployeePermissions = async (req, res) => {
       });
     }
 
-    const allPermissions = await employee.getAllPermissions();
+    // Extraer solo los moduleId de customPermissions para el frontend
+    const customPermissionIds = employee.customPermissions.map((p) => p.moduleId);
 
     res.status(200).json({
       status: 'success',
       data: {
         roleId: employee.roleId?._id,
         roleName: employee.roleId?.nombre,
-        permissions: allPermissions,
-        customPermissions: employee.customPermissions,
+        permissions: customPermissionIds, // Array de moduleId (strings)
+        customPermissions: employee.customPermissions, // Objetos completos por si se necesitan
       },
     });
   } catch (err) {
@@ -211,20 +212,46 @@ exports.getEmployeePermissions = async (req, res) => {
 // Actualizar permisos personalizados
 exports.updateEmployeePermissions = async (req, res) => {
   try {
-    const { customPermissions } = req.body;
+    console.log('📝 Body recibido:', req.body);
+    let { customPermissions } = req.body; // puede ser array de moduleId o de ObjectIds
+    
+    console.log('📝 customPermissions recibidos:', customPermissions);
+
+    // Normalizar: si llega string único, convertir a array
+    if (!Array.isArray(customPermissions)) customPermissions = [customPermissions];
+
+    // Buscar los módulos correspondientes a los moduleId (o _id) recibidos
+    const PermissionModule = require('../../models/PermissionModule');
+
+    // Si los elementos parecen ObjectId de 24 hex, usarlos directo; de lo contrario buscar por moduleId
+    const isObjectId = (v) => /^[a-fA-F0-9]{24}$/.test(String(v));
+
+    let modules;
+    if (customPermissions.length === 0) {
+      modules = [];
+    } else if (customPermissions.every(isObjectId)) {
+      console.log('🔍 Buscando por _id');
+      modules = await PermissionModule.find({ _id: { $in: customPermissions } });
+    } else {
+      console.log('🔍 Buscando por moduleId:', customPermissions);
+      modules = await PermissionModule.find({ moduleId: { $in: customPermissions } });
+    }
+
+    console.log('✅ Módulos encontrados:', modules.map(m => ({ _id: m._id, moduleId: m.moduleId })));
+
+    const moduleIds = modules.map((m) => m._id);
 
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
-      { customPermissions },
-      { new: true, runValidators: true }
+      { customPermissions: moduleIds },
+      { new: true, runValidators: false }
     ).populate('customPermissions');
 
     if (!employee) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Empleado no encontrado',
-      });
+      return res.status(404).json({ status: 'fail', message: 'Empleado no encontrado' });
     }
+
+    console.log('💾 Permisos guardados en BD:', employee.customPermissions.map(p => p.moduleId));
 
     res.status(200).json({
       status: 'success',
@@ -232,10 +259,8 @@ exports.updateEmployeePermissions = async (req, res) => {
       data: employee.customPermissions,
     });
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
+    console.error('❌ Error al actualizar permisos:', err);
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
