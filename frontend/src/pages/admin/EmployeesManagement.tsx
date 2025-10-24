@@ -6,7 +6,7 @@ import {
   UserPlus,
   Edit2,
   Trash2,
-  Key,
+  
   X,
   Save,
   User,
@@ -14,13 +14,13 @@ import {
   Briefcase,
   Lock
 } from 'lucide-react';
-import { usersApi, rolesApi } from '../../services/api';
+import { usersApi } from '../../services/api';
 
 export const EmployeesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -36,17 +36,7 @@ export const EmployeesManagement: React.FC = () => {
   
   const queryClient = useQueryClient();
   
-  // Roles
-  const { data: roles } = useQuery('roles', rolesApi.getAll);
-  // roles puede ser una respuesta Axios con shape { data: { status, results, data: Role[] } }
-  const rolesList = Array.isArray(roles?.data) ? roles?.data : (roles?.data?.data || []);
-  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
-
-  useEffect(() => {
-    if (!selectedEmployee && rolesList.length > 0 && !selectedRoleId) {
-      setSelectedRoleId(rolesList[0]._id);
-    }
-  }, [rolesList, selectedEmployee, selectedRoleId]);
+  // Roles quitados (no se selecciona rol en creación/edición)
   
   // Obtener todos los empleados
   const { data: employees, isLoading } = useQuery('employees', usersApi.getAllEmployees);
@@ -87,7 +77,7 @@ export const EmployeesManagement: React.FC = () => {
   );
   
   const deleteEmployeeMutation = useMutation(
-    (id: number) => usersApi.deleteEmployee(id),
+    (id: string) => usersApi.deleteEmployee(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('employees');
@@ -97,15 +87,7 @@ export const EmployeesManagement: React.FC = () => {
     }
   );
   
-  const resetPasswordMutation = useMutation(
-    (id: number) => usersApi.resetEmployeePassword(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('employees');
-        setIsResetPasswordModalOpen(false);
-      }
-    }
-  );
+  // Reset de contraseña eliminado
   
   // Filtrar empleados por búsqueda
   const filteredEmployees = employees?.data?.filter((employee: any) => 
@@ -144,10 +126,10 @@ export const EmployeesManagement: React.FC = () => {
         genero: employee.genero || '',
         cargo: employee.cargo || ''
       });
-      setSelectedRoleId(employee?.roleId?._id || '');
+      
     } else {
       resetForm();
-      setSelectedRoleId(rolesList[0]?._id || '');
+      
     }
     setIsModalOpen(true);
   };
@@ -163,10 +145,7 @@ export const EmployeesManagement: React.FC = () => {
     e.preventDefault();
     setFormError('');
     
-    if (!selectedRoleId) {
-      setFormError('Selecciona un rol');
-      return;
-    }
+    // Validación de rol eliminada
     if (!selectedEmployee && !formData.genero) {
       setFormError('Selecciona un género');
       return;
@@ -183,7 +162,7 @@ export const EmployeesManagement: React.FC = () => {
     if (selectedEmployee) {
       // Actualizar empleado existente
       // Si la contraseña está vacía, la eliminamos del objeto
-      const updateData = { ...formData, roleId: selectedRoleId } as any;
+      const updateData = { ...formData } as any;
       
       // Crear un objeto para la mutación
       const dataToSend = updateData.contraseA 
@@ -195,7 +174,7 @@ export const EmployeesManagement: React.FC = () => {
             email: updateData.email,
             genero: updateData.genero,
             cargo: updateData.cargo,
-            roleId: updateData.roleId
+            
           };
       
       updateEmployeeMutation.mutate({
@@ -212,8 +191,7 @@ export const EmployeesManagement: React.FC = () => {
         contraseA: formData.contraseA,
         confirmPassword: formData.confirmPassword,
         genero: formData.genero,
-        cargo: formData.cargo,
-        roleId: selectedRoleId
+        cargo: formData.cargo
       });
     }
   };
@@ -231,18 +209,7 @@ export const EmployeesManagement: React.FC = () => {
     }
   };
   
-  // Abrir modal para resetear contraseña
-  const handleOpenResetPasswordModal = (employee: any) => {
-    setSelectedEmployee(employee);
-    setIsResetPasswordModalOpen(true);
-  };
   
-  // Resetear contraseña
-  const handleResetPassword = () => {
-    if (selectedEmployee) {
-      resetPasswordMutation.mutate(selectedEmployee._id);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -343,13 +310,7 @@ export const EmployeesManagement: React.FC = () => {
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => handleOpenResetPasswordModal(employee)}
-                        className="text-yellow-600 hover:text-yellow-900"
-                        title="Resetear contraseña"
-                      >
-                        <Key className="h-4 w-4" />
-                      </button>
+                      
                       <button
                         onClick={() => handleOpenDeleteModal(employee)}
                         className="text-red-600 hover:text-red-900"
@@ -520,28 +481,7 @@ export const EmployeesManagement: React.FC = () => {
                             />
                           </div>
                         </div>
-                        <div>
-                          <label htmlFor="roleId" className="block text-sm font-medium text-gray-700">
-                            Rol
-                          </label>
-                          <div className="mt-1 relative rounded-md shadow-sm">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <Briefcase className="h-4 w-4 text-gray-400" />
-                            </div>
-                            <select
-                              id="roleId"
-                              name="roleId"
-                              className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                              value={selectedRoleId}
-                              onChange={(e) => setSelectedRoleId(e.target.value)}
-                              required
-                            >
-                              {Array.isArray(rolesList) && rolesList.map((role: any) => (
-                                <option key={role._id} value={role._id}>{role.nombre}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
+                        
                         {!selectedEmployee && (
                           <div>
                             <label htmlFor="contraseA" className="block text-sm font-medium text-gray-700">
@@ -598,7 +538,7 @@ export const EmployeesManagement: React.FC = () => {
                   type="button"
                   className="btn-primary w-full sm:ml-3 sm:w-auto"
                   onClick={handleSubmit}
-                  disabled={createEmployeeMutation.isLoading || updateEmployeeMutation.isLoading || !selectedRoleId}
+                  disabled={createEmployeeMutation.isLoading || updateEmployeeMutation.isLoading}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {selectedEmployee ? 'Actualizar' : 'Crear'}
@@ -672,57 +612,7 @@ export const EmployeesManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de confirmación para resetear contraseña */}
-      {isResetPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <Key className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      Resetear Contraseña
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        ¿Está seguro de que desea resetear la contraseña de {selectedEmployee?.nombre} {selectedEmployee?.apellido}? Se generará una contraseña temporal y se enviará por correo electrónico.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="btn-warning w-full sm:ml-3 sm:w-auto"
-                  onClick={handleResetPassword}
-                  disabled={resetPasswordMutation.isLoading}
-                >
-                  <Key className="h-4 w-4 mr-2" />
-                  Resetear Contraseña
-                </button>
-                <button
-                  type="button"
-                  className="btn-outline mt-3 sm:mt-0 w-full sm:w-auto"
-                  onClick={() => setIsResetPasswordModalOpen(false)}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

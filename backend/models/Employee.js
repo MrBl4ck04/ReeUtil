@@ -49,7 +49,6 @@ const employeeSchema = new mongoose.Schema(
     roleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Role',
-      required: [true, 'Por favor asigna un rol'],
     },
     customPermissions: [
       {

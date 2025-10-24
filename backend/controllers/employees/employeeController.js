@@ -5,7 +5,7 @@ const User = require('../../models/User');
 // Obtener todos los empleados
 exports.getAllEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find()
+    const employees = await Employee.find({ isActive: true })
       .populate('roleId', 'nombre description')
       .populate('customPermissions', 'moduleId nombre display icon')
       .select('-contraseA');
@@ -22,7 +22,7 @@ exports.getAllEmployees = async (req, res) => {
 // Obtener empleado por ID
 exports.getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id)
+    const employee = await Employee.findOne({ _id: req.params.id, isActive: true })
       .populate('roleId', 'nombre description')
       .populate('customPermissions', 'moduleId nombre display icon')
       .select('-contraseA');
@@ -52,10 +52,10 @@ exports.createEmployee = async (req, res) => {
     const { nombre, apellido, apellidoMaterno, email, contraseA, confirmPassword, genero, cargo, roleId } = req.body;
 
     // Validaciones básicas
-    if (!nombre || !apellido || !apellidoMaterno || !email || !contraseA || !genero || !roleId) {
+    if (!nombre || !apellido || !apellidoMaterno || !email || !contraseA || !genero) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Por favor completa todos los campos requeridos: nombre, apellido paterno, apellido materno, género, email, contraseña y rol.',
+        message: 'Por favor completa todos los campos requeridos: nombre, apellido paterno, apellido materno, género, email y contraseña.',
       });
     }
 
@@ -77,13 +77,13 @@ exports.createEmployee = async (req, res) => {
       });
     }
 
-    // Validar que el rol existe
-    const role = await Role.findById(roleId);
-    if (!role) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Rol no encontrado',
-      });
+    // roleId es opcional; si se provee, puede validarse, pero no es requerido
+    let roleFound = null;
+    if (roleId) {
+      roleFound = await Role.findById(roleId);
+      if (!roleFound) {
+        return res.status(404).json({ status: 'fail', message: 'Rol no encontrado' });
+      }
     }
 
     // Generar userId único como en authController
@@ -112,7 +112,7 @@ exports.createEmployee = async (req, res) => {
       contraseA,
       genero: genderCode,
       cargo,
-      roleId,
+      ...(roleFound ? { roleId } : {}),
     });
 
     // Populate para la respuesta
@@ -170,14 +170,17 @@ exports.updateEmployee = async (req, res) => {
 // Eliminar empleado
 exports.deleteEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
+    const employee = await Employee.findById(req.params.id);
 
-    if (!employee) {
+    if (!employee || employee.isActive === false) {
       return res.status(404).json({
         status: 'fail',
         message: 'Empleado no encontrado',
       });
     }
+
+    employee.isActive = false;
+    await employee.save({ validateBeforeSave: false });
 
     res.status(204).json({
       status: 'success',
