@@ -31,9 +31,18 @@ export const UsersManagement: React.FC = () => {
     }
   );
   
-  // Mutación para desbloquear usuario
+  // Mutaciones para banear/desbanear
   const unblockUserMutation = useMutation(
-    (id: string) => usersApi.unblockUser(id),
+    (id: string) => usersApi.unblockUserById(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('users');
+        queryClient.invalidateQueries('blockedUsers');
+      }
+    }
+  );
+  const blockUserMutation = useMutation(
+    (id: string) => usersApi.blockUser(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('users');
@@ -67,6 +76,17 @@ export const UsersManagement: React.FC = () => {
       unblockUserMutation.mutate(id, {
         onError: (err: any) => {
           console.error('Respuesta del servidor:', err.response?.data);   //  ←  mostrará { status, message }
+        }
+      });
+    }
+  };
+
+  // Bloquear usuario
+  const handleBlockUser = (id: string) => {
+    if (window.confirm('¿Está seguro de que desea bloquear a este usuario?')) {
+      blockUserMutation.mutate(id, {
+        onError: (err: any) => {
+          console.error('Respuesta del servidor:', err.response?.data);
         }
       });
     }
@@ -220,7 +240,7 @@ export const UsersManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end">
-                      {user.isBlocked && (
+                      {user.isBlocked ? (
                         <button
                           onClick={() => handleUnblockUser(String(user._id))}
                           className="text-primary-600 hover:text-primary-900 flex items-center"
@@ -228,6 +248,15 @@ export const UsersManagement: React.FC = () => {
                         >
                           <Unlock className="h-4 w-4 mr-1" />
                           Desbloquear
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBlockUser(String(user._id))}
+                          className="text-red-600 hover:text-red-800 flex items-center"
+                          title="Bloquear usuario"
+                        >
+                          <Lock className="h-4 w-4 mr-1" />
+                          Bloquear
                         </button>
                       )}
                     </div>

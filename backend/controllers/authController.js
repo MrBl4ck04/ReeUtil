@@ -261,7 +261,10 @@ exports.login = async (req, res) => {
     captchas.delete(captchaId);
 
     // 1) Intentar login como EMPLEADO
-    const employee = await Employee.findOne({ email }).select('+contraseA');
+    const employee = await Employee.findOne({ email })
+      .select('+contraseA')
+      .populate('customPermissions');
+      
     if (employee) {
       const isCorrect = await employee.correctPassword(contraseA, employee.contraseA);
       if (!isCorrect) {
@@ -278,6 +281,9 @@ exports.login = async (req, res) => {
         });
       }
 
+      // Obtener permisos personalizados (moduleId)
+      const permissions = employee.customPermissions.map(p => p.moduleId);
+
       const token = signToken(employee._id);
       return res.status(200).json({
         status: 'success',
@@ -289,6 +295,7 @@ exports.login = async (req, res) => {
           email: employee.email,
           rol: true, // empleado => admin
           cargo: employee.cargo || '',
+          permissions: permissions, // NUEVO: permisos para filtrar módulos
           loginAttempts: employee.loginAttempts || 0,
           isBlocked: employee.isBlocked || false
         }
@@ -530,17 +537,24 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    // Si es un Employee (tiene roleId en lugar de role), se considera admin
+    // Verificar si el usuario es un Employee (los empleados son admin)
+    // Los Employee tienen 'roleId', los User normales tienen 'role'
     const isEmployee = req.user.roleId !== undefined;
-    const userRole = isEmployee ? 'admin' : req.user.role;
     
-    if (!roles.includes(userRole)) {
-      return res.status(403).json({
-        status: 'fail',
-        message: 'No tienes permisos para realizar esta acción'
-      });
+    // Si es empleado, permitir acceso (los empleados son admin)
+    if (isEmployee && roles.includes('admin')) {
+      return next();
     }
-    next();
+    
+    // Para usuarios normales, verificar el campo 'role'
+    if (req.user.role && roles.includes(req.user.role)) {
+      return next();
+    }
+    
+    return res.status(403).json({
+      status: 'fail',
+      message: 'No tienes permisos para realizar esta acción'
+    });
   };
 };
 
@@ -815,14 +829,32 @@ exports.unblockUserById = async (req, res) => {
     console.log('BODY recibido en /auth/unblock-account:', req.body);   //  ←  temporal
     const { userId } = req.body;
     const { id } = req.params;
-    const user = await User.findById(id);
+    const user = await User.findByIdAndUpdate(
+      id,
+      { isBlocked: false, loginAttempts: 0, blockedAt: null },
+      { new: true, runValidators: false }
+    );
     if (!user) {
       return res.status(404).json({ status: 'fail', message: 'Usuario no encontrado' });
     }
-    user.isBlocked = false;
-    user.loginAttempts = 0;
-    user.blockedAt = null;
-    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({ status: 'success' });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
+// Bloquear usuario por ID (ban)
+exports.blockUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndUpdate(
+      id,
+      { isBlocked: true, blockedAt: new Date() },
+      { new: true, runValidators: false }
+    );
+    if (!user) {
+      return res.status(404).json({ status: 'fail', message: 'Usuario no encontrado' });
+    }
     return res.status(200).json({ status: 'success' });
   } catch (err) {
     return res.status(400).json({ status: 'fail', message: err.message });

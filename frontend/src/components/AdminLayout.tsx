@@ -23,7 +23,7 @@ interface LayoutProps {
 
 export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -32,20 +32,22 @@ export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
-  // Estos módulos deberían cargarse dinámicamente según los permisos del usuario
-  // Por ahora los mostramos todos
-  const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: Home },
-    { name: 'Reglas', href: '/admin/reglas', icon: Settings },
-    { name: 'Reparaciones', href: '/admin/reparaciones', icon: Wrench },
-    { name: 'Reciclaje', href: '/admin/reciclaje', icon: RecycleIcon },
-    { name: 'Dashboards', href: '/admin/dashboards', icon: BarChart2 },
-    { name: 'Administrar Ventas', href: '/admin/ventas', icon: ShoppingBag },
-    { name: 'Satisfacción Cliente', href: '/admin/satisfaccion', icon: Star },
-    { name: 'ABM Empleados', href: '/admin/empleados', icon: Users },
-    { name: 'ABM Usuarios', href: '/admin/usuarios', icon: UserCheck },
-    { name: 'Gestión OSI', href: '/admin/osi', icon: Shield },
+  // Mapeo de módulos con sus IDs para permisos
+  const allModules = [
+    { id: 'dashboard', name: 'Dashboard', href: '/admin', icon: Home },
+    { id: 'rules', name: 'Reglas', href: '/admin/reglas', icon: Settings },
+    { id: 'repairs', name: 'Reparaciones', href: '/admin/reparaciones', icon: Wrench },
+    { id: 'recycle', name: 'Reciclaje', href: '/admin/reciclaje', icon: RecycleIcon },
+    { id: 'dashboards', name: 'Dashboards', href: '/admin/dashboards', icon: BarChart2 },
+    { id: 'sales', name: 'Administrar Ventas', href: '/admin/ventas', icon: ShoppingBag },
+    { id: 'satisfaction', name: 'Satisfacción Cliente', href: '/admin/satisfaccion', icon: Star },
+    { id: 'employees', name: 'ABM Empleados', href: '/admin/empleados', icon: Users },
+    { id: 'users', name: 'ABM Usuarios', href: '/admin/usuarios', icon: UserCheck },
+    { id: 'osi', name: 'Gestión OSI', href: '/admin/osi', icon: Shield },
   ];
+
+  // Filtrar módulos según permisos del usuario
+  const navigation = allModules.filter(module => hasPermission(module.id));
 
   const isActive = (href: string) => location.pathname === href;
 

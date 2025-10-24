@@ -14,6 +14,7 @@ import { usersApi } from '../../services/api';
 export const OSIManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [draftPerms, setDraftPerms] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
   
   // Obtener todos los empleados
@@ -27,14 +28,37 @@ export const OSIManagement: React.FC = () => {
       enabled: !!selectedEmployee,
     }
   );
-  
+
+  // Sincronizar permisos efectivos cuando cambia el empleado o la consulta
+  React.useEffect(() => {
+    console.log('Permisos recibidos del backend:', permissions);
+    console.log('permissions?.data:', permissions?.data);
+    console.log('permissions?.data?.data:', permissions?.data?.data);
+    
+    // Axios ya envuelve en .data, y el backend devuelve { data: { permissions } }
+    const permsArray = permissions?.data?.data?.permissions || [];
+    console.log('Permisos efectivos:', permsArray);
+    setDraftPerms(new Set(permsArray as string[]));
+  }, [permissions?.data?.data?.permissions, selectedEmployee?._id]);
+
+  // Set con permisos efectivos del empleado
+  const employeePermSet = draftPerms;
+
   // Mutación para actualizar permisos
   const updatePermissionsMutation = useMutation(
-    (data: { id: number; permissions: any[] }) => 
-      usersApi.updateEmployeePermissions(data.id, data.permissions),
+    (data: { id: any; permissions: any[] }) => {
+      console.log('Guardando permisos:', data);
+      return usersApi.updateEmployeePermissions(data.id, data.permissions);
+    },
     {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        console.log('Permisos guardados exitosamente:', response);
         queryClient.invalidateQueries(['employeePermissions', selectedEmployee?._id]);
+        alert('Permisos guardados exitosamente');
+      },
+      onError: (error: any) => {
+        console.error('Error al guardar permisos:', error);
+        alert('Error al guardar permisos: ' + (error.response?.data?.message || error.message));
       }
     }
   );
@@ -62,25 +86,19 @@ export const OSIManagement: React.FC = () => {
   
   // Actualizar permiso
   const handleTogglePermission = (moduleId: string) => {
-    if (!permissions?.data) return;
-    
-    const updatedPermissions = permissions.data.map((p: any) => 
-      p.moduleId === moduleId ? { ...p, hasAccess: !p.hasAccess } : p
-    );
-    
-    updatePermissionsMutation.mutate({
-      id: selectedEmployee._id,
-      permissions: updatedPermissions
+    setDraftPerms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleId)) newSet.delete(moduleId);
+      else newSet.add(moduleId);
+      return newSet;
     });
   };
-  
-  // Guardar todos los permisos
+
+  // Guardar permisos explícitamente (botón)
   const handleSavePermissions = () => {
-    if (!permissions?.data) return;
-    
     updatePermissionsMutation.mutate({
       id: selectedEmployee._id,
-      permissions: permissions.data
+      permissions: Array.from(draftPerms)
     });
   };
 
@@ -163,7 +181,9 @@ export const OSIManagement: React.FC = () => {
                 <button
                   onClick={handleSavePermissions}
                   className="btn-primary flex items-center"
-                  disabled={updatePermissionsMutation.isLoading}
+                  disabled={updatePermissionsMutation.isLoading ||
+                    JSON.stringify(Array.from(draftPerms).sort()) ===
+                    JSON.stringify((permissions?.data?.data?.permissions || []).slice().sort())}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Guardar cambios
@@ -207,37 +227,23 @@ export const OSIManagement: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {permissions?.data?.map((permission: any) => {
-                          const module = availableModules.find(m => m.id === permission.moduleId);
+                        {availableModules.map((module) => {
+                          const hasAccess = employeePermSet.has(module.id);
                           return (
-                            <tr key={permission.moduleId}>
+                            <tr key={module.id}>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{module?.name || permission.moduleId}</div>
+                                <div className="text-sm font-medium text-gray-900">{module.name}</div>
                               </td>
                               <td className="px-6 py-4">
-                                <div className="text-sm text-gray-500">{module?.description || 'Sin descripción'}</div>
+                                <div className="text-sm text-gray-500">{module.description}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-center">
-                                <button
-                                  onClick={() => handleTogglePermission(permission.moduleId)}
-                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                    permission.hasAccess
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}
-                                >
-                                  {permission.hasAccess ? (
-                                    <>
-                                      <Check className="h-3 w-3 mr-1" />
-                                      Habilitado
-                                    </>
-                                  ) : (
-                                    <>
-                                      <X className="h-3 w-3 mr-1" />
-                                      Deshabilitado
-                                    </>
-                                  )}
-                                </button>
+                                <input
+                                  type="checkbox"
+                                  checked={hasAccess}
+                                  onChange={() => handleTogglePermission(module.id)}
+                                  className="h-4 w-4 text-primary-600"
+                                />
                               </td>
                             </tr>
                           );
