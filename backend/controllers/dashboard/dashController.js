@@ -1,4 +1,6 @@
 const Venta = require('../../models/Venta');
+const Review = require('../../models/Review');
+const User = require('../../models/User');
 
 // Controlador para obtener estadísticas del dashboard
 exports.obtenerEstadisticasDashboard = async (req, res) => {
@@ -132,6 +134,111 @@ exports.obtenerEstadisticasDashboard = async (req, res) => {
     return res.status(500).json({
       status: 'error',
       message: 'Error al obtener estadísticas del dashboard',
+      error: error.message
+    });
+  }
+};
+
+// NUEVO: Obtener todos los datos del dashboard para admin
+exports.getAllDashboardData = async (req, res) => {
+  try {
+    // Obtener reparaciones pendientes
+    const pendingRepairs = await Venta.countDocuments({ estado: 'reparacion_pendiente' });
+    
+    // Obtener reciclajes pendientes
+    const pendingRecycle = await Venta.countDocuments({ estado: 'reciclaje_pendiente' });
+    
+    // Obtener ventas recientes (últimas 10)
+    const recentSales = await Venta.find()
+      .sort({ fechaCreacion: -1 })
+      .limit(10)
+      .select('_id producto cantidad precio estado fechaCreacion usuario')
+      .lean();
+    
+    // Obtener reseñas nuevas (últimas 10)
+    const newReviews = await Review.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('autor', 'name')
+      .populate('destinatario', 'name')
+      .select('_id titulo comentario calificacion tipo createdAt autor destinatario')
+      .lean();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        pendingRepairs: {
+          count: pendingRepairs
+        },
+        pendingRecycle: {
+          count: pendingRecycle
+        },
+        recentSales: {
+          count: recentSales.length,
+          sales: recentSales
+        },
+        newReviews: {
+          count: newReviews.length,
+          reviews: newReviews
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error al obtener datos del dashboard admin:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error al obtener datos del dashboard',
+      error: error.message
+    });
+  }
+};
+
+// Obtener datos del dashboard de cliente
+exports.getClientDashboardData = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Usuario no autenticado'
+      });
+    }
+
+    // Ventas activas del usuario
+    const activesSales = await Venta.countDocuments({ usuario: userId, estado: { $in: ['venta', 'disponible'] } });
+    
+    // Compras realizadas
+    const purchases = await Venta.countDocuments({ comprador: userId, estado: 'comprado' });
+    
+    // Reparaciones en proceso
+    const repairsInProgress = await Venta.countDocuments({ usuario: userId, estado: 'reparacion_pendiente' });
+    
+    // Reciclajes realizados
+    const recycleCount = await Venta.countDocuments({ usuario: userId, estado: 'reciclaje_completado' });
+    
+    // Últimas ventas del usuario
+    const recentSales = await Venta.find({ usuario: userId })
+      .sort({ fechaCreacion: -1 })
+      .limit(5)
+      .select('_id producto cantidad precio estado fechaCreacion')
+      .lean();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        activeSales: activesSales,
+        purchases: purchases,
+        repairsInProgress: repairsInProgress,
+        recycleCount: recycleCount,
+        recentSales: recentSales
+      }
+    });
+  } catch (error) {
+    console.error('Error al obtener datos del dashboard cliente:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error al obtener datos del dashboard',
       error: error.message
     });
   }
