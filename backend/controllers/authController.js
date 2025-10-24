@@ -831,3 +831,41 @@ exports.unblockUserById = async (req, res) => {
     return res.status(400).json({ status: 'fail', message: err.message });
   }
 };
+
+// NUEVO: Búsqueda de usuarios por nombre (para reseñas)
+exports.searchUsersByName = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Debes ingresar al menos 2 caracteres para buscar'
+      });
+    }
+
+    // Buscar usuarios por nombre completo (name, lastName, motherLastName)
+    const users = await User.find({
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { lastName: { $regex: q, $options: 'i' } },
+        { motherLastName: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } },
+        { userId: { $regex: q, $options: 'i' } }
+      ]
+    })
+      .select('_id name lastName motherLastName email userId')
+      .limit(10); // Limitar a 10 resultados
+
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};
