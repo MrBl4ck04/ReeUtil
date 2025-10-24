@@ -1,6 +1,6 @@
 const express = require('express');
 const ruleController = require('../controllers/ruleController');
-const { protect, restrictTo } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/auth');
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const recycleController = require('../controllers/recycleController');
-const authController = require('../controllers/authController');
+const authController = require('../controllers/auth');
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const ventaController = require('../controllers/ventaController');
-const authController = require('../controllers/authController');
+const authController = require('../controllers/auth');
 const dashController = require('../controllers/dashboard/dashController');
 const { body, param, query } = require('express-validator');
 const { validationResult } = require('express-validator');
