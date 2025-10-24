@@ -1,10 +1,11 @@
 const Employee = require('../../models/Employee');
 const Role = require('../../models/Role');
+const User = require('../../models/User');
 
 // Obtener todos los empleados
 exports.getAllEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find()
+    const employees = await Employee.find({ isActive: true })
       .populate('roleId', 'nombre description')
       .populate('customPermissions', 'moduleId nombre display icon')
       .select('-contraseA');
@@ -21,7 +22,7 @@ exports.getAllEmployees = async (req, res) => {
 // Obtener empleado por ID
 exports.getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id)
+    const employee = await Employee.findOne({ _id: req.params.id, isActive: true })
       .populate('roleId', 'nombre description')
       .populate('customPermissions', 'moduleId nombre display icon')
       .select('-contraseA');
@@ -48,25 +49,70 @@ exports.getEmployeeById = async (req, res) => {
 // Crear nuevo empleado
 exports.createEmployee = async (req, res) => {
   try {
-    const { nombre, apellido, email, contraseA, cargo, roleId } = req.body;
+    const { nombre, apellido, apellidoMaterno, email, contraseA, confirmPassword, genero, cargo, roleId } = req.body;
 
-    // Validar que el rol existe
-    const role = await Role.findById(roleId);
-    if (!role) {
-      return res.status(404).json({
+    // Validaciones básicas
+    if (!nombre || !apellido || !apellidoMaterno || !email || !contraseA || !genero) {
+      return res.status(400).json({
         status: 'fail',
-        message: 'Rol no encontrado',
+        message: 'Por favor completa todos los campos requeridos: nombre, apellido paterno, apellido materno, género, email y contraseña.',
+      });
+    }
+
+    // Validar confirmación de contraseña si viene
+    if (typeof confirmPassword !== 'undefined' && contraseA !== confirmPassword) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Las contraseñas no coinciden.',
+      });
+    }
+
+    // Validar género permitido (M, F, N, O)
+    const genderCode = String(genero).trim().charAt(0).toUpperCase();
+    const allowed = ['M', 'F', 'N', 'O'];
+    if (!allowed.includes(genderCode)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Género inválido. Valores permitidos: M, F, N, O.',
+      });
+    }
+
+    // roleId es opcional; si se provee, puede validarse, pero no es requerido
+    let roleFound = null;
+    if (roleId) {
+      roleFound = await Role.findById(roleId);
+      if (!roleFound) {
+        return res.status(404).json({ status: 'fail', message: 'Rol no encontrado' });
+      }
+    }
+
+    // Generar userId único como en authController
+    const initial = (s) => (s || '').trim().charAt(0).toUpperCase();
+    const initials = `${initial(nombre)}${initial(apellido)}${initial(apellidoMaterno)}${genderCode}`;
+    const userId = `USR-${initials}`;
+
+    // Verificar duplicados en Employees y Users
+    const existingEmpId = await Employee.findOne({ userId });
+    const existingUserId = await User.findOne({ userId });
+    if (existingEmpId || existingUserId) {
+      return res.status(400).json({
+        status: 'fail',
+        code: 'USERID_DUPLICATE',
+        message: `El código de usuario generado (${userId}) ya existe. Intenta variar el nombre o verifica tus datos.`,
       });
     }
 
     // Crear empleado
     const newEmployee = await Employee.create({
+      userId,
       nombre,
       apellido,
+      apellidoMaterno,
       email,
       contraseA,
+      genero: genderCode,
       cargo,
-      roleId,
+      ...(roleFound ? { roleId } : {}),
     });
 
     // Populate para la respuesta
@@ -87,9 +133,10 @@ exports.createEmployee = async (req, res) => {
 // Actualizar empleado
 exports.updateEmployee = async (req, res) => {
   try {
-    const { nombre, apellido, email, cargo, roleId, isActive } = req.body;
+    const { nombre, apellido, apellidoMaterno, email, cargo, roleId, isActive, genero } = req.body;
 
-    const updateData = { nombre, apellido, email, cargo, isActive };
+    const updateData = { nombre, apellido, apellidoMaterno, email, cargo, isActive };
+    if (genero) updateData.genero = String(genero).trim().charAt(0).toUpperCase();
     if (roleId) updateData.roleId = roleId;
 
     const employee = await Employee.findByIdAndUpdate(
@@ -123,14 +170,17 @@ exports.updateEmployee = async (req, res) => {
 // Eliminar empleado
 exports.deleteEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
+    const employee = await Employee.findById(req.params.id);
 
-    if (!employee) {
+    if (!employee || employee.isActive === false) {
       return res.status(404).json({
         status: 'fail',
         message: 'Empleado no encontrado',
       });
     }
+
+    employee.isActive = false;
+    await employee.save({ validateBeforeSave: false });
 
     res.status(204).json({
       status: 'success',
@@ -189,15 +239,16 @@ exports.getEmployeePermissions = async (req, res) => {
       });
     }
 
-    const allPermissions = await employee.getAllPermissions();
+    // Extraer solo los moduleId de customPermissions para el frontend
+    const customPermissionIds = employee.customPermissions.map((p) => p.moduleId);
 
     res.status(200).json({
       status: 'success',
       data: {
         roleId: employee.roleId?._id,
         roleName: employee.roleId?.nombre,
-        permissions: allPermissions,
-        customPermissions: employee.customPermissions,
+        permissions: customPermissionIds, // Array de moduleId (strings)
+        customPermissions: employee.customPermissions, // Objetos completos por si se necesitan
       },
     });
   } catch (err) {
@@ -211,20 +262,46 @@ exports.getEmployeePermissions = async (req, res) => {
 // Actualizar permisos personalizados
 exports.updateEmployeePermissions = async (req, res) => {
   try {
-    const { customPermissions } = req.body;
+    console.log('📝 Body recibido:', req.body);
+    let { customPermissions } = req.body; // puede ser array de moduleId o de ObjectIds
+    
+    console.log('📝 customPermissions recibidos:', customPermissions);
+
+    // Normalizar: si llega string único, convertir a array
+    if (!Array.isArray(customPermissions)) customPermissions = [customPermissions];
+
+    // Buscar los módulos correspondientes a los moduleId (o _id) recibidos
+    const PermissionModule = require('../../models/PermissionModule');
+
+    // Si los elementos parecen ObjectId de 24 hex, usarlos directo; de lo contrario buscar por moduleId
+    const isObjectId = (v) => /^[a-fA-F0-9]{24}$/.test(String(v));
+
+    let modules;
+    if (customPermissions.length === 0) {
+      modules = [];
+    } else if (customPermissions.every(isObjectId)) {
+      console.log('🔍 Buscando por _id');
+      modules = await PermissionModule.find({ _id: { $in: customPermissions } });
+    } else {
+      console.log('🔍 Buscando por moduleId:', customPermissions);
+      modules = await PermissionModule.find({ moduleId: { $in: customPermissions } });
+    }
+
+    console.log('✅ Módulos encontrados:', modules.map(m => ({ _id: m._id, moduleId: m.moduleId })));
+
+    const moduleIds = modules.map((m) => m._id);
 
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
-      { customPermissions },
-      { new: true, runValidators: true }
+      { customPermissions: moduleIds },
+      { new: true, runValidators: false }
     ).populate('customPermissions');
 
     if (!employee) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Empleado no encontrado',
-      });
+      return res.status(404).json({ status: 'fail', message: 'Empleado no encontrado' });
     }
+
+    console.log('💾 Permisos guardados en BD:', employee.customPermissions.map(p => p.moduleId));
 
     res.status(200).json({
       status: 'success',
@@ -232,10 +309,8 @@ exports.updateEmployeePermissions = async (req, res) => {
       data: employee.customPermissions,
     });
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
+    console.error('❌ Error al actualizar permisos:', err);
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
