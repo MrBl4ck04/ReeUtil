@@ -547,7 +547,6 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-<<<<<<< HEAD
     // Verificar si el usuario es un Employee (los empleados son admin)
     // Los Employee tienen 'roleId', los User normales tienen 'role'
     const isEmployee = req.user.roleId !== undefined;
@@ -566,32 +565,6 @@ exports.restrictTo = (...roles) => {
       status: 'fail',
       message: 'No tienes permisos para realizar esta acción'
     });
-=======
-    console.log('🔐 restrictTo - Usuario:', req.user?.email);
-    console.log('🔐 restrictTo - Tipo de usuario:', req.user?.userType);
-    console.log('🔐 restrictTo - Rol del usuario:', req.user?.role);
-    console.log('🔐 restrictTo - Roles requeridos:', roles);
-    
-    if (!req.user) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Usuario no autenticado'
-      });
-    }
-
-    // Para employees, verificar que el rol esté en la lista permitida
-    // Para users, verificar que el role esté en la lista permitida
-    if (!roles.includes(req.user.role)) {
-      console.log('❌ Acceso denegado - Rol no permitido');
-      return res.status(403).json({
-        status: 'fail',
-        message: `No tienes permisos para realizar esta acción. Tu rol es: ${req.user.role}, roles permitidos: ${roles.join(', ')}`
-      });
-    }
-    
-    console.log('✅ Acceso permitido');
-    next();
->>>>>>> BOT2-2
   };
 };
 
