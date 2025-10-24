@@ -25,8 +25,11 @@ export const EmployeesManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
+    apellidoMaterno: '',
     email: '',
     contraseA: '',
+    confirmPassword: '',
+    genero: '',
     cargo: ''
   });
   const [formError, setFormError] = useState<string>('');
@@ -117,8 +120,11 @@ export const EmployeesManagement: React.FC = () => {
     setFormData({
       nombre: '',
       apellido: '',
+      apellidoMaterno: '',
       email: '',
       contraseA: '',
+      confirmPassword: '',
+      genero: '',
       cargo: ''
     });
     setSelectedEmployee(null);
@@ -131,8 +137,11 @@ export const EmployeesManagement: React.FC = () => {
       setFormData({
         nombre: employee.nombre,
         apellido: employee.apellido,
+        apellidoMaterno: employee.apellidoMaterno || '',
         email: employee.email,
         contraseA: '',
+        confirmPassword: '',
+        genero: employee.genero || '',
         cargo: employee.cargo || ''
       });
       setSelectedRoleId(employee?.roleId?._id || '');
@@ -144,7 +153,7 @@ export const EmployeesManagement: React.FC = () => {
   };
   
   // Manejar cambios en el formulario
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -158,8 +167,16 @@ export const EmployeesManagement: React.FC = () => {
       setFormError('Selecciona un rol');
       return;
     }
+    if (!selectedEmployee && !formData.genero) {
+      setFormError('Selecciona un género');
+      return;
+    }
     if (!selectedEmployee && (!formData.contraseA || formData.contraseA.length < 8)) {
       setFormError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (!selectedEmployee && formData.contraseA !== formData.confirmPassword) {
+      setFormError('Las contraseñas no coinciden');
       return;
     }
     
@@ -174,7 +191,9 @@ export const EmployeesManagement: React.FC = () => {
         : { 
             nombre: updateData.nombre,
             apellido: updateData.apellido,
+            apellidoMaterno: updateData.apellidoMaterno,
             email: updateData.email,
+            genero: updateData.genero,
             cargo: updateData.cargo,
             roleId: updateData.roleId
           };
@@ -185,7 +204,17 @@ export const EmployeesManagement: React.FC = () => {
       });
     } else {
       // Crear nuevo empleado
-      createEmployeeMutation.mutate({ ...formData, roleId: selectedRoleId });
+      createEmployeeMutation.mutate({ 
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        apellidoMaterno: formData.apellidoMaterno,
+        email: formData.email,
+        contraseA: formData.contraseA,
+        confirmPassword: formData.confirmPassword,
+        genero: formData.genero,
+        cargo: formData.cargo,
+        roleId: selectedRoleId
+      });
     }
   };
   
@@ -412,6 +441,26 @@ export const EmployeesManagement: React.FC = () => {
                           </div>
                         </div>
                         <div>
+                          <label htmlFor="apellidoMaterno" className="block text-sm font-medium text-gray-700">
+                            Apellido materno
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <User className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <input
+                              type="text"
+                              name="apellidoMaterno"
+                              id="apellidoMaterno"
+                              className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                              placeholder="García"
+                              value={formData.apellidoMaterno}
+                              onChange={handleChange}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
                           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             Email
                           </label>
@@ -429,6 +478,27 @@ export const EmployeesManagement: React.FC = () => {
                               onChange={handleChange}
                               required
                             />
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="genero" className="block text-sm font-medium text-gray-700">
+                            Género
+                          </label>
+                          <div className="mt-1 relative rounded-md shadow-sm">
+                            <select
+                              id="genero"
+                              name="genero"
+                              className="focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                              value={formData.genero}
+                              onChange={handleChange}
+                              required={!selectedEmployee}
+                            >
+                              <option value="" disabled>Selecciona tu género</option>
+                              <option value="M">Masculino</option>
+                              <option value="F">Femenino</option>
+                              <option value="N">No binario</option>
+                              <option value="O">Otro</option>
+                            </select>
                           </div>
                         </div>
                         <div>
@@ -488,6 +558,29 @@ export const EmployeesManagement: React.FC = () => {
                                 className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
                                 placeholder="••••••••"
                                 value={formData.contraseA}
+                                onChange={handleChange}
+                                required={!selectedEmployee}
+                                minLength={8}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {!selectedEmployee && (
+                          <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                              Confirmar contraseña
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Lock className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="password"
+                                name="confirmPassword"
+                                id="confirmPassword"
+                                className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                                placeholder="••••••••"
+                                value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required={!selectedEmployee}
                                 minLength={8}

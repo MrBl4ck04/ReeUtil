@@ -1,5 +1,6 @@
 const Employee = require('../../models/Employee');
 const Role = require('../../models/Role');
+const User = require('../../models/User');
 
 // Obtener todos los empleados
 exports.getAllEmployees = async (req, res) => {
@@ -48,7 +49,33 @@ exports.getEmployeeById = async (req, res) => {
 // Crear nuevo empleado
 exports.createEmployee = async (req, res) => {
   try {
-    const { nombre, apellido, email, contraseA, cargo, roleId } = req.body;
+    const { nombre, apellido, apellidoMaterno, email, contraseA, confirmPassword, genero, cargo, roleId } = req.body;
+
+    // Validaciones básicas
+    if (!nombre || !apellido || !apellidoMaterno || !email || !contraseA || !genero || !roleId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Por favor completa todos los campos requeridos: nombre, apellido paterno, apellido materno, género, email, contraseña y rol.',
+      });
+    }
+
+    // Validar confirmación de contraseña si viene
+    if (typeof confirmPassword !== 'undefined' && contraseA !== confirmPassword) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Las contraseñas no coinciden.',
+      });
+    }
+
+    // Validar género permitido (M, F, N, O)
+    const genderCode = String(genero).trim().charAt(0).toUpperCase();
+    const allowed = ['M', 'F', 'N', 'O'];
+    if (!allowed.includes(genderCode)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Género inválido. Valores permitidos: M, F, N, O.',
+      });
+    }
 
     // Validar que el rol existe
     const role = await Role.findById(roleId);
@@ -59,12 +86,31 @@ exports.createEmployee = async (req, res) => {
       });
     }
 
+    // Generar userId único como en authController
+    const initial = (s) => (s || '').trim().charAt(0).toUpperCase();
+    const initials = `${initial(nombre)}${initial(apellido)}${initial(apellidoMaterno)}${genderCode}`;
+    const userId = `USR-${initials}`;
+
+    // Verificar duplicados en Employees y Users
+    const existingEmpId = await Employee.findOne({ userId });
+    const existingUserId = await User.findOne({ userId });
+    if (existingEmpId || existingUserId) {
+      return res.status(400).json({
+        status: 'fail',
+        code: 'USERID_DUPLICATE',
+        message: `El código de usuario generado (${userId}) ya existe. Intenta variar el nombre o verifica tus datos.`,
+      });
+    }
+
     // Crear empleado
     const newEmployee = await Employee.create({
+      userId,
       nombre,
       apellido,
+      apellidoMaterno,
       email,
       contraseA,
+      genero: genderCode,
       cargo,
       roleId,
     });
@@ -87,9 +133,10 @@ exports.createEmployee = async (req, res) => {
 // Actualizar empleado
 exports.updateEmployee = async (req, res) => {
   try {
-    const { nombre, apellido, email, cargo, roleId, isActive } = req.body;
+    const { nombre, apellido, apellidoMaterno, email, cargo, roleId, isActive, genero } = req.body;
 
-    const updateData = { nombre, apellido, email, cargo, isActive };
+    const updateData = { nombre, apellido, apellidoMaterno, email, cargo, isActive };
+    if (genero) updateData.genero = String(genero).trim().charAt(0).toUpperCase();
     if (roleId) updateData.roleId = roleId;
 
     const employee = await Employee.findByIdAndUpdate(

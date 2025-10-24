@@ -24,7 +24,8 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.enable('trust proxy');
+// Configurar trust proxy de forma segura (evita configuración permisiva incompatible con express-rate-limit)
+app.set('trust proxy', process.env.TRUST_PROXY || 'loopback');
 
 // CORS restrictivo por defecto (seguridad por defecto)
 app.use(cors({
