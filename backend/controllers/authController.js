@@ -511,7 +511,7 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3) Verificar si el usuario aún existe (en cualquiera de las colecciones)
-    let currentUser = await Employee.findById(decoded.id);
+    let currentUser = await Employee.findById(decoded.id).populate('roleId');
     if (!currentUser) {
       currentUser = await User.findById(decoded.id);
     }
@@ -521,6 +521,16 @@ exports.protect = async (req, res, next) => {
         status: 'fail',
         message: 'El usuario al que pertenece este token ya no existe.'
       });
+    }
+
+    // Normalizar el campo role para ambos tipos de usuario
+    if (!currentUser.role && currentUser.roleId) {
+      // Es un Employee, asignar role desde roleId
+      currentUser.role = currentUser.roleId.nombre || 'employee';
+      currentUser.userType = 'employee';
+    } else {
+      // Es un User normal
+      currentUser.userType = 'user';
     }
 
     // 4) Otorgar acceso a la ruta protegida
@@ -537,12 +547,29 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
+    console.log('🔐 restrictTo - Usuario:', req.user?.email);
+    console.log('🔐 restrictTo - Tipo de usuario:', req.user?.userType);
+    console.log('🔐 restrictTo - Rol del usuario:', req.user?.role);
+    console.log('🔐 restrictTo - Roles requeridos:', roles);
+    
+    if (!req.user) {
+      return res.status(401).json({
         status: 'fail',
-        message: 'No tienes permisos para realizar esta acción'
+        message: 'Usuario no autenticado'
       });
     }
+
+    // Para employees, verificar que el rol esté en la lista permitida
+    // Para users, verificar que el role esté en la lista permitida
+    if (!roles.includes(req.user.role)) {
+      console.log('❌ Acceso denegado - Rol no permitido');
+      return res.status(403).json({
+        status: 'fail',
+        message: `No tienes permisos para realizar esta acción. Tu rol es: ${req.user.role}, roles permitidos: ${roles.join(', ')}`
+      });
+    }
+    
+    console.log('✅ Acceso permitido');
     next();
   };
 };

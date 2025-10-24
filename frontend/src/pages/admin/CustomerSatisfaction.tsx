@@ -23,7 +23,7 @@ export const CustomerSatisfaction: React.FC = () => {
   // Debug log
   React.useEffect(() => {
     console.log('📊 Admin Reviews Response:', reviewsResponse);
-    console.log('📊 Reseñas cargadas:', reviewsResponse?.data?.reviews?.length || 0);
+    console.log('📊 Reseñas cargadas:', reviewsResponse?.data?.data?.reviews?.length || 0);
     if (error) {
       console.error('❌ Error al cargar reseñas:', error);
     }
