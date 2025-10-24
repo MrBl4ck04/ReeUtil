@@ -11,4 +11,7 @@ export const ventasApi = {
   obtenerVentas: (params?: any) => api.get('/api/ventas', { params }),
   buscarVentas: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
   obtenerEstadisticasDashboard: () => api.get('/api/ventas/dashboard'),
+  // Admin endpoints
+  deshabilitarVenta: (id: string) => api.patch(`/api/ventas/admin/${id}/deshabilitar`),
+  habilitarVenta: (id: string) => api.patch(`/api/ventas/admin/${id}/habilitar`),
 };
