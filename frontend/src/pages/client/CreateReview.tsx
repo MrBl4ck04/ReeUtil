@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Star, ArrowLeft } from 'lucide-react';
+import { Star, ArrowLeft, Search } from 'lucide-react';
 import { clientReviewsApi } from '../../services/clientReviewsApi';
+import api from '../../services/api';
 
 export const CreateReview: React.FC = () => {
   const navigate = useNavigate();
   const { vendedorId } = useParams<{ vendedorId: string }>();
   const [hoveredStar, setHoveredStar] = useState(0);
   const [selectedStars, setSelectedStars] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     titulo: '',
     comentario: '',
@@ -18,6 +22,21 @@ export const CreateReview: React.FC = () => {
     ventaId: ''
   });
   const [errors, setErrors] = useState<any>({});
+
+  // Query para buscar usuarios por nombre
+  const { data: searchResults = [], isLoading: isSearching } = useQuery(
+    ['searchUsers', searchQuery],
+    async () => {
+      if (!searchQuery.trim()) return [];
+      try {
+        const response = await api.get(`/auth/users/search?q=${encodeURIComponent(searchQuery)}`);
+        return response.data?.data || [];
+      } catch {
+        return [];
+      }
+    },
+    { enabled: searchQuery.length > 1 }
+  );
 
   const createMutation = useMutation(
     (data: any) => clientReviewsApi.createReview(data),
@@ -142,24 +161,83 @@ export const CreateReview: React.FC = () => {
             {errors.tipo && <p className="mt-1 text-sm text-red-500">{errors.tipo}</p>}
           </div>
 
-          {/* Destinatario */}
+          {/* Destinatario - Búsqueda por nombre */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sobre quién es esta reseña (ID del usuario o vendedor) *
+              Nombre de la persona *
             </label>
-            <input
-              type="text"
-              value={formData.destinatarioId}
-              onChange={(e) => setFormData(prev => ({ ...prev, destinatarioId: e.target.value }))}
-              placeholder="Ej: ID del vendedor (encontrar en su perfil)"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                errors.destinatarioId ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
+            <div className="relative">
+              <div className="flex items-center space-x-2">
+                <Search className="h-5 w-5 text-gray-400 absolute left-3" />
+                <input
+                  type="text"
+                  value={selectedUser ? selectedUser.name : searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (selectedUser) setSelectedUser(null);
+                    setShowSearchResults(true);
+                    if (errors.destinatarioId) {
+                      setErrors((prev: any) => ({...prev, destinatarioId: ''}));
+                    }
+                  }}
+                  placeholder="Escribe el nombre de la persona..."
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                    errors.destinatarioId ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+
+              {/* Resultados de búsqueda */}
+              {showSearchResults && searchQuery.length > 1 && (
+                <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-3 text-center text-gray-500">Buscando...</div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((user: any) => (
+                      <button
+                        key={user._id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setFormData(prev => ({ ...prev, destinatarioId: user._id }));
+                          setSearchQuery('');
+                          setShowSearchResults(false);
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-200 last:border-b-0 transition"
+                      >
+                        <p className="font-medium text-gray-900">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-3 text-center text-gray-500">No se encontraron resultados</div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* Usuario seleccionado */}
+            {selectedUser && (
+              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-green-900">{selectedUser.name}</p>
+                  <p className="text-sm text-green-700">{selectedUser.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedUser(null);
+                    setFormData(prev => ({ ...prev, destinatarioId: '' }));
+                    setSearchQuery('');
+                  }}
+                  className="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Cambiar
+                </button>
+              </div>
+            )}
+            
             {errors.destinatarioId && <p className="mt-1 text-sm text-red-500">{errors.destinatarioId}</p>}
-            <p className="mt-1 text-xs text-gray-500">
-              Si accediste desde el perfil de un vendedor, este campo se llenará automáticamente
-            </p>
           </div>
 
           {/* Título */}
