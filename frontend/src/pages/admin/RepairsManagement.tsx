@@ -1,72 +1,85 @@
 import React, { useState } from 'react';
+import { useQuery } from 'react-query';
 import { Wrench, Search, CheckCircle, XCircle, Clock, DollarSign } from 'lucide-react';
+import { repairApi } from '../../services/marketplaceApi';
 
 export const RepairsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [selectedRepair, setSelectedRepair] = useState<any>(null);
+  const [quoteData, setQuoteData] = useState({ monto: '', tiempoEstimado: '', detalles: '' });
   
-  // Datos de ejemplo para las reparaciones
-  const repairsData = [
-    { 
-      id: 1, 
-      device: 'iPhone 11', 
-      problem: 'Pantalla rota', 
-      customer: 'Juan Pérez', 
-      date: '2023-10-15', 
-      status: 'pendiente',
-      images: ['https://via.placeholder.com/150'] 
-    },
-    { 
-      id: 2, 
-      device: 'Samsung Galaxy S20', 
-      problem: 'No carga la batería', 
-      customer: 'María López', 
-      date: '2023-10-14', 
-      status: 'evaluando',
-      images: ['https://via.placeholder.com/150'] 
-    },
-    { 
-      id: 3, 
-      device: 'MacBook Pro', 
-      problem: 'No enciende', 
-      customer: 'Carlos Rodríguez', 
-      date: '2023-10-12', 
-      status: 'cotizado',
-      quote: { amount: 150, time: 3 },
-      images: ['https://via.placeholder.com/150'] 
-    },
-    { 
-      id: 4, 
-      device: 'Lenovo ThinkPad', 
-      problem: 'Teclado no funciona', 
-      customer: 'Ana Martínez', 
-      date: '2023-10-10', 
-      status: 'en_reparacion',
-      quote: { amount: 80, time: 2 },
-      images: ['https://via.placeholder.com/150'] 
-    },
-    { 
-      id: 5, 
-      device: 'iPad Air', 
-      problem: 'Botón home no funciona', 
-      customer: 'Pedro Sánchez', 
-      date: '2023-10-08', 
-      status: 'completado',
-      quote: { amount: 60, time: 1 },
-      images: ['https://via.placeholder.com/150'] 
-    },
-  ];
+  // Obtener todas las reparaciones
+  const { data: repairsResponse, isLoading, refetch } = useQuery(
+    ['allRepairs', statusFilter, searchTerm], 
+    () => repairApi.getAllRepairRequests({ estado: statusFilter !== 'all' ? statusFilter : undefined, search: searchTerm })
+      .then(response => response.data)
+  );
 
-  // Filtrar reparaciones por búsqueda y estado
-  const filteredRepairs = repairsData.filter(repair => {
-    const matchesSearch = 
-      repair.device.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      repair.problem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      repair.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (statusFilter === 'all') return matchesSearch;
-    return matchesSearch && repair.status === statusFilter;
-  });
+  const repairsData = repairsResponse?.data?.reparaciones || [];
+  
+  // Usar solo datos reales
+  const filteredRepairs = repairsData;
+
+  // Manejar evaluación
+  const handleEvaluate = async (id: string) => {
+    try {
+      await repairApi.evaluateRepair(id);
+      refetch();
+    } catch (error) {
+      console.error('Error al evaluar:', error);
+    }
+  };
+
+  // Abrir modal de cotización
+  const handleOpenQuote = (repair: any) => {
+    setSelectedRepair(repair);
+    setShowQuoteModal(true);
+  };
+
+  // Enviar cotización
+  const handleSubmitQuote = async () => {
+    if (!selectedRepair) return;
+    try {
+      await repairApi.updateRepairQuote(selectedRepair._id, {
+        monto: Number(quoteData.monto),
+        tiempoEstimado: quoteData.tiempoEstimado,
+        detalles: quoteData.detalles
+      });
+      setShowQuoteModal(false);
+      setQuoteData({ monto: '', tiempoEstimado: '', detalles: '' });
+      refetch();
+    } catch (error) {
+      console.error('Error al cotizar:', error);
+    }
+  };
+
+  // Marcar como completado
+  const handleComplete = async (id: string) => {
+    if (window.confirm('¿Marcar esta reparación como completada?')) {
+      try {
+        await repairApi.completeRepair(id);
+        alert('✅ Reparación completada exitosamente');
+        refetch();
+      } catch (error) {
+        console.error('Error al completar:', error);
+        alert('❌ Error al completar la reparación');
+      }
+    }
+  };
+
+  // Rechazar reparación
+  const handleReject = async (id: string) => {
+    if (window.confirm('¿Estás seguro de rechazar esta reparación?')) {
+      try {
+        await repairApi.rejectRepairAdmin(id);
+        refetch();
+      } catch (error) {
+        console.error('Error al rechazar:', error);
+      }
+    }
+  };
 
   // Obtener color según estado
   const getStatusColor = (status: string) => {
@@ -132,9 +145,15 @@ export const RepairsManagement: React.FC = () => {
       </div>
 
       {/* Lista de reparaciones */}
+      {isLoading ? (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
+          <p className="mt-2 text-gray-500">Cargando reparaciones...</p>
+        </div>
+      ) : (
       <div className="space-y-4">
-        {filteredRepairs.map((repair) => (
-          <div key={repair.id} className="card hover:shadow-md transition-shadow">
+        {filteredRepairs.map((repair: any) => (
+          <div key={repair._id || repair.id} className="card hover:shadow-md transition-shadow">
             <div className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
@@ -144,53 +163,54 @@ export const RepairsManagement: React.FC = () => {
                   </div>
                   
                   <div>
-                    <h3 className="font-medium text-gray-900">{repair.device}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{repair.problem}</p>
+                    <h3 className="font-medium text-gray-900">{repair.tipoDispositivo || repair.device}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{repair.marca} {repair.modelo}</p>
+                    <p className="text-sm text-gray-600 mt-1">{repair.descripcionProblema || repair.problem}</p>
                     <div className="mt-2 flex items-center text-xs text-gray-500">
                       <Clock className="h-4 w-4 text-gray-400 mr-1" />
-                      <span>Solicitado el {repair.date}</span>
+                      <span>Solicitado el {repair.fechaSolicitud ? new Date(repair.fechaSolicitud).toLocaleDateString() : repair.date}</span>
                     </div>
                     <div className="mt-1 text-xs text-gray-500">
-                      Cliente: {repair.customer}
+                      Cliente: {repair.usuario?.name || repair.customer}
                     </div>
                   </div>
                 </div>
                 
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(repair.status)}`}>
-                  {getStatusText(repair.status)}
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(repair.estado || repair.status)}`}>
+                  {getStatusText(repair.estado || repair.status)}
                 </span>
               </div>
               
               {/* Imágenes */}
-              {repair.images && repair.images.length > 0 && (
+              {repair.imagenes && repair.imagenes.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Imágenes:</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Imagen del Equipo:</h4>
                   <div className="flex space-x-2 overflow-x-auto pb-2">
-                    {repair.images.map((img: string, idx: number) => (
-                      <div key={idx} className="h-16 w-16 rounded-md bg-gray-200 flex-shrink-0 overflow-hidden">
+                    {repair.imagenes.map((img: string, idx: number) => (
+                      <a key={idx} href={img} target="_blank" rel="noopener noreferrer" className="h-24 w-24 rounded-md bg-gray-200 flex-shrink-0 overflow-hidden hover:opacity-75 transition-opacity">
                         <img src={img} alt={`Imagen ${idx + 1}`} className="h-full w-full object-cover" />
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>
               )}
               
               {/* Cotización */}
-              {repair.quote && (
+              {(repair.cotizacion || repair.quote) && (
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center">
                     <div>
                       <h4 className="text-sm font-medium text-gray-700">Cotización:</h4>
                       <div className="flex items-center mt-1">
                         <DollarSign className="h-4 w-4 text-green-600 mr-1" />
-                        <span className="font-medium text-gray-900">{repair.quote.amount}</span>
+                        <span className="font-medium text-gray-900">{repair.cotizacion?.monto || repair.quote?.amount}</span>
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        Tiempo estimado: {repair.quote.time} días
+                        Tiempo estimado: {repair.cotizacion?.tiempoEstimado || repair.quote?.time} {typeof repair.cotizacion?.tiempoEstimado === 'string' ? '' : 'días'}
                       </div>
                     </div>
                     
-                    {repair.status === 'cotizado' && (
+                    {(repair.estado || repair.status) === 'cotizado' && (
                       <div className="flex space-x-2">
                         <button className="btn-outline-danger flex items-center text-xs px-3 py-1">
                           <XCircle className="h-3 w-3 mr-1" />
@@ -208,27 +228,28 @@ export const RepairsManagement: React.FC = () => {
               
               {/* Acciones */}
               <div className="mt-4 flex justify-end space-x-2">
-                {repair.status === 'pendiente' && (
-                  <button className="btn-primary flex items-center text-xs px-3 py-1">
-                    Evaluar
-                  </button>
+                {(repair.estado || repair.status) === 'pendiente' && (
+                  <>
+                    <button onClick={() => handleEvaluate(repair._id)} className="btn-primary flex items-center text-xs px-3 py-1">
+                      Evaluar
+                    </button>
+                    <button onClick={() => handleReject(repair._id)} className="btn-outline-danger flex items-center text-xs px-3 py-1">
+                      Rechazar
+                    </button>
+                  </>
                 )}
                 
-                {repair.status === 'evaluando' && (
-                  <button className="btn-primary flex items-center text-xs px-3 py-1">
+                {(repair.estado || repair.status) === 'evaluando' && (
+                  <button onClick={() => handleOpenQuote(repair)} className="btn-primary flex items-center text-xs px-3 py-1">
                     Cotizar
                   </button>
                 )}
                 
-                {repair.status === 'en_reparacion' && (
-                  <button className="btn-primary flex items-center text-xs px-3 py-1">
+                {(repair.estado || repair.status) === 'en_reparacion' && (
+                  <button onClick={() => handleComplete(repair._id)} className="btn-primary flex items-center text-xs px-3 py-1">
                     Marcar como completado
                   </button>
                 )}
-                
-                <button className="btn-outline flex items-center text-xs px-3 py-1">
-                  Ver detalles
-                </button>
               </div>
             </div>
           </div>
@@ -242,6 +263,61 @@ export const RepairsManagement: React.FC = () => {
           </div>
         )}
       </div>
+      )}
+
+      {/* Modal de cotización */}
+      {showQuoteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Cotizar Reparación</h2>
+              <button onClick={() => setShowQuoteModal(false)} className="text-gray-500 hover:text-gray-700">
+                <XCircle className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Monto (Bs)</label>
+                <input
+                  type="number"
+                  value={quoteData.monto}
+                  onChange={(e) => setQuoteData({...quoteData, monto: e.target.value})}
+                  className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="150.00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Tiempo Estimado</label>
+                <input
+                  type="text"
+                  value={quoteData.tiempoEstimado}
+                  onChange={(e) => setQuoteData({...quoteData, tiempoEstimado: e.target.value})}
+                  className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="3-5 días"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Detalles</label>
+                <textarea
+                  value={quoteData.detalles}
+                  onChange={(e) => setQuoteData({...quoteData, detalles: e.target.value})}
+                  className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="Descripción de la reparación a realizar"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button onClick={() => setShowQuoteModal(false)} className="btn-outline">
+                  Cancelar
+                </button>
+                <button onClick={handleSubmitQuote} className="btn-primary">
+                  Enviar Cotización
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

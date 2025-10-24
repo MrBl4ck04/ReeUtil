@@ -537,24 +537,18 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    // Verificar si el usuario es un Employee (los empleados son admin)
-    // Los Employee tienen 'roleId', los User normales tienen 'role'
+    // Determinar si es Employee (admin) o usuario normal
     const isEmployee = req.user.roleId !== undefined;
-    
-    // Si es empleado, permitir acceso (los empleados son admin)
-    if (isEmployee && roles.includes('admin')) {
-      return next();
+    const userRole = isEmployee ? 'admin' : req.user.role;
+
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'No tienes permisos para realizar esta acción'
+      });
     }
-    
-    // Para usuarios normales, verificar el campo 'role'
-    if (req.user.role && roles.includes(req.user.role)) {
-      return next();
-    }
-    
-    return res.status(403).json({
-      status: 'fail',
-      message: 'No tienes permisos para realizar esta acción'
-    });
+
+    return next();
   };
 };
 

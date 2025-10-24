@@ -16,6 +16,8 @@ const permissionsRoutes = require('./routes/permissions');
 const reviewsRoutes = require('./routes/reviews');
 const dashboardRoutes = require('./routes/dashboard');
 const rulesRoutes = require('./routes/rules');
+const repairsRoutes = require('./routes/repairs');
+const recycleRoutes = require('./routes/recycle');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -74,15 +76,10 @@ app.use('/api/permissions', permissionsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/rules', rulesRoutes);
+app.use('/api/repairs', repairsRoutes);
+app.use('/api/recycle', recycleRoutes);
 
 // Rutas de mock para evitar errores 404
-app.get('/repairs/all', (req, res) => {
-  res.json({ status: 'success', data: [] });
-});
-
-app.get('/recycle/all', (req, res) => {
-  res.json({ status: 'success', data: [] });
-});
 
 app.get('/marketplace/products', (req, res) => {
   res.json({ status: 'success', data: [] });
