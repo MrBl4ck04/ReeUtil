@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ventasApi } from '../../services/ventasApi';
+import { ActiveRulesBox } from '../ActiveRulesBox';
 import { X, ShoppingBag } from 'lucide-react';
 
 interface Props {
@@ -66,8 +67,8 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
           <div className="flex items-center">
             <ShoppingBag className="h-5 w-5 text-blue-600 mr-2" />
             <h2 className="text-lg font-semibold">Nuevo Producto</h2>
@@ -83,6 +84,10 @@ const NuevoProductoModal: React.FC<Props> = ({ open, onClose, onCreated }) => {
               {error}
             </div>
           )}
+
+          {/* Reglas Activas */}
+          <ActiveRulesBox />
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Nombre</label>
             <input
