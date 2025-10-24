@@ -530,7 +530,11 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    // Si es un Employee (tiene roleId en lugar de role), se considera admin
+    const isEmployee = req.user.roleId !== undefined;
+    const userRole = isEmployee ? 'admin' : req.user.role;
+    
+    if (!roles.includes(userRole)) {
       return res.status(403).json({
         status: 'fail',
         message: 'No tienes permisos para realizar esta acción'
