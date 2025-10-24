@@ -511,7 +511,7 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3) Verificar si el usuario aún existe (en cualquiera de las colecciones)
-    let currentUser = await Employee.findById(decoded.id);
+    let currentUser = await Employee.findById(decoded.id).populate('roleId');
     if (!currentUser) {
       currentUser = await User.findById(decoded.id);
     }
@@ -521,6 +521,16 @@ exports.protect = async (req, res, next) => {
         status: 'fail',
         message: 'El usuario al que pertenece este token ya no existe.'
       });
+    }
+
+    // Normalizar el campo role para ambos tipos de usuario
+    if (!currentUser.role && currentUser.roleId) {
+      // Es un Employee, asignar role desde roleId
+      currentUser.role = currentUser.roleId.nombre || 'employee';
+      currentUser.userType = 'employee';
+    } else {
+      // Es un User normal
+      currentUser.userType = 'user';
     }
 
     // 4) Otorgar acceso a la ruta protegida
@@ -537,6 +547,7 @@ exports.protect = async (req, res, next) => {
 // Middleware para restringir acceso solo a administradores
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
+<<<<<<< HEAD
     // Verificar si el usuario es un Employee (los empleados son admin)
     // Los Employee tienen 'roleId', los User normales tienen 'role'
     const isEmployee = req.user.roleId !== undefined;
@@ -555,6 +566,32 @@ exports.restrictTo = (...roles) => {
       status: 'fail',
       message: 'No tienes permisos para realizar esta acción'
     });
+=======
+    console.log('🔐 restrictTo - Usuario:', req.user?.email);
+    console.log('🔐 restrictTo - Tipo de usuario:', req.user?.userType);
+    console.log('🔐 restrictTo - Rol del usuario:', req.user?.role);
+    console.log('🔐 restrictTo - Roles requeridos:', roles);
+    
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Usuario no autenticado'
+      });
+    }
+
+    // Para employees, verificar que el rol esté en la lista permitida
+    // Para users, verificar que el role esté en la lista permitida
+    if (!roles.includes(req.user.role)) {
+      console.log('❌ Acceso denegado - Rol no permitido');
+      return res.status(403).json({
+        status: 'fail',
+        message: `No tienes permisos para realizar esta acción. Tu rol es: ${req.user.role}, roles permitidos: ${roles.join(', ')}`
+      });
+    }
+    
+    console.log('✅ Acceso permitido');
+    next();
+>>>>>>> BOT2-2
   };
 };
 
@@ -858,5 +895,43 @@ exports.blockUserById = async (req, res) => {
     return res.status(200).json({ status: 'success' });
   } catch (err) {
     return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
+// NUEVO: Búsqueda de usuarios por nombre (para reseñas)
+exports.searchUsersByName = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Debes ingresar al menos 2 caracteres para buscar'
+      });
+    }
+
+    // Buscar usuarios por nombre completo (name, lastName, motherLastName)
+    const users = await User.find({
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { lastName: { $regex: q, $options: 'i' } },
+        { motherLastName: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } },
+        { userId: { $regex: q, $options: 'i' } }
+      ]
+    })
+      .select('_id name lastName motherLastName email userId')
+      .limit(10); // Limitar a 10 resultados
+
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
   }
 };

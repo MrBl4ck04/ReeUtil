@@ -88,4 +88,7 @@ router.get('/users/blocked', authController.getBlockedUsers);
 router.post('/users/:id/unblock', [param('id').isString().notEmpty()], validate, authController.unblockUserById);
 router.post('/users/:id/block', [param('id').isString().notEmpty()], validate, authController.blockUserById);
 
+// NUEVO: Búsqueda de usuarios por nombre (para reseñas)
+router.get('/users/search', authController.searchUsersByName);
+
 module.exports = router;
