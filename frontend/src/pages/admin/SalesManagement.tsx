@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { Search, ShoppingBag, DollarSign, CheckCircle, XCircle, AlertTriangle, User, Calendar, Tag, Trash2, Eye } from 'lucide-react';
 import { ventasApi } from '../../services/ventasApi';
+import toast from 'react-hot-toast';
 
 export const SalesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +21,8 @@ export const SalesManagement: React.FC = () => {
       (sale.descripcion || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sale.usuario?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (statusFilter === 'all') return matchesSearch;
+    // Por defecto ("all"), solo mostrar ventas habilitadas
+    if (statusFilter === 'all') return matchesSearch && (sale.estadoAdmin === 'habilitado' || !sale.estadoAdmin);
     return matchesSearch && sale.estadoAdmin === statusFilter;
   });
 
@@ -28,11 +30,13 @@ export const SalesManagement: React.FC = () => {
   const handleDisableSale = async (saleId: string) => {
     if (window.confirm('¿Estás seguro de que deseas deshabilitar esta venta?')) {
       try {
-        // Actualizar el estado a deshabilitado
-        await ventasApi.actualizarVenta(saleId, { estadoAdmin: 'deshabilitado' });
+        // Usar endpoint específico de admin para deshabilitar
+        await ventasApi.deshabilitarVenta(saleId);
+        toast.success('Venta deshabilitada correctamente');
         refetch();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al deshabilitar la venta:', error);
+        toast.error(error?.response?.data?.message || 'Error al deshabilitar la venta');
       }
     }
   };
@@ -41,11 +45,13 @@ export const SalesManagement: React.FC = () => {
   const handleEnableSale = async (saleId: string) => {
     if (window.confirm('¿Estás seguro de que deseas habilitar esta venta?')) {
       try {
-        // Actualizar el estado a habilitado
-        await ventasApi.actualizarVenta(saleId, { estadoAdmin: 'habilitado' });
+        // Usar endpoint específico de admin para habilitar
+        await ventasApi.habilitarVenta(saleId);
+        toast.success('Venta habilitada correctamente');
         refetch();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al habilitar la venta:', error);
+        toast.error(error?.response?.data?.message || 'Error al habilitar la venta');
       }
     }
   };

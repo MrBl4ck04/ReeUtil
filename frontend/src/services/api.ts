@@ -65,6 +65,9 @@ export const usersApi = {
   delete: (id: number) => api.delete(`/auth/users/${id}`),
   getBlocked: () => api.get('/auth/users/blocked'),
   unblockUser: (id: string) => api.post('/auth/unblock-account', { userId: id }),
+  // Nuevos endpoints específicos por ID
+  unblockUserById: (id: string) => api.post(`/auth/users/${id}/unblock`),
+  blockUser: (id: string) => api.post(`/auth/users/${id}/block`),
   
   // Empleados (admin)
   getAllEmployees: () => api.get('/api/employees'),
@@ -134,10 +137,11 @@ export const quotationsApi = {
 
 // Rules API
 export const rulesApi = {
-  getAll: () => api.get('/rules'),
-  getByCatalogId: (idCatalogo: string) => api.get(`/rules/catalog/${idCatalogo}`),
-  create: (data: any) => api.post('/rules', data),
-  delete: (id: string) => api.delete(`/rules/${id}`),
+  getAll: () => api.get('/api/rules'),
+  getByCatalogId: (idCatalogo: string) => api.get(`/api/rules/catalog/${idCatalogo}`),
+  create: (data: any) => api.post('/api/rules', data),
+  update: (id: string, data: any) => api.patch(`/api/rules/${id}`, data),
+  delete: (id: string) => api.delete(`/api/rules/${id}`),
 };
 
 // Inventory API

@@ -14,6 +14,11 @@ const employeeSchema = new mongoose.Schema(
       required: [true, 'Por favor ingresa tu apellido'],
       trim: true,
     },
+    apellidoMaterno: {
+      type: String,
+      required: [true, 'Por favor ingresa tu apellido materno'],
+      trim: true,
+    },
     email: {
       type: String,
       required: [true, 'Por favor ingresa tu correo electrónico'],
@@ -31,10 +36,19 @@ const employeeSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    genero: {
+      type: String,
+      required: [true, 'Por favor selecciona tu género'],
+      enum: ['M', 'F', 'N', 'O'],
+    },
+    userId: {
+      type: String,
+      unique: true,
+      index: true,
+    },
     roleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Role',
-      required: [true, 'Por favor asigna un rol'],
     },
     customPermissions: [
       {
