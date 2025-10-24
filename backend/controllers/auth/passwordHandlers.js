@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../../models/User');
 const { pruneExpiredCodes, verificationCodes } = require('./verificationService');
+const { logEvent } = require('../../services/auditService');
 
 // Endpoint para cambiar contraseña con validación de historial
 const changePassword = async (req, res) => {
@@ -47,6 +48,17 @@ const changePassword = async (req, res) => {
     user.passwordConfirm = newPasswordConfirm;
 
     await user.save();
+
+    try {
+      await logEvent({
+        type: 'PASSWORD_CHANGED',
+        userType: 'user',
+        userId: user._id,
+        email: user.email,
+        name: `${user.name || ''} ${user.lastName || ''}`.trim(),
+        metadata: { method: 'self-change' }
+      });
+    } catch (_) {}
 
     return res.status(200).json({
       status: 'success',
@@ -130,6 +142,25 @@ const resetPassword = async (req, res) => {
     user.blockedAt = null;
 
     await user.save();
+
+    try {
+      await logEvent({
+        type: 'PASSWORD_RESET',
+        userType: 'user',
+        userId: user._id,
+        email: user.email,
+        name: `${user.name || ''} ${user.lastName || ''}`.trim(),
+        metadata: { method: 'verification-code' }
+      });
+      await logEvent({
+        type: 'ACCOUNT_UNBLOCKED',
+        userType: 'user',
+        userId: user._id,
+        email: user.email,
+        name: `${user.name || ''} ${user.lastName || ''}`.trim(),
+        metadata: { reason: 'password reset' }
+      });
+    } catch (_) {}
 
     return res.status(200).json({
       status: 'success',

@@ -18,6 +18,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const rulesRoutes = require('./routes/rules');
 const repairsRoutes = require('./routes/repairs');
 const recycleRoutes = require('./routes/recycle');
+const logsRoutes = require('./routes/logs');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -78,6 +79,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/rules', rulesRoutes);
 app.use('/repairs', repairsRoutes);
 app.use('/recycle', recycleRoutes);
+app.use('/api/logs', logsRoutes);
 
 // Rutas de mock para evitar errores 404
 

@@ -14,7 +14,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Shield
+  Shield,
+  FileText
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -44,6 +45,7 @@ export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
     { id: 'employees', name: 'ABM Empleados', href: '/admin/empleados', icon: Users },
     { id: 'users', name: 'ABM Usuarios', href: '/admin/usuarios', icon: UserCheck },
     { id: 'osi', name: 'Gestión OSI', href: '/admin/osi', icon: Shield },
+    { id: 'logs', name: 'Logs del Sistema', href: '/admin/logs', icon: FileText },
   ];
 
   // Filtrar módulos según permisos del usuario

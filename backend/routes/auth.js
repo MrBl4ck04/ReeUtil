@@ -77,6 +77,9 @@ router.post(
   validate,
   authController.resetPassword
 );
+// Logout protegido
+router.post('/logout', authController.protect, authController.logout);
+
 // NUEVO: desbloquear cuenta (uso administrativo)
 router.post('/unblock-account', [body('userId').isString().notEmpty()], validate, authController.unblockAccount);
 // NUEVO: verificar estado de bloqueo

@@ -1,5 +1,5 @@
 // Importar todos los módulos de autenticación
-const { signup, login, verifyLoginCode } = require('./authHandlers');
+const { signup, login, verifyLoginCode, logout } = require('./authHandlers');
 const { protect, restrictTo } = require('./authMiddleware');
 const { getCaptcha } = require('./captchaService');
 const { sendVerificationCode } = require('./verificationService');
@@ -20,6 +20,7 @@ module.exports = {
   signup,
   login,
   verifyLoginCode,
+  logout,
   
   // Auth middleware
   protect,

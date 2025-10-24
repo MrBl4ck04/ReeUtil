@@ -1,6 +1,7 @@
 const User = require('../../models/User');
 const Employee = require('../../models/Employee');
 const emailService = require('../../services/emailService');
+const { logEvent } = require('../../services/auditService');
 const { signToken, createSendToken } = require('./tokenUtils');
 const { validateCaptcha } = require('./captchaService');
 const { 
@@ -120,6 +121,19 @@ const login = async (req, res) => {
       const permissions = employee.customPermissions.map(p => p.moduleId);
 
       const token = signToken(employee._id);
+
+      // Audit: login empleado
+      try {
+        await logEvent({
+          type: 'LOGIN',
+          userType: 'employee',
+          userId: employee._id,
+          email: employee.email,
+          name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+          metadata: { method: 'password+captcha' }
+        });
+      } catch (_) {}
+
       return res.status(200).json({
         status: 'success',
         access_token: token,
@@ -291,6 +305,18 @@ const verifyLoginCode = async (req, res) => {
       }
       
       const token = signToken(employee._id);
+
+      // Audit: login empleado tras verificación
+      try {
+        await logEvent({
+          type: 'LOGIN',
+          userType: 'employee',
+          userId: employee._id,
+          email: employee.email,
+          name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+          metadata: { method: 'verification-code' }
+        });
+      } catch (_) {}
       return res.status(200).json({
         status: 'success',
         access_token: token,
@@ -315,6 +341,16 @@ const verifyLoginCode = async (req, res) => {
       }
       
       // Usar la función createSendToken existente
+      try {
+        await logEvent({
+          type: 'LOGIN',
+          userType: 'user',
+          userId: user._id,
+          email: user.email,
+          name: `${user.name || ''} ${user.lastName || ''}`.trim(),
+          metadata: { method: 'verification-code' }
+        });
+      } catch (_) {}
       createSendToken(user, 200, res);
     }
   } catch (err) {
@@ -325,8 +361,32 @@ const verifyLoginCode = async (req, res) => {
   }
 };
 
+// Logout (requiere auth)
+const logout = async (req, res) => {
+  try {
+    const u = req.user;
+    if (u) {
+      try {
+        await logEvent({
+          type: 'LOGOUT',
+          userType: u.roleId ? 'employee' : 'user',
+          userId: u._id,
+          email: u.email,
+          name: `${u.nombre || u.name || ''} ${u.apellido || u.lastName || ''}`.trim(),
+          metadata: { reason: 'explicit' }
+        });
+      } catch (_) {}
+    }
+    // En apps con JWT stateless, el logout se maneja en cliente; aquí solo confirmamos
+    return res.status(200).json({ status: 'success', message: 'Sesión cerrada' });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
 module.exports = {
   signup,
   login,
-  verifyLoginCode
+  verifyLoginCode,
+  logout
 };

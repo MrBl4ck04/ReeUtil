@@ -33,6 +33,7 @@ import { CustomerSatisfaction } from './pages/admin/CustomerSatisfaction';
 import { EmployeesManagement } from './pages/admin/EmployeesManagement';
 import { UsersManagement } from './pages/admin/UsersManagement';
 import { OSIManagement } from './pages/admin/OSIManagement';
+import { SystemLogs } from './pages/admin/SystemLogs';
 
 // Crear cliente de React Query
 const queryClient = new QueryClient({
@@ -174,6 +175,12 @@ function App() {
             <Route path="/admin/osi" element={
               <AdminLayout>
                 <OSIManagement />
+              </AdminLayout>
+            } />
+            
+            <Route path="/admin/logs" element={
+              <AdminLayout>
+                <SystemLogs />
               </AdminLayout>
             } />
           </Routes>

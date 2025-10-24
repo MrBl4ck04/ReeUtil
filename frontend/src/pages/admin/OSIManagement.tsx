@@ -82,6 +82,7 @@ export const OSIManagement: React.FC = () => {
     { id: 'employees', name: 'ABM Empleados', description: 'Gestión de empleados' },
     { id: 'users', name: 'ABM Usuarios', description: 'Gestión de usuarios' },
     { id: 'osi', name: 'Gestión OSI', description: 'Gestión de permisos (solo para OSI)' },
+    { id: 'logs', name: 'Logs del Sistema', description: 'Auditoría de logins, bloqueos y cambios' },
   ];
   
   // Actualizar permiso

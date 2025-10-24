@@ -1,6 +1,7 @@
 const Employee = require('../../models/Employee');
 const Role = require('../../models/Role');
 const User = require('../../models/User');
+const { logEvent } = require('../../services/auditService');
 
 // Obtener todos los empleados
 exports.getAllEmployees = async (req, res) => {
@@ -118,6 +119,17 @@ exports.createEmployee = async (req, res) => {
     // Populate para la respuesta
     await newEmployee.populate('roleId', 'nombre description');
 
+    try {
+      await logEvent({
+        type: 'EMPLOYEE_CREATED',
+        userType: 'employee',
+        userId: newEmployee._id,
+        email: newEmployee.email,
+        name: `${newEmployee.nombre || ''} ${newEmployee.apellido || ''}`.trim(),
+        metadata: { roleId: newEmployee.roleId?._id || null }
+      });
+    } catch (_) {}
+
     res.status(201).json({
       status: 'success',
       data: newEmployee,
@@ -211,6 +223,17 @@ exports.resetEmployeePassword = async (req, res) => {
 
     employee.contraseA = tempPassword;
     await employee.save();
+
+    try {
+      await logEvent({
+        type: 'PASSWORD_RESET',
+        userType: 'employee',
+        userId: employee._id,
+        email: employee.email,
+        name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+        metadata: { method: 'admin-reset' }
+      });
+    } catch (_) {}
 
     res.status(200).json({
       status: 'success',
@@ -329,6 +352,17 @@ exports.toggleBlockEmployee = async (req, res) => {
     employee.isBlocked = !employee.isBlocked;
     employee.loginAttempts = 0;
     await employee.save();
+
+    try {
+      await logEvent({
+        type: employee.isBlocked ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+        userType: 'employee',
+        userId: employee._id,
+        email: employee.email,
+        name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+        metadata: { by: 'admin' }
+      });
+    } catch (_) {}
 
     res.status(200).json({
       status: 'success',
