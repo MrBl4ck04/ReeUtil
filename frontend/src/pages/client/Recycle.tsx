@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
 import { 
   Plus, 
   Recycle as RecycleIcon,
@@ -13,21 +12,27 @@ import {
   Laptop,
   Monitor,
   Printer,
-  Star
+  Star,
+  Camera
 } from 'lucide-react';
 import { recycleApi } from '../../services/marketplaceApi';
+import NuevoReciclajeModal from '../../components/recycle/NuevoReciclajeModal';
 
 export const Recycle: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Obtener solicitudes de reciclaje
-  const { data: recycleRequests, isLoading, refetch } = useQuery('recycleRequests', recycleApi.getMyRecycleRequests);
+  const { data: recycleRequests, isLoading, refetch } = useQuery('recycleRequests', () =>
+    recycleApi.getMyRecycleRequests().then(response => response.data)
+  );
   
   // Filtrar por estado
   const filteredRequests = recycleRequests?.data?.filter((recycle: any) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'pending') return recycle.estado === 'pendiente' || recycle.estado === 'evaluando';
     if (activeTab === 'quoted') return recycle.estado === 'cotizado';
+    if (activeTab === 'in_progress') return recycle.estado === 'en_reparacion';
     if (activeTab === 'completed') return recycle.estado === 'completado';
     return true;
   });
@@ -36,10 +41,15 @@ export const Recycle: React.FC = () => {
   const handleAcceptQuote = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas aceptar esta cotización?')) {
       try {
-        await recycleApi.acceptRecycleQuote(id);
+        const response = await recycleApi.acceptRecycleQuote(id);
+        console.log('Respuesta:', response);
+        alert('✅ Cotización aceptada. Tu dispositivo será reciclado.');
         refetch();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al aceptar la cotización:', error);
+        console.error('Detalles del error:', error.response?.data);
+        const errorMessage = error.response?.data?.message || 'Error desconocido';
+        alert(`❌ Error: ${errorMessage}`);
       }
     }
   };
@@ -49,9 +59,12 @@ export const Recycle: React.FC = () => {
     if (window.confirm('¿Estás seguro de que deseas rechazar esta cotización?')) {
       try {
         await recycleApi.rejectRecycleQuote(id);
+        alert('✅ Cotización rechazada');
         refetch();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al rechazar la cotización:', error);
+        const errorMessage = error.response?.data?.message || 'Error desconocido';
+        alert(`❌ Error: ${errorMessage}`);
       }
     }
   };
@@ -84,6 +97,7 @@ export const Recycle: React.FC = () => {
       case 'pendiente': return 'bg-yellow-100 text-yellow-800';
       case 'evaluando': return 'bg-blue-100 text-blue-800';
       case 'cotizado': return 'bg-purple-100 text-purple-800';
+      case 'en_reparacion': return 'bg-orange-100 text-orange-800';
       case 'completado': return 'bg-green-100 text-green-800';
       case 'rechazado': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -96,6 +110,7 @@ export const Recycle: React.FC = () => {
       case 'pendiente': return 'Pendiente';
       case 'evaluando': return 'En evaluación';
       case 'cotizado': return 'Cotizado';
+      case 'en_reparacion': return 'En Proceso';
       case 'completado': return 'Completado';
       case 'rechazado': return 'Rechazado';
       default: return status;
@@ -111,13 +126,13 @@ export const Recycle: React.FC = () => {
             Recicla tus dispositivos electrónicos y recibe compensación
           </p>
         </div>
-        <Link
-          to="/client/reciclar/nuevo"
+        <button
+          onClick={() => setShowCreateModal(true)}
           className="btn-primary flex items-center"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Reciclaje
-        </Link>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -152,6 +167,16 @@ export const Recycle: React.FC = () => {
             }`}
           >
             Cotizadas
+          </button>
+          <button
+            onClick={() => setActiveTab('in_progress')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'in_progress'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            En Proceso
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -270,22 +295,14 @@ export const Recycle: React.FC = () => {
                   )}
                   
                   {recycle.estado === 'completado' && !recycle.resena && (
-                    <Link
-                      to={`/client/resenas/nuevo?tipo=reciclaje&id=${recycle._id}`}
+                    <button
+                      onClick={() => alert('Funcionalidad de reseñas próximamente')}
                       className="btn-outline-primary flex items-center"
                     >
                       <Star className="h-4 w-4 mr-2" />
                       Dejar Reseña
-                    </Link>
+                    </button>
                   )}
-                  
-                  <Link
-                    to={`/client/reciclar/${recycle._id}`}
-                    className="btn-outline flex items-center"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Ver Detalles
-                  </Link>
                 </div>
               </div>
             </div>
@@ -296,13 +313,13 @@ export const Recycle: React.FC = () => {
           <RecycleIcon className="h-12 w-12 text-gray-400 mx-auto" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">No tienes solicitudes de reciclaje</h3>
           <p className="mt-1 text-gray-500">Recicla tus dispositivos electrónicos y recibe compensación</p>
-          <Link
-            to="/client/reciclar/nuevo"
+          <button
+            onClick={() => setShowCreateModal(true)}
             className="btn-primary mt-4 inline-flex items-center"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Reciclaje
-          </Link>
+          </button>
         </div>
       )}
       
@@ -382,6 +399,16 @@ export const Recycle: React.FC = () => {
           </li>
         </ul>
       </div>
+
+      {/* Modal de nuevo reciclaje */}
+      <NuevoReciclajeModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={() => {
+          refetch();
+          alert('✅ Solicitud de reciclaje creada exitosamente');
+        }}
+      />
     </div>
   );
 };

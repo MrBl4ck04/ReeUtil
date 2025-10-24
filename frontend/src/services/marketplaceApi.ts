@@ -61,16 +61,20 @@ export const recycleApi = {
   createRecycleRequest: (data: any) => api.post('/recycle/request', data),
   acceptRecycleQuote: (id: string) => api.post(`/recycle/${id}/accept`),
   rejectRecycleQuote: (id: string) => api.post(`/recycle/${id}/reject`),
+  getRecycleById: (id: string) => api.get(`/recycle/${id}`),
   
   // Admin
-  getAllRecycleRequests: (status?: string) => {
+  getAllRecycleRequests: (filters?: any) => {
     const params = new URLSearchParams();
-    if (status) params.append('status', status);
+    if (filters?.estado) params.append('estado', filters.estado);
+    if (filters?.search) params.append('search', filters.search);
     return api.get(`/recycle/all?${params.toString()}`);
   },
-  getRecycleById: (id: string) => api.get(`/recycle/${id}`),
   updateRecycleQuote: (id: string, data: any) => api.patch(`/recycle/${id}/quote`, data),
-  updateRecycleStatus: (id: string, status: string) => api.patch(`/recycle/${id}/status`, { status }),
+  updateRecycleStatus: (id: string, data: any) => api.patch(`/recycle/${id}/status`, data),
+  evaluateRecycle: (id: string) => api.post(`/recycle/${id}/evaluate`),
+  rejectRecycleAdmin: (id: string) => api.post(`/recycle/${id}/reject-admin`),
+  completeRecycle: (id: string, data?: any) => api.post(`/recycle/${id}/complete`, data || {}),
 };
 
 // API para reseñas
