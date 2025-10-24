@@ -13,12 +13,16 @@ import {
   Star
 } from 'lucide-react';
 import { repairApi } from '../../services/marketplaceApi';
+import NuevaReparacionModal from '../../components/repairs/NuevaReparacionModal';
 
 export const Repairs: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Obtener solicitudes de reparación
-  const { data: repairRequests, isLoading, refetch } = useQuery('repairRequests', repairApi.getMyRepairRequests);
+  const { data: repairRequests, isLoading, refetch } = useQuery('repairRequests', () =>
+    repairApi.getMyRepairRequests().then(response => response.data)
+  );
   
   // Filtrar por estado
   const filteredRequests = repairRequests?.data?.filter((repair: any) => {
@@ -34,10 +38,15 @@ export const Repairs: React.FC = () => {
   const handleAcceptQuote = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas aceptar esta cotización?')) {
       try {
-        await repairApi.acceptRepairQuote(id);
+        const response = await repairApi.acceptRepairQuote(id);
+        console.log('Respuesta:', response);
+        alert('✅ Cotización aceptada. Tu dispositivo entrará en reparación.');
         refetch();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al aceptar la cotización:', error);
+        console.error('Detalles del error:', error.response?.data);
+        const errorMessage = error.response?.data?.message || 'Error desconocido';
+        alert(`❌ Error: ${errorMessage}`);
       }
     }
   };
@@ -89,13 +98,13 @@ export const Repairs: React.FC = () => {
             Solicita y gestiona reparaciones de tus dispositivos
           </p>
         </div>
-        <Link
-          to="/client/reparaciones/nuevo"
+        <button
+          onClick={() => setShowCreateModal(true)}
           className="btn-primary flex items-center"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nueva Solicitud
-        </Link>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -228,12 +237,12 @@ export const Repairs: React.FC = () => {
                 {/* Imágenes */}
                 {repair.imagenes && repair.imagenes.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imágenes:</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imagen del Equipo:</h4>
                     <div className="flex space-x-2 overflow-x-auto pb-2">
                       {repair.imagenes.map((img: string, idx: number) => (
-                        <div key={idx} className="h-16 w-16 rounded-md bg-gray-200 flex-shrink-0 overflow-hidden">
+                        <a key={idx} href={img} target="_blank" rel="noopener noreferrer" className="h-20 w-20 rounded-md bg-gray-200 flex-shrink-0 overflow-hidden hover:opacity-75 transition-opacity">
                           <img src={img} alt={`Imagen ${idx + 1}`} className="h-full w-full object-cover" />
-                        </div>
+                        </a>
                       ))}
                     </div>
                   </div>
@@ -287,13 +296,13 @@ export const Repairs: React.FC = () => {
           <Wrench className="h-12 w-12 text-gray-400 mx-auto" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">No tienes solicitudes de reparación</h3>
           <p className="mt-1 text-gray-500">Solicita la reparación de tus dispositivos electrónicos</p>
-          <Link
-            to="/client/reparaciones/nuevo"
+          <button
+            onClick={() => setShowCreateModal(true)}
             className="btn-primary mt-4 inline-flex items-center"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nueva Solicitud
-          </Link>
+          </button>
         </div>
       )}
       
@@ -350,6 +359,13 @@ export const Repairs: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal para crear nueva reparación */}
+      <NuevaReparacionModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={refetch}
+      />
     </div>
   );
 };
