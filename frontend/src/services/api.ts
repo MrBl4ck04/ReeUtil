@@ -65,6 +65,9 @@ export const usersApi = {
   delete: (id: number) => api.delete(`/auth/users/${id}`),
   getBlocked: () => api.get('/auth/users/blocked'),
   unblockUser: (id: string) => api.post('/auth/unblock-account', { userId: id }),
+  // Nuevos endpoints específicos por ID
+  unblockUserById: (id: string) => api.post(`/auth/users/${id}/unblock`),
+  blockUser: (id: string) => api.post(`/auth/users/${id}/block`),
   
   // Empleados (admin)
   getAllEmployees: () => api.get('/api/employees'),

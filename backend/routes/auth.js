@@ -86,5 +86,6 @@ router.get('/check-blocked/:email', [param('email').isEmail()], validate, authCo
 router.get('/users', authController.getAllUsers);
 router.get('/users/blocked', authController.getBlockedUsers);
 router.post('/users/:id/unblock', [param('id').isString().notEmpty()], validate, authController.unblockUserById);
+router.post('/users/:id/block', [param('id').isString().notEmpty()], validate, authController.blockUserById);
 
 module.exports = router;

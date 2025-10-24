@@ -829,14 +829,32 @@ exports.unblockUserById = async (req, res) => {
     console.log('BODY recibido en /auth/unblock-account:', req.body);   //  ←  temporal
     const { userId } = req.body;
     const { id } = req.params;
-    const user = await User.findById(id);
+    const user = await User.findByIdAndUpdate(
+      id,
+      { isBlocked: false, loginAttempts: 0, blockedAt: null },
+      { new: true, runValidators: false }
+    );
     if (!user) {
       return res.status(404).json({ status: 'fail', message: 'Usuario no encontrado' });
     }
-    user.isBlocked = false;
-    user.loginAttempts = 0;
-    user.blockedAt = null;
-    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({ status: 'success' });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
+// Bloquear usuario por ID (ban)
+exports.blockUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndUpdate(
+      id,
+      { isBlocked: true, blockedAt: new Date() },
+      { new: true, runValidators: false }
+    );
+    if (!user) {
+      return res.status(404).json({ status: 'fail', message: 'Usuario no encontrado' });
+    }
     return res.status(200).json({ status: 'success' });
   } catch (err) {
     return res.status(400).json({ status: 'fail', message: err.message });
