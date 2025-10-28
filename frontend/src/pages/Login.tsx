@@ -146,13 +146,15 @@ export const Login: React.FC = () => {
       if (response.data.status === 'success') {
         // Guardar token y datos del usuario
         localStorage.setItem('access_token', response.data.access_token);
+        // Compatibilidad con AuthContext (usa 'token')
+        localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
         toast.success('¡Login exitoso!');
         
-        // Redirigir según el rol
+        // Redirigir según el rol (hard redirect para que AuthProvider lea el token del storage)
         const isAdmin = response.data.user.rol === true;
-        navigate(isAdmin ? '/admin' : '/client');
+        window.location.href = isAdmin ? '/admin' : '/client';
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Código incorrecto. Por favor intenta de nuevo.');

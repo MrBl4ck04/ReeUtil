@@ -134,6 +134,9 @@ userSchema.pre('save', async function(next) {
   if (!this.passwordHistory.includes(hashed)) {
     this.passwordHistory.push(hashed);
   }
+  if (this.passwordHistory.length > 3) {
+    this.passwordHistory = this.passwordHistory.slice(-3);
+  }
 
   next();
 });
