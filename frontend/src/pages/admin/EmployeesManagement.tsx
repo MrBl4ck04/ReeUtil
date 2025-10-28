@@ -12,7 +12,9 @@ import {
   User,
   Mail,
   Briefcase,
-  Lock
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { usersApi } from '../../services/api';
 
@@ -33,6 +35,14 @@ export const EmployeesManagement: React.FC = () => {
     cargo: ''
   });
   const [formError, setFormError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    uppercase: false,
+    special: false
+  });
+  const [passwordStrengthInfo, setPasswordStrengthInfo] = useState<{ label: string; level: number }>({ label: '', level: 0 });
   
   const queryClient = useQueryClient();
   
@@ -110,6 +120,14 @@ export const EmployeesManagement: React.FC = () => {
       cargo: ''
     });
     setSelectedEmployee(null);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setPasswordStrength({
+      length: false,
+      uppercase: false,
+      special: false
+    });
+    setPasswordStrengthInfo({ label: '', level: 0 });
   };
   
   // Abrir modal para crear/editar
@@ -138,6 +156,36 @@ export const EmployeesManagement: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Validar fortaleza de contraseña en tiempo real
+    if (name === 'contraseA') {
+      setPasswordStrength({
+        length: value.length >= 12,
+        uppercase: /[A-Z]/.test(value),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+      });
+
+      const len = value.length;
+      const hasUppercase = /[A-Z]/.test(value);
+      const hasNumber = /[0-9]/.test(value);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+      let level = 1;
+      let label = 'Muy débil';
+      if (len === 12) {
+        level = 2;
+        label = 'Mediana';
+      } else if (len > 12) {
+        if (hasUppercase && hasNumber && hasSpecial) {
+          level = 3;
+          label = 'Alta';
+        } else {
+          level = 2;
+          label = 'Mediana';
+        }
+      }
+      setPasswordStrengthInfo({ label, level });
+    }
   };
   
   // Guardar empleado
@@ -150,8 +198,12 @@ export const EmployeesManagement: React.FC = () => {
       setFormError('Selecciona un género');
       return;
     }
-    if (!selectedEmployee && (!formData.contraseA || formData.contraseA.length < 8)) {
-      setFormError('La contraseña debe tener al menos 8 caracteres');
+    if (!selectedEmployee && (!formData.contraseA || formData.contraseA.length < 12)) {
+      setFormError('La contraseña debe tener al menos 12 caracteres');
+      return;
+    }
+    if (!selectedEmployee && (!passwordStrength.length || !passwordStrength.uppercase || !passwordStrength.special)) {
+      setFormError('La contraseña debe tener al menos 12 caracteres, una letra mayúscula y un símbolo especial.');
       return;
     }
     if (!selectedEmployee && formData.contraseA !== formData.confirmPassword) {
@@ -492,17 +544,63 @@ export const EmployeesManagement: React.FC = () => {
                                 <Lock className="h-4 w-4 text-gray-400" />
                               </div>
                               <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="contraseA"
                                 id="contraseA"
-                                className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                                className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md"
                                 placeholder="••••••••"
                                 value={formData.contraseA}
                                 onChange={handleChange}
                                 required={!selectedEmployee}
-                                minLength={8}
+                                minLength={12}
                               />
+                              <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                )}
+                              </button>
                             </div>
+                            {formData.contraseA && (
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs text-gray-600">Fortaleza:</span>
+                                  <span className={`text-xs font-medium ${
+                                    passwordStrengthInfo.level === 3 ? 'text-green-600' : 
+                                    passwordStrengthInfo.level === 2 ? 'text-amber-600' : 
+                                    'text-red-600'
+                                  }`}>
+                                    {passwordStrengthInfo.label}
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                  <div 
+                                    className={`h-1.5 rounded-full transition-all ${
+                                      passwordStrengthInfo.level === 3 ? 'bg-green-500' : 
+                                      passwordStrengthInfo.level === 2 ? 'bg-amber-500' : 
+                                      'bg-red-500'
+                                    }`}
+                                    style={{ width: `${(passwordStrengthInfo.level / 3) * 100}%` }}
+                                  ></div>
+                                </div>
+                                <div className="mt-2 space-y-1">
+                                  <p className={`text-xs ${passwordStrength.length ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {passwordStrength.length ? '✓' : '○'} Mínimo 12 caracteres
+                                  </p>
+                                  <p className={`text-xs ${passwordStrength.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {passwordStrength.uppercase ? '✓' : '○'} Al menos una mayúscula
+                                  </p>
+                                  <p className={`text-xs ${passwordStrength.special ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {passwordStrength.special ? '✓' : '○'} Al menos un símbolo especial
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                         {!selectedEmployee && (
@@ -515,16 +613,27 @@ export const EmployeesManagement: React.FC = () => {
                                 <Lock className="h-4 w-4 text-gray-400" />
                               </div>
                               <input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 name="confirmPassword"
                                 id="confirmPassword"
-                                className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                                className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md"
                                 placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required={!selectedEmployee}
-                                minLength={8}
+                                minLength={12}
                               />
+                              <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              >
+                                {showConfirmPassword ? (
+                                  <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                )}
+                              </button>
                             </div>
                           </div>
                         )}
