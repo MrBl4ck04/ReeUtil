@@ -163,3 +163,60 @@ Recomendaciones:
 - Usar HTTPS en producción para habilitar HSTS y proteger tokens en tránsito.
 - Rotar `JWT_SECRET` si hay sospecha de exposición.
 - Revisar periódicamente los logs de auditoría y endpoints protegidos.
+
+---
+
+## Referencias de código (Dónde está implementado)
+
+- Seguridad de transporte y cabeceras
+  - `backend/server.js`
+    - `helmet()` y `helmet.crossOriginResourcePolicy({ policy: 'same-site' })`
+    - `cors({ origin: ..., credentials: true })`
+    - `express-rate-limit` para `/auth` y `/api`
+    - `express.json()`, `mongoSanitize()`, `xss-clean()`, `hpp(...)`, `compression()`
+    - `app.set('trust proxy', process.env.TRUST_PROXY || 'loopback')`
+
+- Autenticación y flujo de login/registro
+  - `backend/routes/auth.js`
+    - Validaciones con `express-validator` en `/signup`, `/login`, `/verify-login-code`, `/change-password`, `/reset-password`
+    - `normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false, gmail_convert_googlemaildotcom: false })`
+  - `backend/controllers/auth/authHandlers.js`
+    - `signup`, `login` (captcha, intento Employee → fallback User, bloqueo, envío de código), `verifyLoginCode`, `logout`
+  - `backend/controllers/auth/captchaService.js`
+    - Generación/validación de captcha para login
+  - `backend/controllers/auth/verificationService.js`
+    - Generación y almacenamiento temporal de códigos de verificación (`pendingLogins`)
+  - `backend/controllers/auth/tokenUtils.js`
+    - `signToken`, `createSendToken`
+  - `backend/controllers/auth/authMiddleware.js`
+    - `protect` (verificación JWT y carga de usuario), `restrictTo`
+
+- Modelos y políticas de contraseñas
+  - `backend/models/User.js`
+    - Reglas de contraseña (longitud, mayúscula, símbolo), hash (`bcrypt`), expiración, bloqueo e intentos
+  - `backend/models/Employee.js`
+    - Campo `contraseA` con hash, métodos `correctPassword` y `getAllPermissions()`
+
+- Roles y permisos (OSI)
+  - `backend/models/Role.js`, `backend/models/PermissionModule.js`
+  - `backend/seeds/initializeData.js` (módulos y roles del sistema)
+  - `backend/controllers/permissions/permissionModuleController.js` (ABM módulos)
+  - `backend/controllers/roles/roleController.js` (ABM roles)
+  - `backend/routes/permissions.js`, `backend/routes/roles.js` (si corresponde)
+
+- Auditoría y logs
+  - `backend/services/auditService.js` (usado por `authHandlers.js`)
+  - `backend/controllers/logs/auditController.js`
+  - `backend/routes/logs.js` (protegido con `protect`)
+
+- Frontend (enforcement de acceso y manejo de token)
+  - `frontend/src/contexts/AuthContext.tsx`
+    - Manejo de login, toasts, persistencia `token`/`user`, `hasPermission`
+  - `frontend/src/components/ProtectedRoute.tsx`
+    - Control de acceso por `requiredRole` y permisos
+  - `frontend/src/components/AdminLayout.tsx`
+    - Filtrado de navegación según `hasPermission`
+  - `frontend/src/pages/Login.tsx`
+    - Captcha, flujo de verificación por código y persistencia de token
+  - `frontend/src/services/api.ts`
+    - Axios baseURL, interceptor de requests (Bearer), interceptor de respuestas (manejo 401 sin refresh en auth)
