@@ -1,0 +1,24 @@
+{
+  "name": "reeutil-frontend-only",
+  "version": "2.0.0",
+  "description": "ReeUtil - Frontend (Solo interfaz, sin backend)",
+  "author": "ReeUtil Team",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "cd frontend && npm start",
+    "start": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "install:all": "npm install && cd frontend && npm install",
+    "test": "cd frontend && npm run test",
+    "lint": "cd frontend && npm run lint"
+  },
+  "devDependencies": {},
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
