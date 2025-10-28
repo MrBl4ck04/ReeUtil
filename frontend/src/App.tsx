@@ -54,134 +54,176 @@ function App() {
             {/* Rutas públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Navigate to="/client" replace />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
             
-            {/* Rutas de cliente - SIN PROTECCIÓN */}
+            {/* Rutas de cliente - CON PROTECCIÓN */}
             <Route path="/client" element={
-              <ClientLayout>
-                <ClientDashboard />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <ClientDashboard />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/ventas" element={
-              <ClientLayout>
-                <Sales />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Sales />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/compras" element={
-              <ClientLayout>
-                <Purchases />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Purchases />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/reparaciones" element={
-              <ClientLayout>
-                <Repairs />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Repairs />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/reciclar" element={
-              <ClientLayout>
-                <Recycle />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Recycle />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/resenas" element={
-              <ClientLayout>
-                <Reviews />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Reviews />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/resenas/nuevo" element={
-              <ClientLayout>
-                <CreateReview />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <CreateReview />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/resenas/nuevo/:vendedorId" element={
-              <ClientLayout>
-                <CreateReview />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <CreateReview />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/resenas/editar/:id" element={
-              <ClientLayout>
-                <EditReview />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <EditReview />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/client/notificaciones" element={
-              <ClientLayout>
-                <Notifications />
-              </ClientLayout>
+              <ProtectedRoute requiredRole="client">
+                <ClientLayout>
+                  <Notifications />
+                </ClientLayout>
+              </ProtectedRoute>
             } />
             
-            {/* Rutas de administrador - SIN PROTECCIÓN */}
+            {/* Rutas de administrador - CON PROTECCIÓN */}
             <Route path="/admin" element={
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/reglas" element={
-              <AdminLayout>
-                <RulesManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <RulesManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/reparaciones" element={
-              <AdminLayout>
-                <RepairsManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <RepairsManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/reciclaje" element={
-              <AdminLayout>
-                <RecycleManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <RecycleManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/dashboards" element={
-              <AdminLayout>
-                <DashboardsView />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <DashboardsView />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/ventas" element={
-              <AdminLayout>
-                <SalesManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <SalesManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/satisfaccion" element={
-              <AdminLayout>
-                <CustomerSatisfaction />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <CustomerSatisfaction />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/empleados" element={
-              <AdminLayout>
-                <EmployeesManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <EmployeesManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/usuarios" element={
-              <AdminLayout>
-                <UsersManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <UsersManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/osi" element={
-              <AdminLayout>
-                <OSIManagement />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <OSIManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             
             <Route path="/admin/logs" element={
-              <AdminLayout>
-                <SystemLogs />
-              </AdminLayout>
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <SystemLogs />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
           </Routes>
         </Router>

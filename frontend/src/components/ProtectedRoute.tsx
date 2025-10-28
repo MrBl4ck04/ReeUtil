@@ -35,10 +35,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     const isAdmin = user?.rol === true;
     
     if (requiredRole === 'admin' && !isAdmin) {
-      return <Navigate to="/client" replace />;
+      // Si no es admin, redirigir a login para que se autentique como cliente
+      return <Navigate to="/login" replace />;
     }
     
     if (requiredRole === 'client' && isAdmin) {
+      // Si es admin pero trata de acceder a rutas de cliente, redirigir a admin
       return <Navigate to="/admin" replace />;
     }
   }
