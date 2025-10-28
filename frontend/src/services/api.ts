@@ -22,10 +22,21 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    const status = error.response?.status;
+    const url: string | undefined = error.config?.url;
+    const isAuthEndpoint = url?.startsWith('/auth/');
+    const isLoginAttempt = url === '/auth/login' || url === '/auth/verify-login-code' || url === '/auth/change-password' || url === '/auth/reset-password';
+    const isOnLoginPage = typeof window !== 'undefined' && window.location.pathname === '/login';
+
+    if (status === 401) {
+      // Evitar refresh automático para endpoints de autenticación, dejar que la UI maneje el error
+      if (!isAuthEndpoint || (!isLoginAttempt && !isOnLoginPage)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (!isOnLoginPage) {
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   }

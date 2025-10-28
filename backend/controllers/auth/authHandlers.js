@@ -103,52 +103,45 @@ const login = async (req, res) => {
       
     if (employee) {
       const isCorrect = await employee.correctPassword(contraseA, employee.contraseA);
-      if (!isCorrect) {
-        return res.status(401).json({
-          status: 'fail',
-          message: 'Email o contraseña incorrectos'
-        });
-      }
-
-      if (employee.isBlocked) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'La cuenta de empleado está bloqueada'
-        });
-      }
-
-      // Obtener permisos personalizados (moduleId)
-      const permissions = employee.customPermissions.map(p => p.moduleId);
-
-      const token = signToken(employee._id);
-
-      // Audit: login empleado
-      try {
-        await logEvent({
-          type: 'LOGIN',
-          userType: 'employee',
-          userId: employee._id,
-          email: employee.email,
-          name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
-          metadata: { method: 'password+captcha' }
-        });
-      } catch (_) {}
-
-      return res.status(200).json({
-        status: 'success',
-        access_token: token,
-        user: {
-          idUsuario: employee._id,
-          nombre: employee.nombre,
-          apellido: employee.apellido || '',
-          email: employee.email,
-          rol: true, // empleado => admin
-          cargo: employee.cargo || '',
-          permissions: permissions, // NUEVO: permisos para filtrar módulos
-          loginAttempts: employee.loginAttempts || 0,
-          isBlocked: employee.isBlocked || false
+      if (isCorrect) {
+        if (employee.isBlocked) {
+          return res.status(403).json({
+            status: 'fail',
+            message: 'La cuenta de empleado está bloqueada'
+          });
         }
-      });
+
+        const permissions = employee.customPermissions.map(p => p.moduleId);
+        const token = signToken(employee._id);
+
+        try {
+          await logEvent({
+            type: 'LOGIN',
+            userType: 'employee',
+            userId: employee._id,
+            email: employee.email,
+            name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+            metadata: { method: 'password+captcha' }
+          });
+        } catch (_) {}
+
+        return res.status(200).json({
+          status: 'success',
+          access_token: token,
+          user: {
+            idUsuario: employee._id,
+            nombre: employee.nombre,
+            apellido: employee.apellido || '',
+            email: employee.email,
+            rol: true,
+            cargo: employee.cargo || '',
+            permissions: permissions,
+            loginAttempts: employee.loginAttempts || 0,
+            isBlocked: employee.isBlocked || false
+          }
+        });
+      }
+      // Si la contraseña del empleado no es correcta, continuar para intentar como usuario (cliente)
     }
 
     // 2) Si no es empleado, intentar login como USUARIO (cliente)
