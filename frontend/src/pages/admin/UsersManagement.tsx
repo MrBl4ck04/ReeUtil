@@ -9,13 +9,17 @@ import {
   Mail,
   Phone,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 import { usersApi } from '../../services/api';
 
 export const UsersManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   
   const queryClient = useQueryClient();
   
@@ -70,21 +74,41 @@ export const UsersManagement: React.FC = () => {
     });
   };
   
+  // Abrir modal de desbloqueo
+  const handleOpenUnblockModal = (user: any) => {
+    setSelectedUser(user);
+    setIsUnblockModalOpen(true);
+  };
+
+  // Abrir modal de bloqueo
+  const handleOpenBlockModal = (user: any) => {
+    setSelectedUser(user);
+    setIsBlockModalOpen(true);
+  };
+
   // Desbloquear usuario
-  const handleUnblockUser = (id: string) => {
-    if (window.confirm('¿Está seguro de que desea desbloquear a este usuario?')) {
-      unblockUserMutation.mutate(id, {
+  const handleUnblockUser = () => {
+    if (selectedUser) {
+      unblockUserMutation.mutate(String(selectedUser._id), {
+        onSuccess: () => {
+          setIsUnblockModalOpen(false);
+          setSelectedUser(null);
+        },
         onError: (err: any) => {
-          console.error('Respuesta del servidor:', err.response?.data);   //  ←  mostrará { status, message }
+          console.error('Respuesta del servidor:', err.response?.data);
         }
       });
     }
   };
 
   // Bloquear usuario
-  const handleBlockUser = (id: string) => {
-    if (window.confirm('¿Está seguro de que desea bloquear a este usuario?')) {
-      blockUserMutation.mutate(id, {
+  const handleBlockUser = () => {
+    if (selectedUser) {
+      blockUserMutation.mutate(String(selectedUser._id), {
+        onSuccess: () => {
+          setIsBlockModalOpen(false);
+          setSelectedUser(null);
+        },
         onError: (err: any) => {
           console.error('Respuesta del servidor:', err.response?.data);
         }
@@ -242,7 +266,7 @@ export const UsersManagement: React.FC = () => {
                     <div className="flex justify-end">
                       {user.isBlocked ? (
                         <button
-                          onClick={() => handleUnblockUser(String(user._id))}
+                          onClick={() => handleOpenUnblockModal(user)}
                           className="text-primary-600 hover:text-primary-900 flex items-center"
                           title="Desbloquear usuario"
                         >
@@ -251,7 +275,7 @@ export const UsersManagement: React.FC = () => {
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleBlockUser(String(user._id))}
+                          onClick={() => handleOpenBlockModal(user)}
                           className="text-red-600 hover:text-red-800 flex items-center"
                           title="Bloquear usuario"
                         >
@@ -316,6 +340,112 @@ export const UsersManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmación para desbloquear */}
+      {isUnblockModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Unlock className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Desbloquear Usuario
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Está seguro de que desea desbloquear a <span className="font-semibold">{selectedUser.nombre} {selectedUser.apellido}</span>? 
+                        El usuario podrá iniciar sesión nuevamente y su contador de intentos fallidos se reiniciará.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn-primary w-full sm:ml-3 sm:w-auto"
+                  onClick={handleUnblockUser}
+                  disabled={unblockUserMutation.isLoading}
+                >
+                  <Unlock className="h-4 w-4 mr-2" />
+                  Desbloquear
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline mt-3 sm:mt-0 w-full sm:w-auto"
+                  onClick={() => setIsUnblockModalOpen(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para bloquear */}
+      {isBlockModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Lock className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Bloquear Usuario
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Está seguro de que desea bloquear a <span className="font-semibold">{selectedUser.nombre} {selectedUser.apellido}</span>? 
+                        El usuario no podrá iniciar sesión hasta que un administrador desbloquee su cuenta.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn-danger w-full sm:ml-3 sm:w-auto"
+                  onClick={handleBlockUser}
+                  disabled={blockUserMutation.isLoading}
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Bloquear
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline mt-3 sm:mt-0 w-full sm:w-auto"
+                  onClick={() => setIsBlockModalOpen(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

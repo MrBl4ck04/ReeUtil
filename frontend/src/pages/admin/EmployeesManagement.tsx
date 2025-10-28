@@ -22,6 +22,8 @@ export const EmployeesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isConfirmCreateModalOpen, setIsConfirmCreateModalOpen] = useState(false);
+  const [isConfirmEditModalOpen, setIsConfirmEditModalOpen] = useState(false);
   
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -188,7 +190,7 @@ export const EmployeesManagement: React.FC = () => {
     }
   };
   
-  // Guardar empleado
+  // Validar y abrir modal de confirmación
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
@@ -211,12 +213,34 @@ export const EmployeesManagement: React.FC = () => {
       return;
     }
     
+    // Abrir modal de confirmación
     if (selectedEmployee) {
-      // Actualizar empleado existente
-      // Si la contraseña está vacía, la eliminamos del objeto
+      setIsConfirmEditModalOpen(true);
+    } else {
+      setIsConfirmCreateModalOpen(true);
+    }
+  };
+
+  // Confirmar creación de empleado
+  const handleConfirmCreate = () => {
+    createEmployeeMutation.mutate({ 
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      apellidoMaterno: formData.apellidoMaterno,
+      email: formData.email,
+      contraseA: formData.contraseA,
+      confirmPassword: formData.confirmPassword,
+      genero: formData.genero,
+      cargo: formData.cargo
+    });
+    setIsConfirmCreateModalOpen(false);
+  };
+
+  // Confirmar edición de empleado
+  const handleConfirmEdit = () => {
+    if (selectedEmployee) {
       const updateData = { ...formData } as any;
       
-      // Crear un objeto para la mutación
       const dataToSend = updateData.contraseA 
         ? updateData 
         : { 
@@ -226,25 +250,13 @@ export const EmployeesManagement: React.FC = () => {
             email: updateData.email,
             genero: updateData.genero,
             cargo: updateData.cargo,
-            
           };
       
       updateEmployeeMutation.mutate({
         id: selectedEmployee._id,
         employeeData: dataToSend
       });
-    } else {
-      // Crear nuevo empleado
-      createEmployeeMutation.mutate({ 
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        apellidoMaterno: formData.apellidoMaterno,
-        email: formData.email,
-        contraseA: formData.contraseA,
-        confirmPassword: formData.confirmPassword,
-        genero: formData.genero,
-        cargo: formData.cargo
-      });
+      setIsConfirmEditModalOpen(false);
     }
   };
   
@@ -721,6 +733,117 @@ export const EmployeesManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de confirmación para crear empleado */}
+      {isConfirmCreateModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <UserPlus className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Confirmar Creación de Empleado
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Está seguro de que desea crear el empleado <span className="font-semibold">{formData.nombre} {formData.apellido}</span> con el cargo de <span className="font-semibold">{formData.cargo || 'Sin cargo'}</span>?
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Se enviará un correo de bienvenida a <span className="font-semibold">{formData.email}</span>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn-primary w-full sm:ml-3 sm:w-auto"
+                  onClick={handleConfirmCreate}
+                  disabled={createEmployeeMutation.isLoading}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Crear Empleado
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline mt-3 sm:mt-0 w-full sm:w-auto"
+                  onClick={() => setIsConfirmCreateModalOpen(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para editar empleado */}
+      {isConfirmEditModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Edit2 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Confirmar Edición de Empleado
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Está seguro de que desea actualizar la información de <span className="font-semibold">{selectedEmployee.nombre} {selectedEmployee.apellido}</span>?
+                      </p>
+                      {formData.contraseA && (
+                        <p className="text-sm text-yellow-600 mt-2">
+                          ⚠️ Se actualizará la contraseña del empleado.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn-primary w-full sm:ml-3 sm:w-auto"
+                  onClick={handleConfirmEdit}
+                  disabled={updateEmployeeMutation.isLoading}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Actualizar
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline mt-3 sm:mt-0 w-full sm:w-auto"
+                  onClick={() => setIsConfirmEditModalOpen(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
     </div>
   );
