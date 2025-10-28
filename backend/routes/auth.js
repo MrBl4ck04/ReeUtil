@@ -21,7 +21,11 @@ router.post(
     body('lastName').isString().trim().notEmpty(),
     body('motherLastName').isString().trim().notEmpty(),
     body('gender').isString().isIn(['M', 'F', 'N', 'O']),
-    body('email').isEmail().normalizeEmail(),
+    body('email').isEmail().normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      gmail_convert_googlemaildotcom: false,
+    }),
     body('password').isString().isLength({ min: 12 }),
     body('passwordConfirm').isString().isLength({ min: 12 })
   ],
@@ -34,7 +38,11 @@ router.post('/register', [body('email').isEmail()], validate, authController.sig
 router.post(
   '/login',
   [
-    body('email').isEmail().normalizeEmail(),
+    body('email').isEmail().normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      gmail_convert_googlemaildotcom: false,
+    }),
     body('contraseA').isString().notEmpty(),
     body('captchaId').isString().notEmpty(),
     body('captchaValue').isString().notEmpty()
@@ -42,20 +50,33 @@ router.post(
   validate,
   authController.login
 );
+
 // NUEVO: Verificar código de login
 router.post(
   '/verify-login-code',
-  [body('email').isEmail().normalizeEmail(), body('verificationCode').isString().isLength({ min: 6, max: 6 })],
+  [
+    body('email').isEmail().normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      gmail_convert_googlemaildotcom: false,
+    }),
+    body('verificationCode').isString().isLength({ min: 6, max: 6 })
+  ],
   validate,
   authController.verifyLoginCode
 );
+
 // Captcha de imagen para login
 router.get('/captcha', authController.getCaptcha);
 // NUEVO: cambio de contraseña (requiere email y contraseña actual)
 router.post(
   '/change-password',
   [
-    body('email').isEmail(),
+    body('email').isEmail().normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      gmail_convert_googlemaildotcom: false,
+    }),
     body('currentPassword').isString().isLength({ min: 8 }),
     body('newPassword').isString().isLength({ min: 12 }),
     body('newPasswordConfirm').isString().isLength({ min: 12 })
@@ -63,13 +84,28 @@ router.post(
   validate,
   authController.changePassword
 );
+
 // NUEVO: enviar código de verificación por email
-router.post('/send-verification-code', [body('email').isEmail()], validate, authController.sendVerificationCode);
+router.post(
+  '/send-verification-code',
+  [body('email').isEmail().normalizeEmail({
+    gmail_remove_dots: false,
+    gmail_remove_subaddress: false,
+    gmail_convert_googlemaildotcom: false,
+  })],
+  validate,
+  authController.sendVerificationCode
+);
+
 // NUEVO: recuperación de contraseña (requiere código de verificación, desbloquea cuenta y resetea intentos)
 router.post(
   '/reset-password',
   [
-    body('email').isEmail(),
+    body('email').isEmail().normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      gmail_convert_googlemaildotcom: false,
+    }),
     body('verificationCode').isString().isLength({ min: 6, max: 6 }),
     body('newPassword').isString().isLength({ min: 12 }),
     body('newPasswordConfirm').isString().isLength({ min: 12 })
@@ -77,11 +113,13 @@ router.post(
   validate,
   authController.resetPassword
 );
+
 // Logout protegido
 router.post('/logout', authController.protect, authController.logout);
 
 // NUEVO: desbloquear cuenta (uso administrativo)
 router.post('/unblock-account', [body('userId').isString().notEmpty()], validate, authController.unblockAccount);
+
 // NUEVO: verificar estado de bloqueo
 router.get('/check-blocked/:email', [param('email').isEmail()], validate, authController.checkBlockedStatus);
 
