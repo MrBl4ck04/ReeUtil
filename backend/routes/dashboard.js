@@ -8,10 +8,10 @@ const router = express.Router();
 router.use(authController.protect);
 
 // ============ RUTAS ADMIN ============
-router.get('/repairs-pending', authController.restrictTo('admin'), dashboardController.getPendingRepairs);
-router.get('/recycle-pending', authController.restrictTo('admin'), dashboardController.getPendingRecycle);
-router.get('/recent-sales', authController.restrictTo('admin'), dashboardController.getRecentSales);
-router.get('/new-reviews', authController.restrictTo('admin'), dashboardController.getNewReviews);
+router.get('/repairs-pending', dashboardController.getPendingRepairs);
+router.get('/recycle-pending', dashboardController.getPendingRecycle);
+router.get('/recent-sales', dashboardController.getRecentSales);
+router.get('/new-reviews', dashboardController.getNewReviews);
 // TEMPORAL: Permitir acceso a cualquier usuario autenticado mientras se configura admin
 router.get('/all', dashboardController.getAllDashboardData);
 

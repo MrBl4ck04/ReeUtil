@@ -24,9 +24,8 @@ router.patch('/:id', authController.protect, reviewController.updateReview);
 router.delete('/:id', authController.protect, reviewController.deleteReview);
 router.post('/:id/flag', authController.protect, reviewController.flagReview);
 
-// Rutas de admin (requieren autenticación + rol admin)
-// TEMPORAL: Permitir acceso a cualquier usuario autenticado mientras se configura admin
+// Rutas de admin (requieren autenticación)
 router.get('/all', authController.protect, reviewController.getAllReviews);
-router.get('/stats', authController.protect, authController.restrictTo('admin'), reviewController.getReviewsStats);
+router.get('/stats', authController.protect, reviewController.getReviewsStats);
 
 module.exports = router;

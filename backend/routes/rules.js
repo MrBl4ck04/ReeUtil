@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/', ruleController.getAllRules);
 router.get('/:id', ruleController.getRule);
 
-// Rutas protegidas (requieren admin)
-router.post('/', protect, restrictTo('admin'), ruleController.createRule);
-router.patch('/:id', protect, restrictTo('admin'), ruleController.updateRule);
-router.delete('/:id', protect, restrictTo('admin'), ruleController.deleteRule);
+// Rutas protegidas (requieren autenticación)
+router.post('/', protect, ruleController.createRule);
+router.patch('/:id', protect, ruleController.updateRule);
+router.delete('/:id', protect, ruleController.deleteRule);
 
 module.exports = router;

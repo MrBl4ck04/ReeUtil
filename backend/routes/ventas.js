@@ -45,8 +45,7 @@ router.post('/:id/comprar', [param('id').isString().notEmpty()], validate, venta
 router.delete('/:id', [param('id').isString().notEmpty()], validate, ventaController.eliminarVenta);
 
 // ========== RUTAS ESPECÍFICAS DEL ADMIN ==========
-// Todas las rutas siguientes requieren autenticación Y rol de admin
-router.use(authController.restrictTo('admin'));
+// Todas las rutas siguientes requieren autenticación
 
 // Rutas de administración
 router.get('/admin/todas', [

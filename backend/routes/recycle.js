@@ -9,12 +9,12 @@ router.use(authController.protect);
 
 // ========== RUTAS ESPECÍFICAS DEL ADMIN ==========
 // Rutas de administración (deben ir primero para evitar conflicto con /:id)
-router.get('/all', authController.restrictTo('admin'), recycleController.obtenerTodosReciclajes);
-router.patch('/:id/quote', authController.restrictTo('admin'), recycleController.actualizarCotizacion);
-router.patch('/:id/status', authController.restrictTo('admin'), recycleController.actualizarEstado);
-router.post('/:id/evaluate', authController.restrictTo('admin'), recycleController.evaluarReciclaje);
-router.post('/:id/reject-admin', authController.restrictTo('admin'), recycleController.rechazarReciclaje);
-router.post('/:id/complete', authController.restrictTo('admin'), recycleController.completarReciclaje);
+router.get('/all', recycleController.obtenerTodosReciclajes);
+router.patch('/:id/quote', recycleController.actualizarCotizacion);
+router.patch('/:id/status', recycleController.actualizarEstado);
+router.post('/:id/evaluate', recycleController.evaluarReciclaje);
+router.post('/:id/reject-admin', recycleController.rechazarReciclaje);
+router.post('/:id/complete', recycleController.completarReciclaje);
 
 // Rutas protegidas (requieren autenticación)
 router.post('/request', recycleController.crearReciclaje);
