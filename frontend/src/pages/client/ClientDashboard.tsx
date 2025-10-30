@@ -92,7 +92,7 @@ export const ClientDashboard: React.FC = () => {
         </Link>
 
         {/* Reciclaje */}
-        <Link to="/client/reciclaje" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+        <Link to="/client/reciclar" className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-green-600/20">
               <RecycleIcon className="h-6 w-6 text-green-600" />
@@ -150,7 +150,7 @@ export const ClientDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Vender un Producto */}
                 <Link
-                  to="/catalog"
+                  to="/client/ventas"
                   className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-blue-50 transition-colors"
                 >
                   <div className="flex items-center">
@@ -167,7 +167,7 @@ export const ClientDashboard: React.FC = () => {
 
                 {/* Comprar Productos */}
                 <Link
-                  to="/catalog"
+                  to="/client/compras"
                   className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-green-50 transition-colors"
                 >
                   <div className="flex items-center">
@@ -201,7 +201,7 @@ export const ClientDashboard: React.FC = () => {
 
                 {/* Reciclar Dispositivo */}
                 <Link
-                  to="/client/reciclaje"
+                  to="/client/reciclar"
                   className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-green-50 transition-colors"
                 >
                   <div className="flex items-center">
