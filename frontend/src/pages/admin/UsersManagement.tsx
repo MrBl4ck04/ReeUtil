@@ -17,6 +17,7 @@ import { usersApi } from '../../services/api';
 export const UsersManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
+  const [viewType, setViewType] = useState<'users' | 'employees'>('users');
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -24,18 +25,38 @@ export const UsersManagement: React.FC = () => {
   const queryClient = useQueryClient();
   
   // Obtener todos los usuarios
-  const { data: users, isLoading } = useQuery('users', usersApi.getAll);
+  const { data: users, isLoading } = useQuery('users', usersApi.getAll, {
+    enabled: viewType === 'users'
+  });
   
   // Obtener usuarios bloqueados
   const { data: blockedUsers, isLoading: loadingBlocked } = useQuery(
     'blockedUsers', 
     usersApi.getBlocked,
     {
-      enabled: showOnlyBlocked
+      enabled: showOnlyBlocked && viewType === 'users'
     }
   );
   
-  // Mutaciones para banear/desbanear
+  // Obtener todos los empleados
+  const { data: employees, isLoading: loadingEmployees } = useQuery(
+    'employees',
+    usersApi.getAllEmployees,
+    {
+      enabled: viewType === 'employees'
+    }
+  );
+  
+  // Obtener empleados bloqueados
+  const { data: blockedEmployees, isLoading: loadingBlockedEmployees } = useQuery(
+    'blockedEmployees',
+    usersApi.getBlockedEmployees,
+    {
+      enabled: showOnlyBlocked && viewType === 'employees'
+    }
+  );
+  
+  // Mutaciones para banear/desbanear usuarios
   const unblockUserMutation = useMutation(
     (id: string) => usersApi.unblockUserById(id),
     {
@@ -55,9 +76,37 @@ export const UsersManagement: React.FC = () => {
     }
   );
   
-  // Filtrar usuarios por búsqueda (robusto ante undefined)
-  const getFilteredUsers = () => {
-    const dataSourceRaw = showOnlyBlocked ? blockedUsers?.data : users?.data;
+  // Mutaciones para banear/desbanear empleados
+  const unblockEmployeeMutation = useMutation(
+    (id: string) => usersApi.unblockEmployeeById(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('employees');
+        queryClient.invalidateQueries('blockedEmployees');
+      }
+    }
+  );
+  const blockEmployeeMutation = useMutation(
+    (id: string) => usersApi.blockEmployeeById(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('employees');
+        queryClient.invalidateQueries('blockedEmployees');
+      }
+    }
+  );
+  
+  // Filtrar usuarios/empleados por búsqueda (robusto ante undefined)
+  const getFilteredData = () => {
+    let dataSourceRaw;
+    
+    if (viewType === 'users') {
+      dataSourceRaw = showOnlyBlocked ? blockedUsers?.data : users?.data;
+    } else {
+      // Para empleados, si showOnlyBlocked, usar blockedEmployees?.data, sino employees (array directo)
+      dataSourceRaw = showOnlyBlocked ? blockedEmployees?.data : employees?.data;
+    }
+    
     if (!Array.isArray(dataSourceRaw)) return [] as any[];
     const term = (searchTerm || '').toLowerCase();
     return dataSourceRaw.filter((u: any) => {
@@ -65,11 +114,13 @@ export const UsersManagement: React.FC = () => {
       const apellido = (u?.apellido || '').toLowerCase();
       const email = (u?.email || '').toLowerCase();
       const telefono = u?.telefono ? String(u.telefono) : '';
+      const cargo = (u?.cargo || '').toLowerCase();
       return (
         nombre.includes(term) ||
         apellido.includes(term) ||
         email.includes(term) ||
-        telefono.includes(searchTerm || '')
+        telefono.includes(searchTerm || '') ||
+        cargo.includes(term)
       );
     });
   };
@@ -86,10 +137,11 @@ export const UsersManagement: React.FC = () => {
     setIsBlockModalOpen(true);
   };
 
-  // Desbloquear usuario
+  // Desbloquear usuario/empleado
   const handleUnblockUser = () => {
     if (selectedUser) {
-      unblockUserMutation.mutate(String(selectedUser._id), {
+      const mutation = viewType === 'users' ? unblockUserMutation : unblockEmployeeMutation;
+      mutation.mutate(String(selectedUser._id), {
         onSuccess: () => {
           setIsUnblockModalOpen(false);
           setSelectedUser(null);
@@ -101,10 +153,11 @@ export const UsersManagement: React.FC = () => {
     }
   };
 
-  // Bloquear usuario
+  // Bloquear usuario/empleado
   const handleBlockUser = () => {
     if (selectedUser) {
-      blockUserMutation.mutate(String(selectedUser._id), {
+      const mutation = viewType === 'users' ? blockUserMutation : blockEmployeeMutation;
+      mutation.mutate(String(selectedUser._id), {
         onSuccess: () => {
           setIsBlockModalOpen(false);
           setSelectedUser(null);
@@ -125,7 +178,32 @@ export const UsersManagement: React.FC = () => {
             Administra los usuarios del sistema
           </p>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
+          {/* Selector de tipo de vista */}
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewType('users')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewType === 'users'
+                  ? 'bg-white text-primary-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Usuarios
+            </button>
+            <button
+              onClick={() => setViewType('employees')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewType === 'employees'
+                  ? 'bg-white text-primary-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Empleados
+            </button>
+          </div>
+          
+          {/* Checkbox para mostrar solo bloqueados */}
           <label className="inline-flex items-center">
             <input
               type="checkbox"
@@ -156,19 +234,19 @@ export const UsersManagement: React.FC = () => {
           <AlertTriangle className="h-5 w-5 text-yellow-400 mr-3 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm text-yellow-700">
-              <span className="font-bold">Información:</span> Los usuarios son bloqueados automáticamente después de 3 intentos fallidos de inicio de sesión. Utilice esta sección para desbloquear cuentas.
+              <span className="font-bold">Información:</span> Los {viewType === 'users' ? 'usuarios' : 'empleados'} son bloqueados automáticamente después de 3 intentos fallidos de inicio de sesión. Utilice esta sección para desbloquear cuentas.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Lista de usuarios */}
-      {isLoading || (showOnlyBlocked && loadingBlocked) ? (
+      {/* Lista de usuarios/empleados */}
+      {isLoading || loadingEmployees || (showOnlyBlocked && (loadingBlocked || loadingBlockedEmployees)) ? (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-primary-600 border-r-transparent"></div>
-          <p className="mt-2 text-gray-500">Cargando usuarios...</p>
+          <p className="mt-2 text-gray-500">Cargando {viewType === 'users' ? 'usuarios' : 'empleados'}...</p>
         </div>
-      ) : getFilteredUsers().length > 0 ? (
+      ) : getFilteredData().length > 0 ? (
         <div className="overflow-x-auto card">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -194,7 +272,7 @@ export const UsersManagement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {getFilteredUsers().map((user: any) => (
+              {getFilteredData().map((user: any) => (
                 <tr key={user._id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -293,11 +371,13 @@ export const UsersManagement: React.FC = () => {
       ) : (
         <div className="text-center py-12 card">
           <UserCheck className="h-12 w-12 text-gray-400 mx-auto" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No hay usuarios {showOnlyBlocked ? 'bloqueados' : ''}</h3>
+          <h3 className="mt-2 text-lg font-medium text-gray-900">
+            No hay {viewType === 'users' ? 'usuarios' : 'empleados'} {showOnlyBlocked ? 'bloqueados' : ''}
+          </h3>
           <p className="mt-1 text-gray-500">
             {showOnlyBlocked 
-              ? 'No hay usuarios bloqueados en este momento'
-              : 'No se encontraron usuarios que coincidan con la búsqueda'}
+              ? `No hay ${viewType === 'users' ? 'usuarios' : 'empleados'} bloqueados en este momento`
+              : `No se encontraron ${viewType === 'users' ? 'usuarios' : 'empleados'} que coincidan con la búsqueda`}
           </p>
         </div>
       )}
@@ -311,7 +391,7 @@ export const UsersManagement: React.FC = () => {
               <span className="block h-5 w-5 text-center text-xs font-bold text-blue-700">1</span>
             </div>
             <p className="text-gray-600">
-              Los usuarios son bloqueados automáticamente después de 3 intentos fallidos de inicio de sesión consecutivos.
+              Los usuarios y empleados son bloqueados automáticamente después de 3 intentos fallidos de inicio de sesión consecutivos.
             </p>
           </div>
           <div className="flex items-start">
@@ -319,7 +399,7 @@ export const UsersManagement: React.FC = () => {
               <span className="block h-5 w-5 text-center text-xs font-bold text-blue-700">2</span>
             </div>
             <p className="text-gray-600">
-              El contador de intentos fallidos se reinicia cuando el usuario inicia sesión correctamente.
+              El contador de intentos fallidos se reinicia cuando el usuario o empleado inicia sesión correctamente.
             </p>
           </div>
           <div className="flex items-start">
@@ -327,7 +407,7 @@ export const UsersManagement: React.FC = () => {
               <span className="block h-5 w-5 text-center text-xs font-bold text-blue-700">3</span>
             </div>
             <p className="text-gray-600">
-              Solo los administradores con permisos adecuados pueden desbloquear cuentas de usuario.
+              Solo los administradores con permisos adecuados pueden desbloquear cuentas de usuarios y empleados.
             </p>
           </div>
           <div className="flex items-start">
@@ -335,7 +415,7 @@ export const UsersManagement: React.FC = () => {
               <span className="block h-5 w-5 text-center text-xs font-bold text-blue-700">4</span>
             </div>
             <p className="text-gray-600">
-              Se recomienda verificar la identidad del usuario antes de desbloquear su cuenta, para evitar accesos no autorizados.
+              Se recomienda verificar la identidad del usuario o empleado antes de desbloquear su cuenta, para evitar accesos no autorizados.
             </p>
           </div>
         </div>

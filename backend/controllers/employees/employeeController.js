@@ -20,6 +20,26 @@ exports.getAllEmployees = async (req, res) => {
   }
 };
 
+// Obtener empleados bloqueados
+exports.getBlockedEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.find({ isBlocked: true, isActive: true })
+      .populate('roleId', 'nombre description')
+      .populate('customPermissions', 'moduleId nombre display icon')
+      .select('-contraseA');
+
+    res.status(200).json({
+      status: 'success',
+      data: employees
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
+};
+
 // Obtener empleado por ID
 exports.getEmployeeById = async (req, res) => {
   try {
@@ -373,6 +393,84 @@ exports.toggleBlockEmployee = async (req, res) => {
     res.status(400).json({
       status: 'fail',
       message: err.message,
+    });
+  }
+};
+
+// Desbloquear empleado por ID
+exports.unblockEmployeeById = async (req, res) => {
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { isBlocked: false, loginAttempts: 0, blockedAt: null },
+      { new: true, runValidators: false }
+    );
+
+    if (!employee) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Empleado no encontrado'
+      });
+    }
+
+    try {
+      await logEvent({
+        type: 'ACCOUNT_UNBLOCKED',
+        userType: 'employee',
+        userId: employee._id,
+        email: employee.email,
+        name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+        metadata: { by: 'admin' }
+      });
+    } catch (_) {}
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Empleado desbloqueado exitosamente'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Bloquear empleado por ID
+exports.blockEmployeeById = async (req, res) => {
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { isBlocked: true, blockedAt: new Date() },
+      { new: true, runValidators: false }
+    );
+
+    if (!employee) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Empleado no encontrado'
+      });
+    }
+
+    try {
+      await logEvent({
+        type: 'ACCOUNT_BLOCKED',
+        userType: 'employee',
+        userId: employee._id,
+        email: employee.email,
+        name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
+        metadata: { by: 'admin' }
+      });
+    } catch (_) {}
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Empleado bloqueado exitosamente'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
     });
   }
 };

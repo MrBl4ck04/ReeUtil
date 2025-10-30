@@ -82,12 +82,15 @@ export const usersApi = {
   
   // Empleados (admin)
   getAllEmployees: () => api.get('/api/employees'),
+  getBlockedEmployees: () => api.get('/api/employees/blocked'),
   getEmployeeById: (id: string) => api.get(`/api/employees/${id}`),
   createEmployee: (data: any) => api.post('/api/employees', data),
   updateEmployee: (id: string, data: any) => api.patch(`/api/employees/${id}`, data),
   deleteEmployee: (id: string) => api.delete(`/api/employees/${id}`),
   resetEmployeePassword: (id: string) => api.post(`/api/employees/${id}/reset-password`),
   toggleBlockEmployee: (id: string) => api.post(`/api/employees/${id}/toggle-block`),
+  unblockEmployeeById: (id: string) => api.post(`/api/employees/${id}/unblock`),
+  blockEmployeeById: (id: string) => api.post(`/api/employees/${id}/block`),
   
   // Permisos de empleados
   getEmployeePermissions: (id: string) => api.get(`/api/employees/${id}/permissions`),

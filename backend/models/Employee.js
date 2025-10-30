@@ -68,6 +68,10 @@ const employeeSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    blockedAt: {
+      type: Date,
+      default: null,
+    },
     lastLogin: {
       type: Date,
     },

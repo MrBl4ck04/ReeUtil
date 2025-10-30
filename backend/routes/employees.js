@@ -5,6 +5,7 @@ const router = express.Router();
 
 // Rutas de empleados
 router.get('/', employeeController.getAllEmployees);
+router.get('/blocked', employeeController.getBlockedEmployees);
 router.post('/', employeeController.createEmployee);
 router.get('/:id', employeeController.getEmployeeById);
 router.patch('/:id', employeeController.updateEmployee);
@@ -19,5 +20,7 @@ router.post('/:id/permissions', employeeController.updateEmployeePermissions);
 
 // Rutas de bloqueo
 router.post('/:id/toggle-block', employeeController.toggleBlockEmployee);
+router.post('/:id/unblock', employeeController.unblockEmployeeById);
+router.post('/:id/block', employeeController.blockEmployeeById);
 
 module.exports = router;

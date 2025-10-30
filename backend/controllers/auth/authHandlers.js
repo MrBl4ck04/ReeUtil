@@ -102,13 +102,22 @@ const login = async (req, res) => {
       .populate('customPermissions');
       
     if (employee) {
+      // Verificar si la cuenta del empleado está bloqueada
+      if (employee.isBlocked) {
+        return res.status(403).json({
+          status: 'fail',
+          code: 'ACCOUNT_BLOCKED',
+          message: 'La cuenta de empleado está bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor contacta con soporte.',
+          blockedAt: employee.blockedAt
+        });
+      }
+
       const isCorrect = await employee.correctPassword(contraseA, employee.contraseA);
       if (isCorrect) {
-        if (employee.isBlocked) {
-          return res.status(403).json({
-            status: 'fail',
-            message: 'La cuenta de empleado está bloqueada'
-          });
+        // Si la contraseña es correcta, resetear intentos fallidos
+        if (employee.loginAttempts > 0) {
+          employee.loginAttempts = 0;
+          await employee.save({ validateBeforeSave: false });
         }
 
         const permissions = employee.customPermissions.map(p => p.moduleId);
@@ -140,8 +149,35 @@ const login = async (req, res) => {
             isBlocked: employee.isBlocked || false
           }
         });
+      } else {
+        // Contraseña incorrecta: incrementar contador de intentos fallidos
+        employee.loginAttempts = (employee.loginAttempts || 0) + 1;
+        
+        // Si alcanza 3 intentos, bloquear la cuenta del empleado
+        if (employee.loginAttempts >= 3) {
+          employee.isBlocked = true;
+          employee.blockedAt = new Date();
+          await employee.save({ validateBeforeSave: false });
+          
+          return res.status(403).json({
+            status: 'fail',
+            code: 'ACCOUNT_BLOCKED',
+            message: 'La cuenta de empleado ha sido bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor contacta con soporte.',
+            blockedAt: employee.blockedAt
+          });
+        }
+        
+        // Guardar el incremento de intentos
+        await employee.save({ validateBeforeSave: false });
+        
+        const attemptsLeft = 3 - employee.loginAttempts;
+        return res.status(401).json({
+          status: 'fail',
+          message: `Email o contraseña incorrectos. Te quedan ${attemptsLeft} intento(s) antes de que tu cuenta sea bloqueada.`,
+          loginAttempts: employee.loginAttempts,
+          attemptsLeft
+        });
       }
-      // Si la contraseña del empleado no es correcta, continuar para intentar como usuario (cliente)
     }
 
     // 2) Si no es empleado, intentar login como USUARIO (cliente)
