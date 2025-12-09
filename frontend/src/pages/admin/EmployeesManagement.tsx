@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { 
+import {
   Users,
   Search,
   UserPlus,
   Edit2,
   Trash2,
-  
+
   X,
   Save,
   User,
@@ -16,7 +16,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { usersApi } from '../../services/api';
+import { usersApi, rolesApi } from '../../services/api';
 
 export const EmployeesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +24,7 @@ export const EmployeesManagement: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isConfirmCreateModalOpen, setIsConfirmCreateModalOpen] = useState(false);
   const [isConfirmEditModalOpen, setIsConfirmEditModalOpen] = useState(false);
-  
+
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -34,7 +34,8 @@ export const EmployeesManagement: React.FC = () => {
     contraseA: '',
     confirmPassword: '',
     genero: '',
-    cargo: ''
+    cargo: '',
+    roleId: ''
   });
   const [formError, setFormError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
@@ -45,14 +46,17 @@ export const EmployeesManagement: React.FC = () => {
     special: false
   });
   const [passwordStrengthInfo, setPasswordStrengthInfo] = useState<{ label: string; level: number }>({ label: '', level: 0 });
-  
+
   const queryClient = useQueryClient();
-  
+
   // Roles quitados (no se selecciona rol en creación/edición)
-  
+
   // Obtener todos los empleados
   const { data: employees, isLoading } = useQuery('employees', usersApi.getAllEmployees);
-  
+
+  // Obtener todos los roles
+  const { data: roles, isLoading: loadingRoles, isError: rolesError } = useQuery('roles', rolesApi.getAll);
+
   // Mutaciones
   const createEmployeeMutation = useMutation(
     (data: any) => usersApi.createEmployee(data),
@@ -70,7 +74,7 @@ export const EmployeesManagement: React.FC = () => {
       }
     }
   );
-  
+
   const updateEmployeeMutation = useMutation(
     (data: any) => usersApi.updateEmployee(data.id, data.employeeData),
     {
@@ -87,7 +91,7 @@ export const EmployeesManagement: React.FC = () => {
       }
     }
   );
-  
+
   const deleteEmployeeMutation = useMutation(
     (id: string) => usersApi.deleteEmployee(id),
     {
@@ -98,17 +102,17 @@ export const EmployeesManagement: React.FC = () => {
       }
     }
   );
-  
+
   // Reset de contraseña eliminado
-  
+
   // Filtrar empleados por búsqueda
-  const filteredEmployees = employees?.data?.filter((employee: any) => 
+  const filteredEmployees = employees?.data?.filter((employee: any) =>
     employee.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.cargo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   // Resetear formulario
   const resetForm = () => {
     setFormData({
@@ -119,7 +123,8 @@ export const EmployeesManagement: React.FC = () => {
       contraseA: '',
       confirmPassword: '',
       genero: '',
-      cargo: ''
+      cargo: '',
+      roleId: ''
     });
     setSelectedEmployee(null);
     setShowPassword(false);
@@ -131,7 +136,7 @@ export const EmployeesManagement: React.FC = () => {
     });
     setPasswordStrengthInfo({ label: '', level: 0 });
   };
-  
+
   // Abrir modal para crear/editar
   const handleOpenModal = (employee?: any) => {
     if (employee) {
@@ -144,21 +149,22 @@ export const EmployeesManagement: React.FC = () => {
         contraseA: '',
         confirmPassword: '',
         genero: employee.genero || '',
-        cargo: employee.cargo || ''
+        cargo: employee.cargo || '',
+        roleId: employee.roleId?._id || ''
       });
-      
+
     } else {
       resetForm();
-      
+
     }
     setIsModalOpen(true);
   };
-  
+
   // Manejar cambios en el formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Validar fortaleza de contraseña en tiempo real
     if (name === 'contraseA') {
       setPasswordStrength({
@@ -189,12 +195,24 @@ export const EmployeesManagement: React.FC = () => {
       setPasswordStrengthInfo({ label, level });
     }
   };
-  
+
+  // Handler para cambio de rol
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedRoleId = e.target.value;
+    const selectedRole = roles?.data?.data?.find((r: any) => r._id === selectedRoleId);
+
+    setFormData(prev => ({
+      ...prev,
+      roleId: selectedRoleId,
+      cargo: selectedRole?.nombre || ''
+    }));
+  };
+
   // Validar y abrir modal de confirmación
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
-    
+
     // Validación de rol eliminada
     if (!selectedEmployee && !formData.genero) {
       setFormError('Selecciona un género');
@@ -212,7 +230,7 @@ export const EmployeesManagement: React.FC = () => {
       setFormError('Las contraseñas no coinciden');
       return;
     }
-    
+
     // Abrir modal de confirmación
     if (selectedEmployee) {
       setIsConfirmEditModalOpen(true);
@@ -223,7 +241,7 @@ export const EmployeesManagement: React.FC = () => {
 
   // Confirmar creación de empleado
   const handleConfirmCreate = () => {
-    createEmployeeMutation.mutate({ 
+    createEmployeeMutation.mutate({
       nombre: formData.nombre,
       apellido: formData.apellido,
       apellidoMaterno: formData.apellidoMaterno,
@@ -231,7 +249,8 @@ export const EmployeesManagement: React.FC = () => {
       contraseA: formData.contraseA,
       confirmPassword: formData.confirmPassword,
       genero: formData.genero,
-      cargo: formData.cargo
+      cargo: formData.cargo,
+      roleId: formData.roleId || undefined
     });
     setIsConfirmCreateModalOpen(false);
   };
@@ -240,18 +259,19 @@ export const EmployeesManagement: React.FC = () => {
   const handleConfirmEdit = () => {
     if (selectedEmployee) {
       const updateData = { ...formData } as any;
-      
-      const dataToSend = updateData.contraseA 
-        ? updateData 
-        : { 
-            nombre: updateData.nombre,
-            apellido: updateData.apellido,
-            apellidoMaterno: updateData.apellidoMaterno,
-            email: updateData.email,
-            genero: updateData.genero,
-            cargo: updateData.cargo,
-          };
-      
+
+      const dataToSend = updateData.contraseA
+        ? updateData
+        : {
+          nombre: updateData.nombre,
+          apellido: updateData.apellido,
+          apellidoMaterno: updateData.apellidoMaterno,
+          email: updateData.email,
+          genero: updateData.genero,
+          cargo: updateData.cargo,
+          roleId: updateData.roleId || undefined
+        };
+
       updateEmployeeMutation.mutate({
         id: selectedEmployee._id,
         employeeData: dataToSend
@@ -259,21 +279,21 @@ export const EmployeesManagement: React.FC = () => {
       setIsConfirmEditModalOpen(false);
     }
   };
-  
+
   // Abrir modal de confirmación para eliminar
   const handleOpenDeleteModal = (employee: any) => {
     setSelectedEmployee(employee);
     setIsDeleteModalOpen(true);
   };
-  
+
   // Eliminar empleado
   const handleDeleteEmployee = () => {
     if (selectedEmployee) {
       deleteEmployeeMutation.mutate(selectedEmployee._id);
     }
   };
-  
-  
+
+
 
   return (
     <div className="space-y-6">
@@ -354,14 +374,15 @@ export const EmployeesManagement: React.FC = () => {
                     <div className="text-sm text-gray-900">{employee.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{employee.cargo || 'Sin cargo'}</div>
+                    <div className="text-sm text-gray-900">
+                      {employee.roleId?.nombre || employee.cargo || 'Sin cargo'}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      employee.isBlocked
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${employee.isBlocked
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                      }`}>
                       {employee.isBlocked ? 'Bloqueado' : 'Activo'}
                     </span>
                   </td>
@@ -374,7 +395,7 @@ export const EmployeesManagement: React.FC = () => {
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      
+
                       <button
                         onClick={() => handleOpenDeleteModal(employee)}
                         className="text-red-600 hover:text-red-900"
@@ -527,25 +548,38 @@ export const EmployeesManagement: React.FC = () => {
                           </div>
                         </div>
                         <div>
-                          <label htmlFor="cargo" className="block text-sm font-medium text-gray-700">
-                            Cargo
+                          <label htmlFor="roleId" className="block text-sm font-medium text-gray-700">
+                            Rol / Cargo
                           </label>
                           <div className="mt-1 relative rounded-md shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                               <Briefcase className="h-4 w-4 text-gray-400" />
                             </div>
-                            <input
-                              type="text"
-                              name="cargo"
-                              id="cargo"
+                            <select
+                              name="roleId"
+                              id="roleId"
                               className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                              placeholder="Analista de Datos"
-                              value={formData.cargo}
-                              onChange={handleChange}
-                            />
+                              value={formData.roleId}
+                              onChange={handleRoleChange}
+                              disabled={loadingRoles}
+                            >
+                              <option value="">
+                                {loadingRoles ? 'Cargando roles...' : rolesError ? 'Error al cargar roles' : 'Sin rol asignado'}
+                              </option>
+                              {!loadingRoles && !rolesError && roles?.data?.data?.map((role: any) => (
+                                <option key={role._id} value={role._id}>
+                                  {role.nombre}
+                                </option>
+                              ))}
+                            </select>
                           </div>
+                          {formData.roleId && !loadingRoles && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Cargo asignado: {formData.cargo}
+                            </p>
+                          )}
                         </div>
-                        
+
                         {!selectedEmployee && (
                           <div>
                             <label htmlFor="contraseA" className="block text-sm font-medium text-gray-700">
@@ -582,21 +616,19 @@ export const EmployeesManagement: React.FC = () => {
                               <div className="mt-2">
                                 <div className="flex items-center justify-between mb-1">
                                   <span className="text-xs text-gray-600">Fortaleza:</span>
-                                  <span className={`text-xs font-medium ${
-                                    passwordStrengthInfo.level === 3 ? 'text-green-600' : 
-                                    passwordStrengthInfo.level === 2 ? 'text-amber-600' : 
-                                    'text-red-600'
-                                  }`}>
+                                  <span className={`text-xs font-medium ${passwordStrengthInfo.level === 3 ? 'text-green-600' :
+                                    passwordStrengthInfo.level === 2 ? 'text-amber-600' :
+                                      'text-red-600'
+                                    }`}>
                                     {passwordStrengthInfo.label}
                                   </span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                  <div 
-                                    className={`h-1.5 rounded-full transition-all ${
-                                      passwordStrengthInfo.level === 3 ? 'bg-green-500' : 
-                                      passwordStrengthInfo.level === 2 ? 'bg-amber-500' : 
-                                      'bg-red-500'
-                                    }`}
+                                  <div
+                                    className={`h-1.5 rounded-full transition-all ${passwordStrengthInfo.level === 3 ? 'bg-green-500' :
+                                      passwordStrengthInfo.level === 2 ? 'bg-amber-500' :
+                                        'bg-red-500'
+                                      }`}
                                     style={{ width: `${(passwordStrengthInfo.level / 3) * 100}%` }}
                                   ></div>
                                 </div>
@@ -844,7 +876,7 @@ export const EmployeesManagement: React.FC = () => {
           </div>
         </div>
       )}
-      
+
     </div>
   );
 };

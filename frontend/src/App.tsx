@@ -31,6 +31,7 @@ import DashboardsView from './pages/admin/DashboardsView';
 import { SalesManagement } from './pages/admin/SalesManagement';
 import { CustomerSatisfaction } from './pages/admin/CustomerSatisfaction';
 import { EmployeesManagement } from './pages/admin/EmployeesManagement';
+import { RolesManagement } from './pages/admin/RolesManagement';
 import { UsersManagement } from './pages/admin/UsersManagement';
 import { OSIManagement } from './pages/admin/OSIManagement';
 import { SystemLogs } from './pages/admin/SystemLogs';
@@ -55,7 +56,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
-            
+
             {/* Rutas de cliente - CON PROTECCIÓN */}
             <Route path="/client" element={
               <ProtectedRoute requiredRole="client">
@@ -64,7 +65,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/ventas" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -72,7 +73,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/compras" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -80,7 +81,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/reparaciones" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -88,7 +89,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/reciclar" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -96,7 +97,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/resenas" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -104,7 +105,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/resenas/nuevo" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -112,7 +113,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/resenas/nuevo/:vendedorId" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -120,7 +121,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/resenas/editar/:id" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -128,7 +129,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/client/notificaciones" element={
               <ProtectedRoute requiredRole="client">
                 <ClientLayout>
@@ -136,7 +137,7 @@ function App() {
                 </ClientLayout>
               </ProtectedRoute>
             } />
-            
+
             {/* Rutas de administrador - CON PROTECCIÓN */}
             <Route path="/admin" element={
               <ProtectedRoute requiredRole="admin">
@@ -145,7 +146,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/reglas" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -153,7 +154,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/reparaciones" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -161,7 +162,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/reciclaje" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -169,7 +170,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/dashboards" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -177,7 +178,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/ventas" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -185,7 +186,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/satisfaccion" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -193,15 +194,24 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/empleados" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
                   <EmployeesManagement />
                 </AdminLayout>
               </ProtectedRoute>
+            }
+            />
+
+            <Route path="/admin/roles" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <RolesManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/usuarios" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -209,7 +219,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/osi" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>
@@ -217,7 +227,7 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            
+
             <Route path="/admin/logs" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout>

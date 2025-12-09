@@ -64,12 +64,20 @@ const modules = [
     orden: 7,
   },
   {
+    moduleId: 'roles',
+    nombre: 'Roles',
+    display: 'ABM Roles',
+    description: 'Gestión de roles del sistema',
+    icon: 'Shield',
+    orden: 8,
+  },
+  {
     moduleId: 'users',
     nombre: 'Usuarios',
     display: 'ABM Usuarios',
     description: 'Gestión de usuarios',
     icon: 'User',
-    orden: 8,
+    orden: 9,
   },
   {
     moduleId: 'osi',
@@ -77,7 +85,15 @@ const modules = [
     display: 'Gestión OSI',
     description: 'Gestión de permisos (solo para OSI)',
     icon: 'Shield',
-    orden: 9,
+    orden: 10,
+  },
+  {
+    moduleId: 'logs',
+    nombre: 'Logs',
+    display: 'Logs del Sistema',
+    description: 'Auditoría de logins, bloqueos y cambios',
+    icon: 'FileText',
+    orden: 11,
   },
 ];
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { 
+import {
   Shield,
   Search,
   User,
@@ -16,10 +16,10 @@ export const OSIManagement: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [draftPerms, setDraftPerms] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
-  
+
   // Obtener todos los empleados
   const { data: employees, isLoading } = useQuery('employees', usersApi.getAllEmployees);
-  
+
   // Obtener permisos del empleado seleccionado
   const { data: permissions, isLoading: loadingPermissions } = useQuery(
     ['employeePermissions', selectedEmployee?._id],
@@ -34,7 +34,7 @@ export const OSIManagement: React.FC = () => {
     console.log('Permisos recibidos del backend:', permissions);
     console.log('permissions?.data:', permissions?.data);
     console.log('permissions?.data?.data:', permissions?.data?.data);
-    
+
     // Axios ya envuelve en .data, y el backend devuelve { data: { permissions } }
     const permsArray = permissions?.data?.data?.permissions || [];
     console.log('Permisos efectivos:', permsArray);
@@ -62,15 +62,15 @@ export const OSIManagement: React.FC = () => {
       }
     }
   );
-  
+
   // Filtrar empleados por búsqueda
-  const filteredEmployees = employees?.data?.filter((employee: any) => 
+  const filteredEmployees = employees?.data?.filter((employee: any) =>
     employee.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.cargo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   // Módulos disponibles en el sistema
   const availableModules = [
     { id: 'rules', name: 'Reglas', description: 'Gestión de reglas del sistema' },
@@ -80,11 +80,12 @@ export const OSIManagement: React.FC = () => {
     { id: 'sales', name: 'Administrar Ventas', description: 'Gestión de ventas en el marketplace' },
     { id: 'satisfaction', name: 'Satisfacción Cliente', description: 'Gestión de reseñas y calificaciones' },
     { id: 'employees', name: 'ABM Empleados', description: 'Gestión de empleados' },
+    { id: 'roles', name: 'ABM Roles', description: 'Gestión de roles del sistema' },
     { id: 'users', name: 'ABM Usuarios', description: 'Gestión de usuarios' },
     { id: 'osi', name: 'Gestión OSI', description: 'Gestión de permisos (solo para OSI)' },
     { id: 'logs', name: 'Logs del Sistema', description: 'Auditoría de logins, bloqueos y cambios' },
   ];
-  
+
   // Actualizar permiso
   const handleTogglePermission = (moduleId: string) => {
     setDraftPerms(prev => {
@@ -116,7 +117,7 @@ export const OSIManagement: React.FC = () => {
         {/* Lista de empleados */}
         <div className="lg:col-span-1 card">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Empleados</h2>
-          
+
           {/* Buscador */}
           <div className="flex items-center px-3 py-2 bg-white rounded-lg border border-gray-200 mb-4">
             <Search className="h-4 w-4 text-gray-400 mr-2" />
@@ -128,7 +129,7 @@ export const OSIManagement: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           {/* Lista de empleados */}
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
             {isLoading ? (
@@ -140,11 +141,10 @@ export const OSIManagement: React.FC = () => {
               filteredEmployees.map((employee: any) => (
                 <div
                   key={employee._id}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedEmployee?._id === employee._id
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedEmployee?._id === employee._id
                       ? 'border-primary-500 bg-primary-50'
                       : 'border-gray-200 hover:bg-gray-50'
-                  }`}
+                    }`}
                   onClick={() => setSelectedEmployee(employee)}
                 >
                   <div className="flex items-center">
@@ -165,7 +165,7 @@ export const OSIManagement: React.FC = () => {
             )}
           </div>
         </div>
-        
+
         {/* Gestión de permisos */}
         <div className="lg:col-span-2 card">
           {selectedEmployee ? (
@@ -190,7 +190,7 @@ export const OSIManagement: React.FC = () => {
                   Guardar cambios
                 </button>
               </div>
-              
+
               {loadingPermissions ? (
                 <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-6 w-6 border-4 border-solid border-primary-600 border-r-transparent"></div>
@@ -210,7 +210,7 @@ export const OSIManagement: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Tabla de permisos */}
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  Home, 
+import {
+  Home,
   Settings,
   Wrench,
   Recycle as RecycleIcon,
@@ -11,8 +11,8 @@ import {
   Star,
   Users,
   UserCheck,
-  LogOut, 
-  Menu, 
+  LogOut,
+  Menu,
   X,
   Shield,
   FileText
@@ -43,6 +43,7 @@ export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
     { id: 'sales', name: 'Administrar Ventas', href: '/admin/ventas', icon: ShoppingBag },
     { id: 'satisfaction', name: 'Satisfacción Cliente', href: '/admin/satisfaccion', icon: Star },
     { id: 'employees', name: 'ABM Empleados', href: '/admin/empleados', icon: Users },
+    { id: 'roles', name: 'ABM Roles', href: '/admin/roles', icon: Shield },
     { id: 'users', name: 'ABM Usuarios', href: '/admin/usuarios', icon: UserCheck },
     { id: 'osi', name: 'Gestión OSI', href: '/admin/osi', icon: Shield },
     { id: 'logs', name: 'Logs del Sistema', href: '/admin/logs', icon: FileText },
@@ -78,11 +79,10 @@ export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive(item.href)
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
                       ? 'bg-primary-100 text-primary-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {item.name}
@@ -107,11 +107,10 @@ export const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive(item.href)
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive(item.href)
                       ? 'bg-primary-100 text-primary-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {item.name}
