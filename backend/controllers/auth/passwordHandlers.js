@@ -58,7 +58,7 @@ const changePassword = async (req, res) => {
         name: `${user.name || ''} ${user.lastName || ''}`.trim(),
         metadata: { method: 'self-change' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     return res.status(200).json({
       status: 'success',
@@ -84,10 +84,25 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    // Normalizar email para búsqueda case-insensitive
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // SEGURIDAD: Buscar usuario primero para obtener el email registrado
+    const user = await User.findOne({ email: normalizedEmail }).select('+password +passwordHistory');
+    if (!user) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Código de verificación no encontrado o expirado. Solicita un nuevo código.'
+      });
+    }
+
+    // SEGURIDAD: Usar el email registrado para buscar el código
+    const registeredEmail = user.email;
+
     // Validar código de verificación
     pruneExpiredCodes();
-    const storedCode = verificationCodes.get(email);
-    
+    const storedCode = verificationCodes.get(registeredEmail);
+
     if (!storedCode) {
       return res.status(400).json({
         status: 'fail',
@@ -103,20 +118,12 @@ const resetPassword = async (req, res) => {
     }
 
     // Código válido, eliminar para evitar reutilización
-    verificationCodes.delete(email);
+    verificationCodes.delete(registeredEmail);
 
     if (newPassword !== newPasswordConfirm) {
       return res.status(400).json({
         status: 'fail',
         message: 'Las contraseñas no coinciden.'
-      });
-    }
-
-    const user = await User.findOne({ email }).select('+password +passwordHistory');
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Usuario no encontrado.'
       });
     }
 
@@ -160,7 +167,7 @@ const resetPassword = async (req, res) => {
         name: `${user.name || ''} ${user.lastName || ''}`.trim(),
         metadata: { reason: 'password reset' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     return res.status(200).json({
       status: 'success',

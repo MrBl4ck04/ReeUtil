@@ -52,7 +52,23 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// SEGURIDAD: Rate limit más estricto para recuperación de contraseña (prevenir abuso)
+// IMPORTANTE: Debe ir ANTES del rate limiter general de /auth para que tenga prioridad
+app.use('/auth/send-verification-code', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    status: 'fail',
+    message: 'Demasiados intentos de recuperación. Intenta nuevamente en 15 minutos.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
+
+// Rate limit general para rutas de autenticación
 app.use('/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+
 app.use('/api', apiLimiter);
 
 // Body parser
@@ -108,7 +124,7 @@ if (process.env.NODE_ENV === 'development') {
 mongoose.connect(process.env.MONGODB_URI, mongoOptions)
   .then(() => {
     console.log('✅ Conexión a MongoDB establecida correctamente');
-    
+
     const PORT = process.env.PORT || 5500;
     app.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
