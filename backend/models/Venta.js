@@ -5,7 +5,7 @@ const ventaSchema = new mongoose.Schema({
     type: String,
     required: [true, 'El ID de venta es requerido'],
     unique: true,
-    default: function() {
+    default: function () {
       return 'VTA-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     }
   },
@@ -54,6 +54,22 @@ const ventaSchema = new mongoose.Schema({
     type: String,
     enum: ['nuevo', 'usado-excelente', 'usado-bueno', 'usado-regular'],
     default: 'usado-bueno'
+  },
+  estadoModeracion: {
+    type: String,
+    enum: ['pendiente', 'aprobada', 'rechazada'],
+    default: 'pendiente'
+  },
+  fechaModeracion: {
+    type: Date
+  },
+  moderadoPor: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Employee'
+  },
+  motivoRechazo: {
+    type: String,
+    maxlength: [500, 'El motivo no puede exceder 500 caracteres']
   }
 });
 
@@ -61,11 +77,12 @@ const ventaSchema = new mongoose.Schema({
 ventaSchema.index({ usuario: 1 });
 ventaSchema.index({ estado: 1 });
 ventaSchema.index({ estadoAdmin: 1 });
+ventaSchema.index({ estadoModeracion: 1 });
 ventaSchema.index({ categoria: 1 });
 ventaSchema.index({ precio: 1 });
 
 // Middleware para popular el usuario automáticamente
-ventaSchema.pre(/^find/, function(next) {
+ventaSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'usuario',
     select: 'name email'

@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import { Search, ShoppingBag, DollarSign, CheckCircle, XCircle, AlertTriangle, User, Calendar, Tag, Trash2, Eye } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { Search, ShoppingBag, DollarSign, CheckCircle, XCircle, AlertTriangle, User, Calendar, Tag, Trash2, Eye, Clock } from 'lucide-react';
 import { ventasApi } from '../../services/ventasApi';
 import toast from 'react-hot-toast';
 
 export const SalesManagement: React.FC = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  
-  // Obtener todas las ventas usando useQuery
-  const { data: allSales, isLoading, refetch } = useQuery('allSales', ventasApi.obtenerVentas);
-  
-  // Normalizar datos
+
+  // Obtener todas las ventas usando el endpoint de admin
+  const { data: allSales, isLoading, refetch } = useQuery('allSalesAdmin', ventasApi.obtenerVentasAdmin);
+
+  // Obtener ventas pendientes de moderación
+  const { data: pendingSales } = useQuery('pendingSales', ventasApi.getPendientes);
+
+  // Normalizar datos - el endpoint de admin devuelve las ventas en data.ventas
   const salesList = allSales?.data?.data?.ventas || [];
-  
+
   // Filtrar ventas por búsqueda y estado
   const filteredSales = salesList.filter((sale: any) => {
-    const matchesSearch = 
+    const matchesSearch =
       (sale.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sale.descripcion || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sale.usuario?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Por defecto ("all"), solo mostrar ventas habilitadas
     if (statusFilter === 'all') return matchesSearch && (sale.estadoAdmin === 'habilitado' || !sale.estadoAdmin);
     return matchesSearch && sale.estadoAdmin === statusFilter;
@@ -56,6 +60,50 @@ export const SalesManagement: React.FC = () => {
     }
   };
 
+  // Mutación para aprobar venta
+  const aprobarMutation = useMutation(
+    (id: string) => ventasApi.aprobar(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('allSalesAdmin');
+        queryClient.invalidateQueries('pendingSales');
+        toast.success('Venta aprobada exitosamente');
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.message || 'Error al aprobar venta');
+      }
+    }
+  );
+
+  // Mutación para rechazar venta
+  const rechazarMutation = useMutation(
+    (id: string) => ventasApi.rechazar(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('allSalesAdmin');
+        queryClient.invalidateQueries('pendingSales');
+        toast.success('Venta rechazada y eliminada');
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.message || 'Error al rechazar venta');
+      }
+    }
+  );
+
+  // Handler para aprobar venta
+  const handleAprobar = (saleId: string, saleName: string) => {
+    if (window.confirm(`¿Aprobar la venta "${saleName}"?`)) {
+      aprobarMutation.mutate(saleId);
+    }
+  };
+
+  // Handler para rechazar venta
+  const handleRechazar = (saleId: string, saleName: string) => {
+    if (window.confirm(`¿Rechazar y eliminar la venta "${saleName}"? Esta acción no se puede deshacer.`)) {
+      rechazarMutation.mutate(saleId);
+    }
+  };
+
   // Obtener color según estado
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -67,7 +115,7 @@ export const SalesManagement: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   // Obtener texto según estado
   const getStatusText = (status: string) => {
     switch (status) {
@@ -98,6 +146,26 @@ export const SalesManagement: React.FC = () => {
     }
   };
 
+  // Obtener color según estado de moderación
+  const getModerationStatusColor = (status: string) => {
+    switch (status) {
+      case 'aprobada': return 'bg-green-100 text-green-800';
+      case 'pendiente': return 'bg-yellow-100 text-yellow-800';
+      case 'rechazada': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Obtener texto según estado de moderación
+  const getModerationStatusText = (status: string) => {
+    switch (status) {
+      case 'aprobada': return 'Aprobada';
+      case 'pendiente': return 'Pendiente';
+      case 'rechazada': return 'Rechazada';
+      default: return status;
+    }
+  };
+
   // Formatear fecha
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES');
@@ -109,11 +177,12 @@ export const SalesManagement: React.FC = () => {
   };
 
   // Calcular estadísticas
-  const totalVentas = salesList.filter((sale: any) => sale.estadoAdmin === 'habilitado').length;
+  const ventasPendientes = pendingSales?.data?.ventas?.length || 0;
+  const totalVentas = salesList.filter((sale: any) => sale.estadoModeracion === 'aprobada').length;
   const ventasDeshabilitadas = salesList.filter((sale: any) => sale.estadoAdmin === 'deshabilitado').length;
-  const ventasCompletadas = salesList.filter((sale: any) => sale.estado === 'comprado' && sale.estadoAdmin === 'habilitado').length;
+  const ventasCompletadas = salesList.filter((sale: any) => sale.estado === 'comprado' && sale.estadoModeracion === 'aprobada').length;
   const ingresosComisiones = salesList
-    .filter((sale: any) => sale.estado === 'comprado' && sale.estadoAdmin === 'habilitado')
+    .filter((sale: any) => sale.estado === 'comprado' && sale.estadoModeracion === 'aprobada')
     .reduce((total: number, sale: any) => total + calculateCommission(sale.precio), 0);
 
   return (
@@ -137,7 +206,7 @@ export const SalesManagement: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <select
           className="form-select rounded-lg border-gray-200 shadow-sm"
           value={statusFilter}
@@ -150,19 +219,31 @@ export const SalesManagement: React.FC = () => {
       </div>
 
       {/* Resumen de ventas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <div className="card bg-orange-50">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-orange-100 mr-3">
+              <Clock className="h-6 w-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-orange-800">Pendientes de Aprobación</p>
+              <p className="text-2xl font-semibold text-orange-900">{ventasPendientes}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="card bg-blue-50">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-blue-100 mr-3">
               <ShoppingBag className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-blue-800">Total de Ventas</p>
+              <p className="text-sm font-medium text-blue-800">Ventas Aprobadas</p>
               <p className="text-2xl font-semibold text-blue-900">{totalVentas}</p>
             </div>
           </div>
         </div>
-        
+
         <div className="card bg-green-50">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-green-100 mr-3">
@@ -174,7 +255,7 @@ export const SalesManagement: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="card bg-yellow-50">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-yellow-100 mr-3">
@@ -210,6 +291,9 @@ export const SalesManagement: React.FC = () => {
                 </th>
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
+                </th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Moderación
                 </th>
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado Admin
@@ -263,34 +347,60 @@ export const SalesManagement: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getModerationStatusColor(sale.estadoModeracion || 'aprobada')}`}>
+                      {getModerationStatusText(sale.estadoModeracion || 'aprobada')}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getAdminStatusColor(sale.estadoAdmin || 'habilitado')}`}>
                       {getAdminStatusText(sale.estadoAdmin || 'habilitado')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <button 
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Ver detalles"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      {(sale.estadoAdmin || 'habilitado') === 'habilitado' ? (
-                        <button 
-                          onClick={() => handleDisableSale(sale._id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Deshabilitar venta"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                      {sale.estadoModeracion === 'pendiente' ? (
+                        <>
+                          <button
+                            onClick={() => handleAprobar(sale._id, sale.nombre)}
+                            className="text-green-600 hover:text-green-900"
+                            title="Aprobar venta"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRechazar(sale._id, sale.nombre)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Rechazar venta"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </button>
+                        </>
                       ) : (
-                        <button 
-                          onClick={() => handleEnableSale(sale._id)}
-                          className="text-green-600 hover:text-green-900"
-                          title="Habilitar venta"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </button>
+                        <>
+                          <button
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Ver detalles"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {(sale.estadoAdmin || 'habilitado') === 'habilitado' ? (
+                            <button
+                              onClick={() => handleDisableSale(sale._id)}
+                              className="text-orange-600 hover:text-orange-900"
+                              title="Deshabilitar venta"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleEnableSale(sale._id)}
+                              className="text-green-600 hover:text-green-900"
+                              title="Habilitar venta"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </td>

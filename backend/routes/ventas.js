@@ -60,4 +60,9 @@ router.get('/admin/todas', [
 router.patch('/admin/:id/deshabilitar', [param('id').isString().notEmpty()], validate, ventaController.deshabilitarVenta);
 router.patch('/admin/:id/habilitar', [param('id').isString().notEmpty()], validate, ventaController.habilitarVenta);
 
+// Rutas de moderación de ventas
+router.get('/admin/pendientes', ventaController.obtenerVentasPendientes);
+router.patch('/admin/:id/aprobar', [param('id').isString().notEmpty()], validate, ventaController.aprobarVenta);
+router.delete('/admin/:id/rechazar', [param('id').isString().notEmpty()], validate, ventaController.rechazarVenta);
+
 module.exports = router;

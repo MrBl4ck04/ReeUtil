@@ -21,21 +21,21 @@ module.exports = {
   login,
   verifyLoginCode,
   logout,
-  
+
   // Auth middleware
   protect,
   restrictTo,
-  
+
   // Captcha
   getCaptcha,
-  
+
   // Verification
   sendVerificationCode,
-  
+
   // Password management
   changePassword,
   resetPassword,
-  
+
   // User management
   getAllUsers,
   getBlockedUsers,

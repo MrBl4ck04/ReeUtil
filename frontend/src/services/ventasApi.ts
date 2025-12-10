@@ -12,6 +12,11 @@ export const ventasApi = {
   buscarVentas: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
   obtenerEstadisticasDashboard: () => api.get('/api/ventas/dashboard'),
   // Admin endpoints
+  obtenerVentasAdmin: (params?: any) => api.get('/api/ventas/admin/todas', { params }),
   deshabilitarVenta: (id: string) => api.patch(`/api/ventas/admin/${id}/deshabilitar`),
   habilitarVenta: (id: string) => api.patch(`/api/ventas/admin/${id}/habilitar`),
+  // Moderation endpoints
+  getPendientes: () => api.get('/api/ventas/admin/pendientes'),
+  aprobar: (id: string) => api.patch(`/api/ventas/admin/${id}/aprobar`),
+  rechazar: (id: string, motivo?: string) => api.delete(`/api/ventas/admin/${id}/rechazar`, { data: { motivo } }),
 };

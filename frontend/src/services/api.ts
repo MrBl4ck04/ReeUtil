@@ -79,7 +79,7 @@ export const usersApi = {
   // Nuevos endpoints específicos por ID
   unblockUserById: (id: string) => api.post(`/auth/users/${id}/unblock`),
   blockUser: (id: string) => api.post(`/auth/users/${id}/block`),
-  
+
   // Empleados (admin)
   getAllEmployees: () => api.get('/api/employees'),
   getBlockedEmployees: () => api.get('/api/employees/blocked'),
@@ -91,10 +91,10 @@ export const usersApi = {
   toggleBlockEmployee: (id: string) => api.post(`/api/employees/${id}/toggle-block`),
   unblockEmployeeById: (id: string) => api.post(`/api/employees/${id}/unblock`),
   blockEmployeeById: (id: string) => api.post(`/api/employees/${id}/block`),
-  
+
   // Permisos de empleados
   getEmployeePermissions: (id: string) => api.get(`/api/employees/${id}/permissions`),
-  updateEmployeePermissions: (id: string, permissions: any[]) => 
+  updateEmployeePermissions: (id: string, permissions: any[]) =>
     api.post(`/api/employees/${id}/permissions`, { customPermissions: permissions }),
 };
 
@@ -182,21 +182,21 @@ export const salesApi = {
   },
   getById: (id: string) => api.get(`/api/ventas/${id}`),
   search: (query: string) => api.get(`/api/ventas/buscar?q=${encodeURIComponent(query)}`),
-  
+
   // Rutas protegidas (requieren autenticación)
   create: (data: any) => api.post('/api/ventas', data),
   getMySales: () => api.get('/api/ventas/usuario/mis-ventas'),
   update: (id: string, data: any) => api.patch(`/api/ventas/${id}`, data),
   buy: (id: string) => api.post(`/api/ventas/${id}/comprar`),
   delete: (id: string) => api.delete(`/api/ventas/${id}`),
-  
+
   // Rutas de administración (requieren rol admin)
-  getAllForAdmin: (params?: { 
-    categoria?: string; 
-    estado?: string; 
-    estadoAdmin?: string; 
-    condicion?: string; 
-    precioMin?: number; 
+  getAllForAdmin: (params?: {
+    categoria?: string;
+    estado?: string;
+    estadoAdmin?: string;
+    condicion?: string;
+    precioMin?: number;
     precioMax?: number;
     search?: string;
   }) => {
@@ -212,6 +212,11 @@ export const salesApi = {
   },
   disable: (id: string) => api.patch(`/api/ventas/admin/${id}/deshabilitar`),
   enable: (id: string) => api.patch(`/api/ventas/admin/${id}/habilitar`),
+
+  // Moderation methods
+  getPendientes: () => api.get('/api/ventas/admin/pendientes'),
+  aprobar: (id: string) => api.patch(`/api/ventas/admin/${id}/aprobar`),
+  rechazar: (id: string, motivo?: string) => api.delete(`/api/ventas/admin/${id}/rechazar`, { data: { motivo } }),
 };
 
 export default api;
