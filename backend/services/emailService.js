@@ -31,18 +31,24 @@ if (isProduction) {
   // Configuración diferente según el servicio
   if (emailService === "brevo" || emailHost) {
     // Brevo u otro servicio SMTP personalizado
+    const port = parseInt(emailPort || "587");
     transportConfig = {
       host: emailHost || "smtp-relay.brevo.com",
-      port: parseInt(emailPort || "587"),
-      secure: false, // TLS en puerto 587
+      port: port,
+      secure: port === 465, // true para 465 (SSL), false para 587 (TLS)
       auth: {
         user: emailUser,
         pass: emailPassword,
       },
+      tls: {
+        rejectUnauthorized: false, // Para evitar errores de certificados
+      },
     };
     console.log(
       "✓ Usando configuración SMTP personalizada:",
-      transportConfig.host
+      transportConfig.host,
+      "- Puerto:",
+      port
     );
   } else {
     // Gmail u otro servicio predefinido
