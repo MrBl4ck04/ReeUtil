@@ -1,0 +1,17 @@
+[build]
+  # Directorio donde está el frontend
+  base = "frontend"
+  # Comando para construir el proyecto
+  command = "npm run build"
+  # Directorio de salida después del build
+  publish = "dist"
+
+# Configuración para el manejo de rutas de React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Variables de entorno (también las puedes configurar en el dashboard de Netlify)
+[build.environment]
+  NODE_VERSION = "18"

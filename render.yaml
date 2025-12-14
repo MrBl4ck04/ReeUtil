@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: reeutil-backend
+    env: node
+    # Directorio del backend
+    rootDir: backend
+    # Comando para iniciar el servidor
+    buildCommand: npm install
+    startCommand: npm start
+    # Plan gratuito de Render
+    plan: free
+    # Variables de entorno (las configurarás en el dashboard de Render)
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # Se configura manualmente en el dashboard
+      - key: JWT_SECRET
+        sync: false # Se configura manualmente en el dashboard
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: CORS_ORIGIN
+        sync: false # Se configurará con la URL de Netlify

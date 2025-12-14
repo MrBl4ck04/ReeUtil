@@ -1,0 +1,15 @@
+[build]
+  # Comando para construir el proyecto
+  command = "npm run build"
+  # Directorio de salida después del build
+  publish = "dist"
+
+# Configuración para el manejo de rutas de React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Variables de entorno
+[build.environment]
+  NODE_VERSION = "18"
