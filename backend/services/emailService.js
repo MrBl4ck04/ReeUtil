@@ -1,39 +1,80 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
-// ========================================
-// CONFIGURACIÓN DIRECTA DE EMAIL (TEMPORAL)
-// Cambia estos valores por tus credenciales reales
-// ========================================
-const EMAIL_CONFIG = {
-  service: 'gmail',
-  user: 'carlocaba2004@gmail.com',
-  password: 'eihzqxjidgbbeojb'
-};
-// ========================================
+// Detectar si estamos en producción
+const isProduction = process.env.NODE_ENV === "production";
 
-// Usar configuración directa o variables de entorno (fallback)
-const emailUser = EMAIL_CONFIG.user || process.env.EMAIL_USER;
-const emailPassword = EMAIL_CONFIG.password || process.env.EMAIL_PASSWORD;
-const emailService = EMAIL_CONFIG.service || process.env.EMAIL_SERVICE || 'gmail';
+let transportConfig;
 
-// Verificar configuración
-if (!emailUser || !emailPassword) {
-  console.error('⚠️  ERROR: Credenciales de email NO configuradas.');
-  console.error('⚠️  Edita emailService.js y configura EMAIL_CONFIG con tus credenciales.');
-} else {
-  console.log('✓ Servicio de email configurado correctamente');
-  console.log('✓ Servicio:', emailService);
-  console.log('✓ Usuario:', emailUser);
-}
+if (isProduction) {
+  // ====================================
+  // PRODUCCIÓN: Usar SIEMPRE variables de entorno
+  // ====================================
+  const emailService = process.env.EMAIL_SERVICE || "gmail";
+  const emailHost = process.env.EMAIL_HOST;
+  const emailPort = process.env.EMAIL_PORT;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPassword = process.env.EMAIL_PASSWORD;
 
-// Configuración del transporter de nodemailer
-const transportConfig = {
-  service: emailService,
-  auth: {
-    user: emailUser,
-    pass: emailPassword
+  // Verificar configuración
+  if (!emailUser || !emailPassword) {
+    console.error(
+      "⚠️  ERROR: EMAIL_USER o EMAIL_PASSWORD no están configurados en las variables de entorno"
+    );
+    console.error("⚠️  Configura estas variables en Render Dashboard");
+  } else {
+    console.log("✓ Servicio de email configurado para PRODUCCIÓN");
+    console.log("✓ Servicio:", emailService);
+    console.log("✓ Usuario:", emailUser);
   }
-};
+
+  // Configuración diferente según el servicio
+  if (emailService === "brevo" || emailHost) {
+    // Brevo u otro servicio SMTP personalizado
+    transportConfig = {
+      host: emailHost || "smtp-relay.brevo.com",
+      port: parseInt(emailPort || "587"),
+      secure: false, // TLS en puerto 587
+      auth: {
+        user: emailUser,
+        pass: emailPassword,
+      },
+    };
+    console.log(
+      "✓ Usando configuración SMTP personalizada:",
+      transportConfig.host
+    );
+  } else {
+    // Gmail u otro servicio predefinido
+    transportConfig = {
+      service: emailService,
+      auth: {
+        user: emailUser,
+        pass: emailPassword,
+      },
+    };
+    console.log("✓ Usando servicio predefinido:", emailService);
+  }
+} else {
+  // ====================================
+  // DESARROLLO: Usar credenciales hardcoded
+  // ====================================
+  const EMAIL_CONFIG = {
+    service: "gmail",
+    user: "carlocaba2004@gmail.com",
+    password: "eihzqxjidgbbeojb",
+  };
+
+  transportConfig = {
+    service: EMAIL_CONFIG.service,
+    auth: {
+      user: EMAIL_CONFIG.user,
+      pass: EMAIL_CONFIG.password,
+    },
+  };
+
+  console.log("✓ Servicio de email configurado para DESARROLLO");
+  console.log("✓ Usuario:", EMAIL_CONFIG.user);
+}
 
 const transporter = nodemailer.createTransport(transportConfig);
 
@@ -43,7 +84,7 @@ exports.sendVerificationCode = async (email, code) => {
     const mailOptions = {
       from: emailUser,
       to: email,
-      subject: 'Código de Verificación - ReeUtil',
+      subject: "Código de Verificación - ReeUtil",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
           <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -77,15 +118,15 @@ exports.sendVerificationCode = async (email, code) => {
             </p>
           </div>
         </div>
-      `
+      `,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email enviado:', info.messageId);
+    console.log("Email enviado:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error al enviar email:', error);
-    throw new Error('No se pudo enviar el código de verificación por email.');
+    console.error("Error al enviar email:", error);
+    throw new Error("No se pudo enviar el código de verificación por email.");
   }
 };
 
@@ -93,10 +134,10 @@ exports.sendVerificationCode = async (email, code) => {
 exports.verifyEmailConfig = async () => {
   try {
     await transporter.verify();
-    console.log('Servicio de email configurado correctamente');
+    console.log("Servicio de email configurado correctamente");
     return true;
   } catch (error) {
-    console.error('Error en configuración de email:', error);
+    console.error("Error en configuración de email:", error);
     return false;
   }
 };
