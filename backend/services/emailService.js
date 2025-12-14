@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const isProduction = process.env.NODE_ENV === "production";
 
 let transportConfig;
+let emailUser; // Definir aquí para poder usarlo en las funciones
 
 if (isProduction) {
   // ====================================
@@ -12,7 +13,7 @@ if (isProduction) {
   const emailService = process.env.EMAIL_SERVICE || "gmail";
   const emailHost = process.env.EMAIL_HOST;
   const emailPort = process.env.EMAIL_PORT;
-  const emailUser = process.env.EMAIL_USER;
+  emailUser = process.env.EMAIL_USER;
   const emailPassword = process.env.EMAIL_PASSWORD;
 
   // Verificar configuración
@@ -63,6 +64,8 @@ if (isProduction) {
     user: "carlocaba2004@gmail.com",
     password: "eihzqxjidgbbeojb",
   };
+
+  emailUser = EMAIL_CONFIG.user;
 
   transportConfig = {
     service: EMAIL_CONFIG.service,
