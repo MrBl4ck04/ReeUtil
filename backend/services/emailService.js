@@ -1,7 +1,7 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // Detectar si estamos en producción
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 let emailUser;
 let useBrevoAPI = false;
@@ -16,33 +16,37 @@ if (isProduction) {
 
   if (brevoApiKey && emailUser) {
     useBrevoAPI = true;
-    console.log('✓ Usando Brevo API (HTTP) para envío de emails');
-    console.log('✓ Usuario:', emailUser);
+    console.log("✓ Usando Brevo API (HTTP) para envío de emails");
+    console.log("✓ Usuario:", emailUser);
   } else {
-    console.error('⚠️  ERROR: BREVO_API_KEY o EMAIL_USER no configurados');
-    console.error('⚠️  Consigue tu API key en: https://app.brevo.com/settings/keys/api');
+    console.error("⚠️  ERROR: BREVO_API_KEY o EMAIL_USER no configurados");
+    console.error(
+      "⚠️  Consigue tu API key en: https://app.brevo.com/settings/keys/api"
+    );
   }
 } else {
   // ====================================
   // DESARROLLO: Usar Gmail con SMTP
   // ====================================
   const EMAIL_CONFIG = {
-    service: 'gmail',
-    user: 'carlocaba2004@gmail.com',
-    password: 'eihzqxjidgbbeojb'
+    service: "gmail",
+    user: "carlocaba2004@gmail.com",
+    password: "eihzqxjidgbbeojb",
   };
 
   emailUser = EMAIL_CONFIG.user;
 }
 
 // Solo crear transporter si NO usamos Brevo API
-const transporter = !useBrevoAPI ? nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'carlocaba2004@gmail.com',
-    pass: 'eihzqxjidgbbeojb'
-  }
-}) : null;
+const transporter = !useBrevoAPI
+  ? nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "carlocaba2004@gmail.com",
+        pass: "eihzqxjidgbbeojb",
+      },
+    })
+  : null;
 
 // Función para enviar email con Brevo API (HTTP)
 async function sendEmailWithBrevoAPI(to, subject, htmlContent) {
@@ -50,19 +54,19 @@ async function sendEmailWithBrevoAPI(to, subject, htmlContent) {
   const from = emailUser;
 
   try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
       headers: {
-        'accept': 'application/json',
-        'api-key': brevoApiKey,
-        'content-type': 'application/json'
+        accept: "application/json",
+        "api-key": brevoApiKey,
+        "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: { email: from, name: 'ReeUtil' },
+        sender: { email: from, name: "ReeUtil" },
         to: [{ email: to }],
         subject: subject,
-        htmlContent: htmlContent
-      })
+        htmlContent: htmlContent,
+      }),
     });
 
     if (!response.ok) {
@@ -71,17 +75,17 @@ async function sendEmailWithBrevoAPI(to, subject, htmlContent) {
     }
 
     const result = await response.json();
-    console.log('Email enviado via Brevo API:', result.messageId);
+    console.log("Email enviado via Brevo API:", result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Error al enviar email con Brevo API:', error);
+    console.error("Error al enviar email con Brevo API:", error);
     throw error;
   }
 }
 
 // Función para enviar código de verificación
-exports.sendVerificationCode = async (email, code) =&gt; {
-  const subject = 'Código de Verificación - ReeUtil';
+exports.sendVerificationCode = async (email, code) => {
+  const subject = "Código de Verificación - ReeUtil";
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
       <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -127,32 +131,32 @@ exports.sendVerificationCode = async (email, code) =&gt; {
         from: emailUser,
         to: email,
         subject: subject,
-        html: htmlContent
+        html: htmlContent,
       };
 
       const info = await transporter.sendMail(mailOptions);
-      console.log('Email enviado:', info.messageId);
+      console.log("Email enviado:", info.messageId);
       return { success: true, messageId: info.messageId };
     }
   } catch (error) {
-    console.error('Error al enviar email:', error);
-    throw new Error('No se pudo enviar el código de verificación por email.');
+    console.error("Error al enviar email:", error);
+    throw new Error("No se pudo enviar el código de verificación por email.");
   }
 };
 
 // Función para verificar la configuración del servicio
 exports.verifyEmailConfig = async () => {
   if (useBrevoAPI) {
-    console.log('Usando Brevo API - no requiere verificación SMTP');
+    console.log("Usando Brevo API - no requiere verificación SMTP");
     return true;
   }
-  
+
   try {
     await transporter.verify();
-    console.log('Servicio de email configurado correctamente');
+    console.log("Servicio de email configurado correctamente");
     return true;
   } catch (error) {
-    console.error('Error en configuración de email:', error);
+    console.error("Error en configuración de email:", error);
     return false;
   }
 };
