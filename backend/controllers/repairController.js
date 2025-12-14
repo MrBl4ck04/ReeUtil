@@ -3,9 +3,25 @@ const Repair = require('../models/Repair');
 // Crear una nueva solicitud de reparación
 exports.crearReparacion = async (req, res) => {
   try {
+    // PREVENCIÓN DE MASS ASSIGNMENT: Seleccionar explícitamente los campos permitidos
+    const {
+      tipoDispositivo,
+      marca,
+      modelo,
+      problema,
+      descripcion,
+      imagenes
+    } = req.body;
+
     const repairData = {
-      ...req.body,
-      usuario: req.user.id
+      tipoDispositivo,
+      marca,
+      modelo,
+      problema,
+      descripcion,
+      imagenes,
+      usuario: req.user.id,
+      // estado, fechaSolicitud, y repairId se manejan automáticamente o por defecto
     };
 
     const nuevaReparacion = await Repair.create(repairData);
@@ -79,10 +95,7 @@ exports.obtenerReparacion = async (req, res) => {
 // Aceptar cotización (usuario)
 exports.aceptarCotizacion = async (req, res) => {
   try {
-    console.log('🔍 Aceptando cotización...');
-    console.log('ID de reparación:', req.params.id);
-    console.log('Usuario autenticado:', req.user.id);
-    
+
     const reparacion = await Repair.findById(req.params.id);
 
     if (!reparacion) {
@@ -93,12 +106,11 @@ exports.aceptarCotizacion = async (req, res) => {
       });
     }
 
-    console.log('Usuario de la reparación (raw):', reparacion.usuario);
-    console.log('Estado actual:', reparacion.estado);
+
 
     // Comparar directamente como ObjectId
     if (!reparacion.usuario || reparacion.usuario.toString() !== req.user.id) {
-      console.log('❌ Usuario no autorizado');
+
       return res.status(403).json({
         status: 'fail',
         message: 'No tienes permisos para aceptar esta cotización'
@@ -106,7 +118,7 @@ exports.aceptarCotizacion = async (req, res) => {
     }
 
     if (reparacion.estado !== 'cotizado') {
-      console.log('❌ Estado incorrecto. Estado actual:', reparacion.estado);
+
       return res.status(400).json({
         status: 'fail',
         message: `La reparación no está en estado cotizado. Estado actual: ${reparacion.estado}`
@@ -115,15 +127,15 @@ exports.aceptarCotizacion = async (req, res) => {
 
     reparacion.estado = 'en_reparacion';
     await reparacion.save();
-    
-    console.log('✅ Cotización aceptada exitosamente');
+
+
 
     res.status(200).json({
       status: 'success',
       data: reparacion
     });
   } catch (err) {
-    console.error('❌ Error al aceptar cotización:', err);
+
     res.status(400).json({
       status: 'fail',
       message: err.message
@@ -180,7 +192,7 @@ exports.rechazarCotizacion = async (req, res) => {
 exports.obtenerTodasReparaciones = async (req, res) => {
   try {
     const filtros = {};
-    
+
     if (req.query.estado) {
       filtros.estado = req.query.estado;
     }
@@ -388,7 +400,7 @@ exports.completarReparacion = async (req, res) => {
 
     reparacion.estado = 'completado';
     reparacion.fechaFinalizacion = Date.now();
-    
+
     // Opcional: agregar detalles de finalización si se envían
     if (req.body.detallesReparacion) {
       reparacion.detallesReparacion = req.body.detallesReparacion;

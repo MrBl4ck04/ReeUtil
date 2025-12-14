@@ -3,9 +3,28 @@ const Recycle = require('../models/Recycle');
 // Crear una nueva solicitud de reciclaje
 exports.crearReciclaje = async (req, res) => {
   try {
+    // PREVENCIÓN DE MASS ASSIGNMENT: Seleccionar explícitamente los campos permitidos
+    const {
+      tipoDispositivo,
+      marca,
+      modelo,
+      estadoDispositivo,
+      descripcion,
+      imagenes
+    } = req.body;
+
+    // PREVENCIÓN DE SSTI: Sanitizar campo marca
+    const sanitizedMarca = marca ? marca.replace(/{{|}}|<%|%>/g, '') : marca;
+
     const recycleData = {
-      ...req.body,
-      usuario: req.user.id
+      tipoDispositivo,
+      marca: sanitizedMarca,
+      modelo,
+      estadoDispositivo,
+      descripcion,
+      imagenes,
+      usuario: req.user.id,
+      // estado, fechaSolicitud, y recycleId se manejan automáticamente o por defecto
     };
 
     const nuevoReciclaje = await Recycle.create(recycleData);
@@ -167,7 +186,7 @@ exports.rechazarCotizacion = async (req, res) => {
 exports.obtenerTodosReciclajes = async (req, res) => {
   try {
     const filtros = {};
-    
+
     if (req.query.estado) {
       filtros.estado = req.query.estado;
     }

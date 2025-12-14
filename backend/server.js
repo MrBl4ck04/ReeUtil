@@ -24,7 +24,11 @@ const logsRoutes = require('./routes/logs');
 dotenv.config();
 
 // Inicializar Express
+// Inicializar Express
 const app = express();
+
+// Asegurar que X-Powered-By esté deshabilitado explícitamente
+app.disable('x-powered-by');
 
 // Middleware
 // Configurar trust proxy de forma segura (evita configuración permisiva incompatible con express-rate-limit)
@@ -42,6 +46,23 @@ app.use(cors({
 
 // HTTP headers endurecidos
 app.use(helmet());
+
+// Configuración explícita de CSP para prevenir ataques XSS y de inyección
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  })
+);
 // Política de COEP/CORP/CSP básica; puede ajustarse por frontend
 app.use(helmet.crossOriginResourcePolicy({ policy: 'same-site' }));
 
