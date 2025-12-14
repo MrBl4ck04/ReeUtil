@@ -47,19 +47,30 @@ app.use(cors({
 // HTTP headers endurecidos
 app.use(helmet());
 
-// Configuración explícita de CSP para prevenir ataques XSS y de inyección
+// Implementar X-Frame-Options: SAMEORIGIN
+app.use(helmet.frameguard({ action: 'sameorigin' }));
+
+// Implementar X-Content-Type-Options: nosniff
+app.use(helmet.noSniff());
+
+// Configuración explícita de CSP
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
+      // script-src: permite scripts propios y unsafe-inline (necesario a menudo para React/herramientas de dev)
       scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      // style-src: permite estilos propios, unsafe-inline (components UI) y Google Fonts
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      // img-src: permite imágenes propias, data URIs y cualquier fuente HTTPS (CDNs)
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", "https:", "data:"],
+      // font-src: permite fuentes propias y Google Fonts (Gstatic)
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      connectSrc: ["'self'"], // Ajustar si hay APIs externas
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
+      upgradeInsecureRequests: [], // Opcional, fuerza HTTPS
     },
   })
 );

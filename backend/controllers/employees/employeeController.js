@@ -148,7 +148,7 @@ exports.createEmployee = async (req, res) => {
         name: `${newEmployee.nombre || ''} ${newEmployee.apellido || ''}`.trim(),
         metadata: { roleId: newEmployee.roleId?._id || null }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     res.status(201).json({
       status: 'success',
@@ -253,7 +253,7 @@ exports.resetEmployeePassword = async (req, res) => {
         name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
         metadata: { method: 'admin-reset' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     res.status(200).json({
       status: 'success',
@@ -305,10 +305,10 @@ exports.getEmployeePermissions = async (req, res) => {
 // Actualizar permisos personalizados
 exports.updateEmployeePermissions = async (req, res) => {
   try {
-    console.log('📝 Body recibido:', req.body);
+
     let { customPermissions } = req.body; // puede ser array de moduleId o de ObjectIds
-    
-    console.log('📝 customPermissions recibidos:', customPermissions);
+
+
 
     // Normalizar: si llega string único, convertir a array
     if (!Array.isArray(customPermissions)) customPermissions = [customPermissions];
@@ -323,14 +323,14 @@ exports.updateEmployeePermissions = async (req, res) => {
     if (customPermissions.length === 0) {
       modules = [];
     } else if (customPermissions.every(isObjectId)) {
-      console.log('🔍 Buscando por _id');
+
       modules = await PermissionModule.find({ _id: { $in: customPermissions } });
     } else {
-      console.log('🔍 Buscando por moduleId:', customPermissions);
+
       modules = await PermissionModule.find({ moduleId: { $in: customPermissions } });
     }
 
-    console.log('✅ Módulos encontrados:', modules.map(m => ({ _id: m._id, moduleId: m.moduleId })));
+
 
     const moduleIds = modules.map((m) => m._id);
 
@@ -344,7 +344,7 @@ exports.updateEmployeePermissions = async (req, res) => {
       return res.status(404).json({ status: 'fail', message: 'Empleado no encontrado' });
     }
 
-    console.log('💾 Permisos guardados en BD:', employee.customPermissions.map(p => p.moduleId));
+
 
     res.status(200).json({
       status: 'success',
@@ -382,7 +382,7 @@ exports.toggleBlockEmployee = async (req, res) => {
         name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
         metadata: { by: 'admin' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     res.status(200).json({
       status: 'success',
@@ -422,7 +422,7 @@ exports.unblockEmployeeById = async (req, res) => {
         name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
         metadata: { by: 'admin' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     res.status(200).json({
       status: 'success',
@@ -461,7 +461,7 @@ exports.blockEmployeeById = async (req, res) => {
         name: `${employee.nombre || ''} ${employee.apellido || ''}`.trim(),
         metadata: { by: 'admin' }
       });
-    } catch (_) {}
+    } catch (_) { }
 
     res.status(200).json({
       status: 'success',
