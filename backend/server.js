@@ -44,26 +44,78 @@ app.use(cors({
   credentials: true
 }));
 
-// HTTP headers endurecidos
-app.use(helmet());
+// HTTP headers endurecidos - Configuración base
+app.use(helmet({
+  // Configuración explícita de headers
+  frameguard: { action: 'deny' }, // X-Frame-Options: DENY (más seguro que SAMEORIGIN)
+  contentSecurityPolicy: false, // Configuramos CSP manualmente abajo
+  hsts: false, // Configuramos HSTS manualmente según ambiente
+}));
 
-// Configuración explícita de CSP para prevenir ataques XSS y de inyección
+// HSTS - Solo en producción para evitar problemas en desarrollo
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet.hsts({
+    maxAge: 31536000, // 1 año en segundos
+    includeSubDomains: true,
+    preload: true
+  }));
+} else {
+  // En desarrollo, usar HSTS con max-age corto
+  app.use(helmet.hsts({
+    maxAge: 0, // No cachear en desarrollo
+    includeSubDomains: false,
+  }));
+}
+
+// Configuración mejorada de CSP para prevenir ataques XSS
+// Mantenemos 'unsafe-inline' para compatibilidad con frontend pero restringimos orígenes
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      // Mantenemos unsafe-inline por compatibilidad, pero añadimos dominios específicos
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'", // Necesario para algunos frameworks frontend
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com"
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'", // Necesario para estilos inline del frontend
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com"
+      ],
+      // Reemplazamos wildcard 'https:' con dominios específicos comunes
+      imgSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+        "https://*.googleusercontent.com", // Para imágenes de Google
+        "https://i.imgur.com", // CDN común para imágenes
+      ],
       connectSrc: ["'self'"],
-      fontSrc: ["'self'", "https:", "data:"],
+      // Limitamos font-src a dominios conocidos en lugar de wildcard
+      fontSrc: [
+        "'self'",
+        "data:",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com"
+      ],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"], // Más restrictivo que 'self'
+      upgradeInsecureRequests: [], // Actualizar requests HTTP a HTTPS
     },
   })
 );
-// Política de COEP/CORP/CSP básica; puede ajustarse por frontend
+
+// Política de COEP/CORP/CSP básica
 app.use(helmet.crossOriginResourcePolicy({ policy: 'same-site' }));
 
 // Rate limit para todas las rutas de API

@@ -52,10 +52,29 @@ Este documento describe las medidas de seguridad implementadas en el backend (Ex
 
 En `backend/server.js` se configura:
 
-- `helmet()` para habilitar un conjunto de cabeceras de seguridad por defecto.
+- `helmet()` con configuración personalizada para control fino de cabeceras de seguridad:
+  - **X-Frame-Options: DENY** - Previene clickjacking completamente (no permite embedding)
+  - **Strict-Transport-Security (HSTS)** - Configurado según ambiente:
+    - **Producción**: `max-age=31536000` (1 año), `includeSubDomains`, `preload`
+    - **Desarrollo**: `max-age=0` para evitar problemas con HTTP local
+  - **X-Content-Type-Options: nosniff** - Previene MIME sniffing
+  - **X-DNS-Prefetch-Control: off** - Desactiva DNS prefetching
+  - **X-Download-Options: noopen** - Previene ejecución automática de descargas
+  
+- **Content Security Policy (CSP)** - Configuración mejorada:
+  - `default-src 'self'` - Solo permite recursos del mismo origen por defecto
+  - `script-src`: `'self'`, `'unsafe-inline'`, Google Fonts (necesario para compatibilidad frontend)
+  - `style-src`: `'self'`, `'unsafe-inline'`, Google Fonts
+  - `img-src`: `'self'`, `data:`, `blob:`, Google Fonts, Google User Content, Imgur
+  - `font-src`: `'self'`, `data:`, Google Fonts (sin wildcards)
+  - `frame-ancestors 'none'` - Previene embedding en iframes externos
+  - `upgradeInsecureRequests` - Fuerza upgrade de HTTP a HTTPS automáticamente
+  
 - `helmet.crossOriginResourcePolicy({ policy: 'same-site' })` para restringir el uso de recursos entre orígenes.
 
-Estas cabeceras ayudan a mitigar ataques como clickjacking, MIME sniffing y exposición de recursos entre orígenes.
+> **Mejora de seguridad (Dic 2024)**: Se reemplazaron wildcards `https:` en `img-src` y `font-src` con dominios específicos, y se configuró HSTS solo para producción para cumplir con OWASP ZAP recomendaciones.
+
+Estas cabeceras ayudan a mitigar ataques como clickjacking, MIME sniffing, XSS y exposición de recursos entre orígenes.
 
 ---
 
